@@ -1,0 +1,9 @@
+# CMake build folder
+
+build/*
+
+# Eclipse folders
+
+.settings
+.project
+.cproject
