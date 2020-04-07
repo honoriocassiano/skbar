@@ -17,16 +17,15 @@ class HalfEdge {
 public:
 	class Iterator {
 
-	private:
-		Iterator(Eigen::MatrixXd& vertices, Eigen::MatrixXi& faces, Eigen::MatrixXi& QQ,
-				Eigen::MatrixXi& QE, int face, int edge, bool reverse);
-
 	public:
+		Iterator(const Eigen::MatrixXd& vertices, const Eigen::MatrixXi& faces, const Eigen::MatrixXi& QQ,
+				const Eigen::MatrixXi& QE, int face, int edge, bool reverse);
+
 		/**
 		 * Get current vertex
 		 * @return current vertex coordinates
 		 */
-		Eigen::VectorXi V() const;
+		Eigen::VectorXd V() const;
 
 		/**
 		 * Get current vertex index
@@ -63,7 +62,9 @@ public:
 		/**
 		 * Flip the vertex
 		 */
-		void FlipV();
+		inline void FlipV() {
+			reverse = !reverse;
+		}
 
 		/**
 		 * Get opposite face
@@ -83,12 +84,27 @@ public:
 		 */
 		int EFlip() const;
 
-	private:
-		Eigen::MatrixXd& vertices;
-		Eigen::MatrixXi& faces;
+		/**
+		 * Check if current position has a reverse edge
+		 * @return true if doesn't exist a reverse edge and false if not
+		 */
+		inline bool IsBorder() const {
+			return QQ(face, edge) == -1;
+		}
 
-		Eigen::MatrixXi& QQ;
-		Eigen::MatrixXi& QE;
+		/**
+		 * Operator to compare two iterators
+		 * @param p2 other iterator
+		 * @return true if both iterators point to the same face, edge and vertex
+		 */
+		bool operator==(Iterator& p2) const;
+
+	private:
+		const Eigen::MatrixXd& vertices;
+		const Eigen::MatrixXi& faces;
+
+		const Eigen::MatrixXi& QQ;
+		const Eigen::MatrixXi& QE;
 
 		int face;
 		int edge;
