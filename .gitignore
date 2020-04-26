@@ -7,3 +7,5 @@ build/*
 .settings
 .project
 .cproject
+/cmake-build-debug/
+/.idea/
