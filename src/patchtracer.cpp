@@ -5,7 +5,6 @@
 #include "patchtracer.h"
 
 #include <algorithm>
-#include <vector>
 
 #include "utils/debug.h"
 
@@ -82,5 +81,79 @@ namespace skbar {
 
 //        printf("%d\n", j);
         return singularities;
+    }
+
+    std::vector<std::vector<int>> PatchTracer::GetGrid(const QuadMesh &mesh, int patch) {
+        std::vector<std::vector<int>> grid;
+
+        // TODO Add patch tracing
+
+        // TODO Change parameter "closed"
+        auto singularities = FindSingularities(mesh, false);
+
+        auto v = *singularities.begin();
+
+        // TODO Set to half-edge inside the patch
+        auto start = mesh.halfedge_handle(OpenMesh::SmartVertexHandle(v));
+
+        auto firstInLine = start;
+
+        bool flipFirst = (firstInLine.face().idx() == -1);
+
+        do {
+            grid.push_back(FindLine(firstInLine, singularities));
+
+            if ((firstInLine.from().idx() != start.from().idx())
+                && (singularities.find(firstInLine.from().idx()) != singularities.end())) {
+                break;
+            }
+
+            auto p0 = mesh.point(OpenMesh::VertexHandle(firstInLine.from().idx()));
+            auto p1 = mesh.point(OpenMesh::VertexHandle(firstInLine.to().idx()));
+
+            Log("(%lf, %lf, %lf) -> (%lf, %lf, %lf)", p0[0], p0[1], p0[2], p1[0], p1[1], p1[2]);
+
+            if (flipFirst) {
+                firstInLine = firstInLine.opp().next().next();
+            } else {
+                firstInLine = firstInLine.next().next().opp();
+            }
+        } while (true);
+
+        return grid;
+    }
+
+    std::vector<int> PatchTracer::FindLine(const OpenMesh::SmartHalfedgeHandle &handle,
+                                           const std::set<int> &singularities) {
+        std::vector<int> line;
+
+        auto current = handle;
+
+        line.push_back(current.from().idx());
+
+        auto samePatch = true;
+
+        do {
+
+            line.push_back(current.to().idx());
+
+            // TODO Check if in another patch
+            if (singularities.find(current.to().idx()) != singularities.end()) {
+                break;
+            }
+
+            if (current.face().idx() != -1) {
+                if (current.next().opp().face().idx() == -1) {
+                    samePatch = false;
+                }
+
+                current = current.next().opp().next();
+            } else {
+                current = current.next();
+            }
+
+        } while (samePatch);
+
+        return line;
     }
 }
