@@ -99,7 +99,7 @@ namespace patchgen {
         
             auto h_insert_x = patch.halfedge_handle(C[1]);  // corresponds to C1-C0
             for (int i = 0; i < param.x; ++i)
-                insert_edgeloop(patch, h_insert_x);
+                kt84::insert_edgeloop(patch, h_insert_x);
         }
         static VariableIndicators& get_variable_indicators() {
             static VariableIndicators variable_indicators;
