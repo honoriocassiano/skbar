@@ -7,8 +7,15 @@
 
 #include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh>
 #include <OpenMesh/Core/Mesh/PolyMesh_ArrayKernelT.hh>
+#include <PatchVertexTag.hh>
 
 namespace skbar {
+
+    struct Patchgen {
+        int corner_index;
+        patchgen::PatchVertexTag tag;
+    };
+
 // define traits
     struct MyTraits : public OpenMesh::DefaultTraits {
         // use double valued coordinates
@@ -25,6 +32,10 @@ namespace skbar {
 //    {
 //        typename Base::Refs::FaceHandle my_face_handle;
 //    };
+      VertexTraits
+      {
+          Patchgen patchgen;
+      };
     };
 // Select mesh type (TriMesh) and kernel (ArrayKernel)
 // and define my personal mesh type (MyMesh)
