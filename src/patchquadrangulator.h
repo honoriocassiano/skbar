@@ -7,7 +7,7 @@
 
 #include "meshtypes.h"
 
-#include "patchgen/generate_subtopology.hh"
+#include "patchgen/generate_topology.hh"
 
 #include <vector>
 
@@ -17,7 +17,7 @@ namespace skbar {
 
     public:
 
-        static void ComputeTopology(const Eigen::VectorXi &patchSides);
+        static void ComputeTopology(const Eigen::VectorXi &patchSides, QuadMesh &mesh);
     };
 }
 

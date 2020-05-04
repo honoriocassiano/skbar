@@ -6,8 +6,8 @@
 
 #include "patchgen/decl.hh"
 
-void skbar::PatchQuadrangulator::ComputeTopology(const Eigen::VectorXi &patchSides) {
-    auto param = patchgen::get_default_parameter(patchSides);
+void skbar::PatchQuadrangulator::ComputeTopology(const Eigen::VectorXi &patchSides, QuadMesh &mesh) {
+    patchgen::PatchParam param;
 
-
+    patchgen::generate_topology<QuadMesh>(patchSides, param, mesh);
 }

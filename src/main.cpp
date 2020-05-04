@@ -11,22 +11,23 @@ using namespace skbar;
 int main(int argc, char *argv[]) {
 
     // The Begginng of a New Era
-    QuadMesh mesh;
-
-    if (!OpenMesh::IO::read_mesh(mesh, "/home/cassiano/workspace-cpp/skbar/models/plane.obj")) {
-        std::cerr << "read error\n";
-        exit(1);
-    }
-
-//    std::vector<std::vector<OpenMesh::Vec3d>> sides;
-//    lprec* ptr;
+//    QuadMesh mesh;
 //
-//    set_verbose(ptr, SEVERE);
+//    if (!OpenMesh::IO::read_mesh(mesh, "/home/cassiano/workspace-cpp/skbar/models/plane.obj")) {
+//        std::cerr << "read error\n";
+//        exit(1);
+//    }
 
-    Eigen::VectorXi sides;
+    QuadMesh patch;
 
-    PatchQuadrangulator::ComputeTopology(sides);
-//    auto param = patchgen::get_default_parameter(sides);
+    Eigen::VectorXi sides(4);
+
+    // A simple quad
+    sides << 1, 1, 1, 1;
+
+    PatchQuadrangulator::ComputeTopology(sides, patch);
+
+    std::cout << std::distance(patch.vertices().begin(), patch.vertices().end());
 
 //    PatchTracer::Trace(mesh);
 
