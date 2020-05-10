@@ -17,7 +17,9 @@ namespace skbar {
 
     public:
 
-        static void ComputeTopology(const Eigen::VectorXi &patchSides, QuadMesh &mesh);
+        static patchgen::PatchParam ComputeTopology(const Eigen::VectorXi &patchSides, QuadMesh &mesh);
+
+        static Eigen::MatrixXi getLaplacianMatrix(const QuadMesh &mesh);
     };
 }
 
