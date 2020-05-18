@@ -2,9 +2,13 @@
 // Created by cassiano on 03/05/2020.
 //
 
+
+#include <utils/debug.h>
 #include "patchquadrangulator.h"
 
 #include "patchgen/decl.hh"
+
+const double skbar::PatchQuadrangulator::LAPLACE_CONSTRAINT_WEIGHT = 10;
 
 patchgen::PatchParam skbar::PatchQuadrangulator::ComputeTopology(const Eigen::VectorXi &patchSides, QuadMesh &mesh) {
     patchgen::PatchParam param;
@@ -14,23 +18,122 @@ patchgen::PatchParam skbar::PatchQuadrangulator::ComputeTopology(const Eigen::Ve
     return param;
 }
 
-Eigen::MatrixXi skbar::PatchQuadrangulator::getLaplacianMatrix(const skbar::QuadMesh &mesh) {
+Eigen::SparseMatrix<double> skbar::PatchQuadrangulator::getLaplacianMatrix(const skbar::QuadMesh &mesh,
+                                                                           const patchgen::PatchParam &param) {
 
-    auto size = std::distance(mesh.vertices().begin(), mesh.vertices().end());
+    typedef Eigen::Triplet<double> Triplet;
+    typedef Eigen::SparseMatrix<double> Matrix;
 
-    Eigen::MatrixXi laplacianMatrix(size, size);
+    Matrix laplacianMatrix;
+
+    auto size = mesh.n_vertices();
+
+//    Eigen::MatrixXd laplacianMatrix(size, size);
 
     laplacianMatrix.setZero();
 
-    for (auto it = mesh.vertices().begin(); it != mesh.vertices().end(); it++) {
-        auto i = it->idx();
+    int nControlVertices = 0;
+    std::vector<Triplet> triplets;
 
-        for (const auto &vn: it->vertices()) {
-            laplacianMatrix(i, vn.idx()) = -1;
+    // Default laplacian matrix
+    for (auto it : mesh.vertices()) {
+        auto i = it.idx();
+
+        for (const auto &vn: it.vertices()) {
+//            laplacianMatrix(i, vn.idx()) = -1;
+            triplets.emplace_back(i, vn.idx(), -1.0 / it.valence());
         }
 
-        laplacianMatrix(i, i) = mesh.valence(*it);
+        triplets.emplace_back(i, i, LAPLACE_CONSTRAINT_WEIGHT);
+//        laplacianMatrix(i, i) = mesh.valence(*it);
+
+//        OpenMesh::VertexHandle(it);
+
+//        if (mesh.data(it).patchgen.corner_index != -1) {
+        if (it.is_boundary()) {
+            triplets.emplace_back(size + i, i, 1);
+            nControlVertices++;
+        }
     }
 
+    auto nsides = param.get_num_sides();
+
+    std::vector<OpenMesh::Vec3d> p;
+
+//    auto lastCorner = 0;
+//
+//    for (auto i = 0; i < nsides; i++) {
+//
+//        p.push_back(positions[lastCorner + i]);
+//
+//        for (int k = 1; k < param.l(i); k++) {
+////            std::cout << ab << std::endl;
+//
+//            p.push_back(positions[lastCorner + i + k]);
+//        }
+//
+//        lastCorner += param.l(i);
+//    }
+
+    laplacianMatrix.resize(size + nControlVertices, size);
+    laplacianMatrix.setFromTriplets(triplets.begin(), triplets.end());
+
     return laplacianMatrix;
+}
+
+Eigen::Matrix<double, -1, 3> skbar::PatchQuadrangulator::getRightSide(const QuadMesh &mesh,
+                                                                      const patchgen::PatchParam &param,
+                                                                      const std::vector<OpenMesh::Vec3d> &positions) {
+
+//    std::vector<double> positions;
+
+    auto perm = param.permutation;
+    auto sides = param.get_num_sides();
+
+    auto startPos = perm[0];
+
+//    if (!perm.is_flipped()) {
+//        startPos = perm[0];
+//    } else {
+//        startPos = perm[0];
+//    }
+
+    std::vector<OpenMesh::Vec3d> p;
+
+    auto lastCorner = 0;
+
+    for (int i = 0; i < sides; i++) {
+
+        p.push_back(positions[lastCorner + i]);
+        Log("%d", lastCorner + i);
+
+        for (int k = 1; k < param.l(i); k++) {
+//            std::cout << ab << std::endl;
+
+            p.push_back(positions[lastCorner + i + k]);
+
+            Log("%d", lastCorner + i + k);
+        }
+
+        lastCorner += param.l(i) - 1;
+    }
+
+    auto nv = mesh.n_vertices();
+
+    Eigen::Matrix<double, -1, 3> b(nv + p.size(), 3);
+
+//        b.resize(nv + p.size());
+    b.setZero();
+
+    for (int i = 0; i < p.size(); i++) {
+
+        auto p2 = p[i];
+
+        b(nv + i, 0) = p2[0] * LAPLACE_CONSTRAINT_WEIGHT;
+        b(nv + i, 1) = p2[1] * LAPLACE_CONSTRAINT_WEIGHT;
+        b(nv + i, 2) = p2[2] * LAPLACE_CONSTRAINT_WEIGHT;
+    }
+
+    return b;
+
 }
