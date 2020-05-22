@@ -8,7 +8,7 @@
 
 #include "patchgen/decl.hh"
 
-const double skbar::PatchQuadrangulator::LAPLACE_CONSTRAINT_WEIGHT = 10;
+const double skbar::PatchQuadrangulator::LAPLACE_CONSTRAINT_WEIGHT = 10 * 1000;
 
 patchgen::PatchParam skbar::PatchQuadrangulator::ComputeTopology(const Eigen::VectorXi &patchSides, QuadMesh &mesh) {
     patchgen::PatchParam param;
@@ -41,17 +41,16 @@ Eigen::SparseMatrix<double> skbar::PatchQuadrangulator::getLaplacianMatrix(const
 
         for (const auto &vn: it.vertices()) {
 //            laplacianMatrix(i, vn.idx()) = -1;
-            triplets.emplace_back(i, vn.idx(), -1.0 / it.valence());
+            triplets.emplace_back(i, vn.idx(), -1.0);
         }
 
-        triplets.emplace_back(i, i, LAPLACE_CONSTRAINT_WEIGHT);
-//        laplacianMatrix(i, i) = mesh.valence(*it);
+        triplets.emplace_back(i, i, it.valence());
 
 //        OpenMesh::VertexHandle(it);
 
 //        if (mesh.data(it).patchgen.corner_index != -1) {
         if (it.is_boundary()) {
-            triplets.emplace_back(size + i, i, 1);
+            triplets.emplace_back(size + i, i, LAPLACE_CONSTRAINT_WEIGHT);
             nControlVertices++;
         }
     }
