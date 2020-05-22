@@ -23,9 +23,9 @@ namespace skbar {
 
         static patchgen::PatchParam ComputeTopology(const Eigen::VectorXi &patchSides, QuadMesh &mesh);
 
-        static Eigen::SparseMatrix<double> getLaplacianMatrix(const QuadMesh &mesh, const patchgen::PatchParam &param);
+        static Eigen::SparseMatrix<double> GetLaplacianMatrix(const QuadMesh &mesh, const patchgen::PatchParam &param);
 
-        static Eigen::Matrix<double, -1, 3> getRightSide(const QuadMesh &mesh, const patchgen::PatchParam &param,
+        static Eigen::Matrix<double, -1, 3> GetRightSide(const QuadMesh &mesh, const patchgen::PatchParam &param,
                                                          const std::vector<OpenMesh::Vec3d> &positions);
     };
 }

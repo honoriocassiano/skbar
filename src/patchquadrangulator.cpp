@@ -18,7 +18,7 @@ patchgen::PatchParam skbar::PatchQuadrangulator::ComputeTopology(const Eigen::Ve
     return param;
 }
 
-Eigen::SparseMatrix<double> skbar::PatchQuadrangulator::getLaplacianMatrix(const skbar::QuadMesh &mesh,
+Eigen::SparseMatrix<double> skbar::PatchQuadrangulator::GetLaplacianMatrix(const skbar::QuadMesh &mesh,
                                                                            const patchgen::PatchParam &param) {
 
     typedef Eigen::Triplet<double> Triplet;
@@ -80,7 +80,7 @@ Eigen::SparseMatrix<double> skbar::PatchQuadrangulator::getLaplacianMatrix(const
     return laplacianMatrix;
 }
 
-Eigen::Matrix<double, -1, 3> skbar::PatchQuadrangulator::getRightSide(const QuadMesh &mesh,
+Eigen::Matrix<double, -1, 3> skbar::PatchQuadrangulator::GetRightSide(const QuadMesh &mesh,
                                                                       const patchgen::PatchParam &param,
                                                                       const std::vector<OpenMesh::Vec3d> &positions) {
 
