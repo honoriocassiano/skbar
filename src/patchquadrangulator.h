@@ -27,6 +27,9 @@ namespace skbar {
 
         static Eigen::Matrix<double, -1, 3> GetRightSide(const QuadMesh &mesh, const patchgen::PatchParam &param,
                                                          const std::vector<OpenMesh::Vec3d> &positions);
+
+        static std::vector<OpenMesh::Vec3d> GetShiftedPositions(const std::vector<OpenMesh::Vec3d> &positions,
+                                                                const patchgen::PatchParam &param);
     };
 }
 

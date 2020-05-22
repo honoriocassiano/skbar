@@ -2,7 +2,6 @@
 // Created by cassiano on 03/05/2020.
 //
 
-
 #include <utils/debug.h>
 #include "patchquadrangulator.h"
 
@@ -28,8 +27,6 @@ Eigen::SparseMatrix<double> skbar::PatchQuadrangulator::GetLaplacianMatrix(const
 
     auto size = mesh.n_vertices();
 
-//    Eigen::MatrixXd laplacianMatrix(size, size);
-
     laplacianMatrix.setZero();
 
     int nControlVertices = 0;
@@ -46,33 +43,11 @@ Eigen::SparseMatrix<double> skbar::PatchQuadrangulator::GetLaplacianMatrix(const
 
         triplets.emplace_back(i, i, it.valence());
 
-//        OpenMesh::VertexHandle(it);
-
-//        if (mesh.data(it).patchgen.corner_index != -1) {
         if (it.is_boundary()) {
             triplets.emplace_back(size + i, i, LAPLACE_CONSTRAINT_WEIGHT);
             nControlVertices++;
         }
     }
-
-    auto nsides = param.get_num_sides();
-
-    std::vector<OpenMesh::Vec3d> p;
-
-//    auto lastCorner = 0;
-//
-//    for (auto i = 0; i < nsides; i++) {
-//
-//        p.push_back(positions[lastCorner + i]);
-//
-//        for (int k = 1; k < param.l(i); k++) {
-////            std::cout << ab << std::endl;
-//
-//            p.push_back(positions[lastCorner + i + k]);
-//        }
-//
-//        lastCorner += param.l(i);
-//    }
 
     laplacianMatrix.resize(size + nControlVertices, size);
     laplacianMatrix.setFromTriplets(triplets.begin(), triplets.end());
@@ -84,55 +59,49 @@ Eigen::Matrix<double, -1, 3> skbar::PatchQuadrangulator::GetRightSide(const Quad
                                                                       const patchgen::PatchParam &param,
                                                                       const std::vector<OpenMesh::Vec3d> &positions) {
 
-//    std::vector<double> positions;
-
-    auto perm = param.permutation;
-    auto sides = param.get_num_sides();
-
-    auto startPos = perm[0];
-
-//    if (!perm.is_flipped()) {
-//        startPos = perm[0];
-//    } else {
-//        startPos = perm[0];
-//    }
-
-    std::vector<OpenMesh::Vec3d> p;
-
-    auto lastCorner = 0;
-
-    for (int i = 0; i < sides; i++) {
-
-        p.push_back(positions[lastCorner + i]);
-        Log("%d", lastCorner + i);
-
-        for (int k = 1; k < param.l(i); k++) {
-//            std::cout << ab << std::endl;
-
-            p.push_back(positions[lastCorner + i + k]);
-
-            Log("%d", lastCorner + i + k);
-        }
-
-        lastCorner += param.l(i) - 1;
-    }
-
     auto nv = mesh.n_vertices();
 
-    Eigen::Matrix<double, -1, 3> b(nv + p.size(), 3);
+    Eigen::Matrix<double, -1, 3> b(nv + positions.size(), 3);
 
-//        b.resize(nv + p.size());
     b.setZero();
 
-    for (int i = 0; i < p.size(); i++) {
+    for (int i = 0; i < positions.size(); i++) {
 
-        auto p2 = p[i];
+        auto point = positions[i];
 
-        b(nv + i, 0) = p2[0] * LAPLACE_CONSTRAINT_WEIGHT;
-        b(nv + i, 1) = p2[1] * LAPLACE_CONSTRAINT_WEIGHT;
-        b(nv + i, 2) = p2[2] * LAPLACE_CONSTRAINT_WEIGHT;
+        b(nv + i, 0) = point[0] * LAPLACE_CONSTRAINT_WEIGHT;
+        b(nv + i, 1) = point[1] * LAPLACE_CONSTRAINT_WEIGHT;
+        b(nv + i, 2) = point[2] * LAPLACE_CONSTRAINT_WEIGHT;
     }
 
     return b;
+}
 
+std::vector<OpenMesh::Vec3d>
+skbar::PatchQuadrangulator::GetShiftedPositions(const std::vector<OpenMesh::Vec3d> &positions,
+                                                const patchgen::PatchParam &param) {
+
+    std::vector<OpenMesh::Vec3d> shiftedPositions(positions.size());
+
+    std::vector<std::size_t> mapPositions(positions.size());
+
+    std::size_t nSides = param.get_num_sides();
+
+    for (std::size_t iCorner = 0, iLastCornerSize = 0, posLastNonCorner = nSides; iCorner < nSides; iCorner++) {
+        mapPositions[iCorner] = iLastCornerSize;
+
+        for (std::size_t iNonCorner = 1; iNonCorner < param.l(iCorner); iNonCorner++) {
+            mapPositions[posLastNonCorner] = iLastCornerSize + iNonCorner;
+
+            posLastNonCorner++;
+        }
+
+        iLastCornerSize += param.l(iCorner);
+    }
+
+    for (std::size_t i = 0; i < mapPositions.size(); i++) {
+        shiftedPositions[i] = positions[mapPositions[i]];
+    }
+
+    return shiftedPositions;
 }
