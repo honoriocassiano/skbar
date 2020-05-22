@@ -35,6 +35,8 @@ int main(int argc, char *argv[]) {
     positions.emplace_back(1, 1, 0);
 //    positions.emplace_back(0.5, 1, 0);
     positions.emplace_back(0, 1, 0);
+//    positions.emplace_back(0.5, 0, 0);
+//    positions.emplace_back(1, 0.5, 0);
 
     // A simple quad
     sides << 2, 2, 1, 1;
@@ -47,13 +49,17 @@ int main(int argc, char *argv[]) {
 
 //    std::cout << param.l << "\n" << std::endl;
 
+//    std::cout << param.l << std::endl;
+//    std::cout << param.get_l_permuted() << std::endl;
+
+//    std::cout << param.get_l_permuted() << "\n" << std::endl;
+
+    auto shiftedPositions = PatchQuadrangulator::GetShiftedPositions(positions, param);
+
+    auto L = PatchQuadrangulator::GetLaplacianMatrix(patch, param);
+    auto b = PatchQuadrangulator::GetRightSide(patch, param, shiftedPositions);
 
 
-//    std::cout << param.get_l_permuted() << "\n" << std::endl;"
-
-    auto L = PatchQuadrangulator::getLaplacianMatrix(patch, param);
-
-    auto b = PatchQuadrangulator::getRightSide(patch, param, positions);
 
 //    Log("%ld", patch.n_vertices());
 //    Log("%ld, %ld", L.rows(), L.cols());
@@ -67,7 +73,16 @@ int main(int argc, char *argv[]) {
     auto solver = new Eigen::SimplicialCholesky<Eigen::SparseMatrix<double>>(L.transpose() * L);
 
     Eigen::Matrix<double, -1, 3> x = solver->solve(L.transpose() * b);
-    std::cout << x << std::endl;
+//    std::cout << x << std::endl;
+
+    for (auto it = patch.vertices().begin(); it != patch.vertices().end(); it++) {
+        patch.set_point(*it, OpenMesh::Vec3d(x(it->idx(), 0), x(it->idx(), 1), x(it->idx(), 2)));
+    }
+
+    OpenMesh::IO::write_mesh(patch, "/home/cassiano/retopo.obj");
+
+
+
 
 //    std::cout << laplacianMatrix << std::endl;
 
