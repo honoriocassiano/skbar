@@ -32,10 +32,10 @@ namespace skbar {
 //    {
 //        typename Base::Refs::FaceHandle my_face_handle;
 //    };
-      VertexTraits
-      {
-          Patchgen patchgen;
-      };
+        VertexTraits
+        {
+            Patchgen patchgen;
+        };
     };
 // Select mesh type (TriMesh) and kernel (ArrayKernel)
 // and define my personal mesh type (MyMesh)
