@@ -3,6 +3,9 @@
 //
 
 #include <utils/debug.h>
+#include <algorithm>
+#include <numeric>
+
 #include "patchquadrangulator.h"
 
 #include "patchgen/decl.hh"
@@ -81,6 +84,8 @@ std::vector<OpenMesh::Vec3d>
 skbar::PatchQuadrangulator::GetShiftedPositions(const std::vector<OpenMesh::Vec3d> &positions,
                                                 const patchgen::PatchParam &param) {
 
+    auto permutation = param.permutation;
+
     std::vector<OpenMesh::Vec3d> shiftedPositions(positions.size());
 
     // Aux vector to nonCornerPositions
@@ -103,8 +108,35 @@ skbar::PatchQuadrangulator::GetShiftedPositions(const std::vector<OpenMesh::Vec3
         iLastCornerSize += param.l(iCorner);
     }
 
+    // Rotate vectors according to permutation
+    if (permutation.id != 0) {
+
+        int rotation;
+
+        if (permutation.is_flipped()) {
+            std::reverse(mapPositions.begin(), mapPositions.end());
+            std::reverse(nonCornerPositions.begin(), nonCornerPositions.end());
+
+            rotation = permutation.id - permutation.num_sides;
+        } else {
+            rotation = permutation.id;
+        }
+
+        std::rotate(mapPositions.begin(), mapPositions.begin() + rotation, mapPositions.end());
+
+        // Sum all side vertices and subtract the corner vertices
+        auto rotateValueNonCorner = std::accumulate(mapPositions.begin(),
+                                                    mapPositions.begin() + rotation,
+                                                    decltype(mapPositions)::value_type(0)) - rotation;
+
+        std::rotate(nonCornerPositions.begin(),
+                    nonCornerPositions.begin() + rotateValueNonCorner,
+                    nonCornerPositions.end());
+    }
+
     // Add non corners do map
-    mapPositions.insert(mapPositions.begin() + param.get_num_sides(), nonCornerPositions.begin(), nonCornerPositions.end());
+    mapPositions.insert(mapPositions.begin() + param.get_num_sides(), nonCornerPositions.begin(),
+                        nonCornerPositions.end());
 
     for (std::size_t i = 0; i < mapPositions.size(); i++) {
         shiftedPositions[i] = positions[mapPositions[i]];
