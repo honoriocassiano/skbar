@@ -83,21 +83,28 @@ skbar::PatchQuadrangulator::GetShiftedPositions(const std::vector<OpenMesh::Vec3
 
     std::vector<OpenMesh::Vec3d> shiftedPositions(positions.size());
 
-    std::vector<std::size_t> mapPositions(positions.size());
+    // Aux vector to nonCornerPositions
+    std::vector<std::size_t> nonCornerPositions(positions.size() - param.get_num_sides());
+
+    // Positions
+    std::vector<std::size_t> mapPositions(param.get_num_sides());
 
     std::size_t nSides = param.get_num_sides();
 
-    for (std::size_t iCorner = 0, iLastCornerSize = 0, posLastNonCorner = nSides; iCorner < nSides; iCorner++) {
+    for (std::size_t iCorner = 0, iLastCornerSize = 0, posLastNonCorner = 0; iCorner < nSides; iCorner++) {
         mapPositions[iCorner] = iLastCornerSize;
 
         for (std::size_t iNonCorner = 1; iNonCorner < param.l(iCorner); iNonCorner++) {
-            mapPositions[posLastNonCorner] = iLastCornerSize + iNonCorner;
+            nonCornerPositions[posLastNonCorner] = iLastCornerSize + iNonCorner;
 
             posLastNonCorner++;
         }
 
         iLastCornerSize += param.l(iCorner);
     }
+
+    // Add non corners do map
+    mapPositions.insert(mapPositions.begin() + param.get_num_sides(), nonCornerPositions.begin(), nonCornerPositions.end());
 
     for (std::size_t i = 0; i < mapPositions.size(); i++) {
         shiftedPositions[i] = positions[mapPositions[i]];
