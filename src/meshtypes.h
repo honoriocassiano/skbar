@@ -14,6 +14,8 @@ namespace skbar {
     struct Patchgen {
         int corner_index;
         patchgen::PatchVertexTag tag;
+
+        Patchgen() : corner_index(-1), tag(patchgen::PatchVertexTag::None) {}
     };
 
 // define traits
