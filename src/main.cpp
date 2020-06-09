@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
 
     auto param = PatchQuadrangulator::ComputeTopology(sides, patch);
 
-    PatchQuadrangulator::SetLaplacianPositions(patch, positions);
+    PatchQuadrangulator::SetLaplacianPositions(patch, positions, false);
 
     auto L = PatchQuadrangulator::GetLaplacianMatrix(patch, param);
     auto b = PatchQuadrangulator::GetRightSide(patch, param);

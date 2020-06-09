@@ -88,11 +88,13 @@ Eigen::Matrix<double, -1, 3> skbar::PatchQuadrangulator::GetRightSide(const Quad
 }
 
 void skbar::PatchQuadrangulator::SetLaplacianPositions(QuadMesh &patch,
-                                                       const std::vector<OpenMesh::Vec3d> &positions) {
+                                                       const std::vector<OpenMesh::Vec3d> &positions,
+                                                       bool positionsIsClockwise) {
 
     OpenMesh::SmartVertexHandle currentVertex;
     OpenMesh::SmartHalfedgeHandle currentEdge;
 
+    // Find first corner
     for (auto v : patch.vertices()) {
         if (patch.data(v).patchgen.corner_index == 0) {
             for (auto h : v.outgoing_halfedges()) {
@@ -108,12 +110,24 @@ void skbar::PatchQuadrangulator::SetLaplacianPositions(QuadMesh &patch,
 
     currentVertex = currentEdge.to();
 
-    // Loop over inversed position vector because boundary halfedges are oriented CLOCKWISE (IMPORTANT!)
-    for (auto it = positions.rbegin(); it != positions.rend(); it++) {
-        patch.data(currentVertex).laplacian.position = *it;
-        patch.data(currentVertex).laplacian.fixed = true;
+    // TODO Use DRY principle here
+    if (positionsIsClockwise) {
+        for (const auto &position : positions) {
 
-        currentEdge = currentEdge.next();
-        currentVertex = currentEdge.to();
+            patch.data(currentVertex).laplacian.position = position;
+            patch.data(currentVertex).laplacian.fixed = true;
+
+            currentEdge = currentEdge.next();
+            currentVertex = currentEdge.to();
+        }
+    } else {
+        for (auto it = positions.rbegin(); it != positions.rend(); it++) {
+
+            patch.data(currentVertex).laplacian.position = *it;
+            patch.data(currentVertex).laplacian.fixed = true;
+
+            currentEdge = currentEdge.next();
+            currentVertex = currentEdge.to();
+        }
     }
 }
