@@ -6,9 +6,9 @@
 
 namespace skbar {
 
-namespace debug {
-static bool active = true;
-}
+    namespace debug {
+        static bool active = true;
+    }
 
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
@@ -23,30 +23,30 @@ static bool active = true;
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
 #define Log(args...) \
-		if(debug::active) {\
-		printf(ANSI_COLOR_CYAN "[%s : %d] ", __FILENAME__, __LINE__); \
-		printf(ANSI_COLOR_RESET args); \
-		printf("\n");}
+        if(debug::active) {\
+        printf(ANSI_COLOR_CYAN "[%s : %d] ", __FILENAME__, __LINE__); \
+        printf(ANSI_COLOR_RESET args); \
+        printf("\n");}
 
 #define Error(args...) \
-		if(debug::active) {\
-		fprintf(stderr, ANSI_COLOR_RED "[%s : %d] ", __FILENAME__, __LINE__); \
-		fprintf(stderr, ANSI_COLOR_RESET args); \
-		fprintf(stderr, "\n");}
+        if(debug::active) {\
+        fprintf(stderr, ANSI_COLOR_RED "[%s : %d] ", __FILENAME__, __LINE__); \
+        fprintf(stderr, ANSI_COLOR_RESET args); \
+        fprintf(stderr, "\n");}
 
 #else
 
 #define Log(args...) \
-		if(debug::active) {\
-		printf("[%s : %d] ", __FILENAME__, __LINE__); \
-		printf(args); \
-		printf("\n");}
+        if(debug::active) {\
+        printf("[%s : %d] ", __FILENAME__, __LINE__); \
+        printf(args); \
+        printf("\n");}
 
 #define Error(args...) \
-		if(debug::active) {\
-		fprintf(stderr, "[%s : %d] ", __FILENAME__, __LINE__); \
-		fprintf(stderr, args); \
-		fprintf(stderr, "\n");}
+        if(debug::active) {\
+        fprintf(stderr, "[%s : %d] ", __FILENAME__, __LINE__); \
+        fprintf(stderr, args); \
+        fprintf(stderr, "\n");}
 
 #endif
 
