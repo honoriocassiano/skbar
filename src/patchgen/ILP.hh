@@ -1,7 +1,5 @@
 #pragma once
-
-#include "lp_solve_5.5/lp_lib.h"
-
+#include <lp_lib.h>
 #include <Eigen/Core>
 
 struct ILP {
