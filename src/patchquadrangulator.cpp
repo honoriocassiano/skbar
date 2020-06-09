@@ -28,119 +28,92 @@ Eigen::SparseMatrix<double> skbar::PatchQuadrangulator::GetLaplacianMatrix(const
 
     Matrix laplacianMatrix;
 
-    auto size = mesh.n_vertices();
+    auto nVertices = mesh.n_vertices();
+    auto nControlPoints = param.l.sum();
+
+    std::vector<Triplet> triplets;
+    std::size_t indexFixedVertex = 0;
 
     laplacianMatrix.setZero();
 
-    int nControlVertices = 0;
-    std::vector<Triplet> triplets;
-
     // Default laplacian matrix
-    for (auto it : mesh.vertices()) {
-        auto i = it.idx();
+    for (auto vertex : mesh.vertices()) {
+        auto vId = vertex.idx();
 
-        for (const auto &vn: it.vertices()) {
+        for (const auto &vn: vertex.vertices()) {
 //            laplacianMatrix(i, vn.idx()) = -1;
-            triplets.emplace_back(i, vn.idx(), -1.0);
+            triplets.emplace_back(vId, vn.idx(), -1.0);
         }
 
-        triplets.emplace_back(i, i, it.valence());
+        triplets.emplace_back(vId, vId, vertex.valence());
 
-        if (it.is_boundary()) {
-            triplets.emplace_back(size + i, i, LAPLACE_CONSTRAINT_WEIGHT);
-            nControlVertices++;
+        if (mesh.data(vertex).laplacian.fixed) {
+            triplets.emplace_back(nVertices + indexFixedVertex, vId, LAPLACE_CONSTRAINT_WEIGHT);
+
+            indexFixedVertex++;
         }
     }
 
-    laplacianMatrix.resize(size + nControlVertices, size);
+    laplacianMatrix.resize(nVertices + nControlPoints, nVertices);
     laplacianMatrix.setFromTriplets(triplets.begin(), triplets.end());
 
     return laplacianMatrix;
 }
 
 Eigen::Matrix<double, -1, 3> skbar::PatchQuadrangulator::GetRightSide(const QuadMesh &mesh,
-                                                                      const patchgen::PatchParam &param,
-                                                                      const std::vector<OpenMesh::Vec3d> &positions) {
+                                                                      const patchgen::PatchParam &param) {
 
     auto nv = mesh.n_vertices();
+    auto fixedVertexIndex = 0;
 
-    Eigen::Matrix<double, -1, 3> b(nv + positions.size(), 3);
+    Eigen::Matrix<double, -1, 3> b(nv + param.l.sum(), 3);
 
     b.setZero();
 
-    for (int i = 0; i < positions.size(); i++) {
+    for (auto v : mesh.vertices()) {
 
-        auto point = positions[i];
+        auto laplacianData = mesh.data(v).laplacian;
 
-        b(nv + i, 0) = point[0] * LAPLACE_CONSTRAINT_WEIGHT;
-        b(nv + i, 1) = point[1] * LAPLACE_CONSTRAINT_WEIGHT;
-        b(nv + i, 2) = point[2] * LAPLACE_CONSTRAINT_WEIGHT;
+        if (laplacianData.fixed) {
+
+            b(nv + fixedVertexIndex, 0) = laplacianData.position[0] * LAPLACE_CONSTRAINT_WEIGHT;
+            b(nv + fixedVertexIndex, 1) = laplacianData.position[1] * LAPLACE_CONSTRAINT_WEIGHT;
+            b(nv + fixedVertexIndex, 2) = laplacianData.position[2] * LAPLACE_CONSTRAINT_WEIGHT;
+
+            fixedVertexIndex++;
+        }
     }
 
     return b;
 }
 
-std::vector<OpenMesh::Vec3d>
-skbar::PatchQuadrangulator::GetShiftedPositions(const std::vector<OpenMesh::Vec3d> &positions,
-                                                const patchgen::PatchParam &param) {
+void skbar::PatchQuadrangulator::SetLaplacianPositions(QuadMesh &patch,
+                                                       const std::vector<OpenMesh::Vec3d> &positions) {
 
-    auto permutation = param.permutation;
+    OpenMesh::SmartVertexHandle currentVertex;
+    OpenMesh::SmartHalfedgeHandle currentEdge;
 
-    std::vector<OpenMesh::Vec3d> shiftedPositions(positions.size());
+    for (auto v : patch.vertices()) {
+        if (patch.data(v).patchgen.corner_index == 0) {
+            for (auto h : v.outgoing_halfedges()) {
 
-    // Aux vector to nonCornerPositions
-    std::vector<std::size_t> nonCornerPositions(positions.size() - param.get_num_sides());
-
-    // Positions
-    std::vector<std::size_t> mapPositions(param.get_num_sides());
-
-    std::size_t nSides = param.get_num_sides();
-
-    for (std::size_t iCorner = 0, iLastCornerSize = 0, posLastNonCorner = 0; iCorner < nSides; iCorner++) {
-        mapPositions[iCorner] = iLastCornerSize;
-
-        for (std::size_t iNonCorner = 1; iNonCorner < param.l(iCorner); iNonCorner++) {
-            nonCornerPositions[posLastNonCorner] = iLastCornerSize + iNonCorner;
-
-            posLastNonCorner++;
+                if (h.is_boundary()) {
+                    currentEdge = patch.halfedge_handle(v);
+                    break;
+                }
+            }
+            break;
         }
-
-        iLastCornerSize += param.l(iCorner);
     }
 
-    // Rotate vectors according to permutation
-    if (permutation.id != 0) {
+    currentVertex = currentEdge.to();
 
-        int rotation;
+    // Loop over inversed position vector because boundary halfedges are oriented CLOCKWISE (IMPORTANT!)
+    for (auto it = positions.rbegin(); it != positions.rend(); it++) {
+        patch.data(currentVertex).laplacian.position = *it;
+        patch.data(currentVertex).laplacian.fixed = true;
 
-        if (permutation.is_flipped()) {
-            std::reverse(mapPositions.begin(), mapPositions.end());
-            std::reverse(nonCornerPositions.begin(), nonCornerPositions.end());
-
-            rotation = permutation.id - permutation.num_sides;
-        } else {
-            rotation = permutation.id;
-        }
-
-        std::rotate(mapPositions.begin(), mapPositions.begin() + rotation, mapPositions.end());
-
-        // Sum all side vertices and subtract the corner vertices
-        auto rotateValueNonCorner = std::accumulate(mapPositions.begin(),
-                                                    mapPositions.begin() + rotation,
-                                                    decltype(mapPositions)::value_type(0)) - rotation;
-
-        std::rotate(nonCornerPositions.begin(),
-                    nonCornerPositions.begin() + rotateValueNonCorner,
-                    nonCornerPositions.end());
+        currentEdge = currentEdge.next();
+        currentVertex = currentEdge.to();
     }
-
-    // Add non corners do map
-    mapPositions.insert(mapPositions.begin() + param.get_num_sides(), nonCornerPositions.begin(),
-                        nonCornerPositions.end());
-
-    for (std::size_t i = 0; i < mapPositions.size(); i++) {
-        shiftedPositions[i] = positions[mapPositions[i]];
-    }
-
-    return shiftedPositions;
 }
