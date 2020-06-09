@@ -18,6 +18,13 @@ namespace skbar {
         Patchgen() : corner_index(-1), tag(patchgen::PatchVertexTag::None) {}
     };
 
+    struct Laplacian {
+        OpenMesh::Vec3d position;
+        bool fixed;
+
+        Laplacian() : fixed(false) {}
+    };
+
 // define traits
     struct MyTraits : public OpenMesh::DefaultTraits {
         // use double valued coordinates
@@ -37,6 +44,7 @@ namespace skbar {
         VertexTraits
         {
             Patchgen patchgen;
+            Laplacian laplacian;
         };
     };
 // Select mesh type (TriMesh) and kernel (ArrayKernel)
