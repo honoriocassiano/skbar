@@ -17,6 +17,7 @@ int main(int argc, char *argv[]) {
     SDLApplication app("SkBaR", 800, 600);
 
     app.Initialize();
+    app.Run();
 
 // //    QuadMesh mesh;
 // //

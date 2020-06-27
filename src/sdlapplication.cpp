@@ -23,6 +23,9 @@ skbar::SDLApplication::SDLApplication(const std::string &_title, int _width, int
 
 skbar::SDLApplication::~SDLApplication() {
 
+    SDL_GL_DeleteContext(glContext);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
 }
 
 void skbar::SDLApplication::Initialize() {
@@ -77,7 +80,6 @@ void skbar::SDLApplication::InitializeSDL() {
 
 	SDL_GL_MakeCurrent(window, glContext);
 
-	SDL_MaximizeWindow(window);
 }
 
 void skbar::SDLApplication::InitializeGL() {
@@ -85,4 +87,74 @@ void skbar::SDLApplication::InitializeGL() {
     if (glewInit() != GLEW_OK) {
 		throw std::runtime_error("Failed to initialize GLEW!");
 	}
+}
+
+void skbar::SDLApplication::Run() {
+    running = true;
+
+	SDL_MaximizeWindow(window);
+
+    while (running) {
+        Update();
+
+        Render();
+    }
+}
+
+void skbar::SDLApplication::Update() {
+    ProcessEvents();
+}
+
+void skbar::SDLApplication::Render() {
+    SDL_GL_SwapWindow(window);
+}
+
+
+void skbar::SDLApplication::ProcessEvents() {
+
+    SDL_Event event;
+
+    while (SDL_PollEvent(&event)) {
+
+        ProcessRealtimeEvents();
+
+        if (event.type == SDL_KEYDOWN) {
+            switch (event.key.keysym.sym) {
+
+                case SDLK_ESCAPE:
+                    running = false;
+                    break;
+
+                // TODO Add other events here
+
+                default:
+                    break;
+            }
+        }
+
+        if (event.type == SDL_QUIT) {
+            running = false;
+        }
+
+        if (event.type == SDL_WINDOWEVENT
+                && (event.window.windowID == SDL_GetWindowID(window))) {
+
+            switch (event.window.event) {
+                case SDL_WINDOWEVENT_CLOSE:
+                    running = false;
+
+                    case SDL_WINDOWEVENT_RESIZED:
+                    case SDL_WINDOWEVENT_SIZE_CHANGED:
+                        SDL_GetWindowSize(window, &width, &height);
+
+                        // TODO Resize OpenGL
+
+            }
+        }
+    }
+}
+
+
+void skbar::SDLApplication::ProcessRealtimeEvents() {
+
 }

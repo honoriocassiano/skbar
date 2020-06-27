@@ -17,11 +17,28 @@ public:
 
     void SaveMesh(const std::string &filename) override;
 
+    void Run();
 
 private:
     void InitializeSDL();
 
     void InitializeGL();
+
+    /** Update states before render
+     */
+    void Update();
+
+    /** Render new state
+     */
+    void Render();
+
+    /** Process mouse and keyboard events
+     */
+    void ProcessEvents();
+
+    /** Process repeated keyboard events
+     */
+    void ProcessRealtimeEvents();
 
 private:
     SDL_Window *window;
@@ -30,7 +47,7 @@ private:
     bool running;
 
     const std::string title;
-    const int width;
-    const int height;
+    int width;
+    int height;
 };
 }
