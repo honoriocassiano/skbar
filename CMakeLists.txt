@@ -115,18 +115,16 @@ add_executable(skbar ${SOURCE_FILES} src/example.h)
 #set(EIGEN_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/src/vcglib/eigenlib")
 
 # Compile ImGUI library
-# add_subdirectory("${CMAKE_SOURCE_DIR}/libsrc/imgui")
+add_subdirectory("${CMAKE_SOURCE_DIR}/libsrc/imgui")
 
 # Compile SOIL
-# add_subdirectory("${CMAKE_SOURCE_DIR}/libsrc/soil")
+add_subdirectory("${CMAKE_SOURCE_DIR}/libsrc/soil")
 
 # Used to debug mode
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
-# find_package(GLEW REQUIRED)
-# find_package(SDL2 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Threads REQUIRED)
@@ -141,7 +139,9 @@ include_directories(${OPENGL_INCLUDE_DIR})
 include_directories(${EIGEN3_INCLUDE_DIR})
 #include_directories(${LPSOLVE_INCLUDE_DIR})
 
+include_directories("${CMAKE_SOURCE_DIR}/libsrc")
+
 include_directories(${OPENMESH_INCLUDE_DIRS})
 
 # target_link_libraries(sbq ${GLEW_LIBRARIES} ${SDL2_LIBRARIES} ${OPENGL_LIBRARIES} pthread)
-target_link_libraries(skbar ${OPENGL_LIBRARIES} ${OPENMESH_LIBRARIES} pthread ${CMAKE_DL_LIBS} patchgen)
+target_link_libraries(skbar ${OPENGL_LIBRARIES} ${OPENMESH_LIBRARIES} pthread ${CMAKE_DL_LIBS} patchgen imgui soil)
