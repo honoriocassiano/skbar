@@ -108,6 +108,11 @@ include_directories(${CMAKE_SOURCE_DIR}/src/patchgen)
 
 target_link_libraries(patchgen lp_solve)
 
+# Add GLEW library
+find_package(GLEW REQUIRED)
+
+include_directories(${GLEW_INCLUDE_DIR})
+
 # Executable config
 
 add_executable(skbar ${SOURCE_FILES} src/example.h)
@@ -144,4 +149,4 @@ include_directories("${CMAKE_SOURCE_DIR}/libsrc")
 include_directories(${OPENMESH_INCLUDE_DIRS})
 
 # target_link_libraries(sbq ${GLEW_LIBRARIES} ${SDL2_LIBRARIES} ${OPENGL_LIBRARIES} pthread)
-target_link_libraries(skbar ${OPENGL_LIBRARIES} ${OPENMESH_LIBRARIES} pthread ${CMAKE_DL_LIBS} patchgen imgui soil)
+target_link_libraries(skbar ${OPENGL_LIBRARIES} ${OPENMESH_LIBRARIES} pthread ${CMAKE_DL_LIBS} patchgen imgui soil ${GLEW_LIBRARIES})
