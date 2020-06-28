@@ -115,7 +115,9 @@ include_directories(${GLEW_INCLUDE_DIR})
 
 # Executable config
 
-add_executable(skbar ${SOURCE_FILES} src/example.h)
+set(TARGET_NAME skbar)
+
+add_executable(${TARGET_NAME} ${SOURCE_FILES} src/example.h)
 
 #set(EIGEN_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/src/vcglib/eigenlib")
 
@@ -148,5 +150,7 @@ include_directories("${CMAKE_SOURCE_DIR}/libsrc")
 
 include_directories(${OPENMESH_INCLUDE_DIRS})
 
+target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra -pedantic)
+
 # target_link_libraries(sbq ${GLEW_LIBRARIES} ${SDL2_LIBRARIES} ${OPENGL_LIBRARIES} pthread)
-target_link_libraries(skbar ${OPENGL_LIBRARIES} ${OPENMESH_LIBRARIES} pthread ${CMAKE_DL_LIBS} patchgen imgui soil ${GLEW_LIBRARIES})
+target_link_libraries(${TARGET_NAME} ${OPENGL_LIBRARIES} ${OPENMESH_LIBRARIES} pthread ${CMAKE_DL_LIBS} patchgen imgui soil ${GLEW_LIBRARIES})
