@@ -149,6 +149,9 @@ void skbar::SDLApplication::ProcessEvents() {
                         SDL_GetWindowSize(window, &width, &height);
 
                         // TODO Resize OpenGL
+                        break;
+                    default:
+                        break;
 
             }
         }
