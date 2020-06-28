@@ -7,7 +7,7 @@
 #include <stdexcept>
 
 // Event filter
-int RepeatedKeyEventFilter(void *userdata, SDL_Event *event) {
+int RepeatedKeyEventFilter([[maybe_unused]] void *userdata, SDL_Event *event) {
 	if (event->type == SDL_KEYDOWN || event->type == SDL_KEYUP) {
 		// Return true if not repeated
 		return !event->key.repeat;
@@ -19,9 +19,14 @@ int RepeatedKeyEventFilter(void *userdata, SDL_Event *event) {
 skbar::SDLApplication::SDLApplication(const std::string &_title, int _width, int _height) :
     title(_title), width(_width), height(_height) {
 
+    viewer = new Viewer(_width, _height);
 }
 
 skbar::SDLApplication::~SDLApplication() {
+
+    delete viewer;
+
+    viewer = nullptr;
 
     SDL_GL_DeleteContext(glContext);
     SDL_DestroyWindow(window);
@@ -31,6 +36,8 @@ skbar::SDLApplication::~SDLApplication() {
 void skbar::SDLApplication::Initialize() {
     InitializeSDL();
     InitializeGL();
+
+    viewer->Initialize();
 }
 
 void skbar::SDLApplication::LoadMesh(const std::string &filename) {
@@ -79,7 +86,6 @@ void skbar::SDLApplication::InitializeSDL() {
 	SDL_SetEventFilter(RepeatedKeyEventFilter, nullptr);
 
 	SDL_GL_MakeCurrent(window, glContext);
-
 }
 
 void skbar::SDLApplication::InitializeGL() {
@@ -106,6 +112,9 @@ void skbar::SDLApplication::Update() {
 }
 
 void skbar::SDLApplication::Render() {
+
+    viewer->Render();
+
     SDL_GL_SwapWindow(window);
 }
 
@@ -143,15 +152,16 @@ void skbar::SDLApplication::ProcessEvents() {
             switch (event.window.event) {
                 case SDL_WINDOWEVENT_CLOSE:
                     running = false;
+                    break;
 
-                    case SDL_WINDOWEVENT_RESIZED:
-                    case SDL_WINDOWEVENT_SIZE_CHANGED:
-                        SDL_GetWindowSize(window, &width, &height);
+                case SDL_WINDOWEVENT_RESIZED:
+                case SDL_WINDOWEVENT_SIZE_CHANGED:
+                    SDL_GetWindowSize(window, &width, &height);
 
-                        // TODO Resize OpenGL
-                        break;
-                    default:
-                        break;
+                    // TODO Resize OpenGL
+                    break;
+                default:
+                    break;
 
             }
         }

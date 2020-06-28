@@ -1,5 +1,6 @@
 #include "application.h"
 #include "eventprocessor.h"
+#include "viewer.h"
 
 #include <SDL2/SDL.h>
 
@@ -88,5 +89,8 @@ private:
     // Window dimensions
     int width;
     int height;
+
+    // Contents of the window
+    Viewer *viewer;
 };
 }
