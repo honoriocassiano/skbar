@@ -1,4 +1,5 @@
 #include "application.h"
+#include "eventprocessor.h"
 
 #include <SDL2/SDL.h>
 
@@ -36,13 +37,11 @@ private:
      */
     void ProcessEvents();
 
-    /** Process repeated keyboard events
-     */
-    void ProcessRealtimeEvents();
-
 private:
     SDL_Window *window;
     SDL_GLContext glContext;
+
+    EventProcessor eventProcessor;
 
     bool running;
 

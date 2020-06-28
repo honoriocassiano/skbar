@@ -113,10 +113,11 @@ void skbar::SDLApplication::Render() {
 void skbar::SDLApplication::ProcessEvents() {
 
     SDL_Event event;
+    const Uint8 *keyboardState = SDL_GetKeyboardState(nullptr);
 
     while (SDL_PollEvent(&event)) {
 
-        ProcessRealtimeEvents();
+        eventProcessor.ProcessRealTimeKeyboard(keyboardState);
 
         if (event.type == SDL_KEYDOWN) {
             switch (event.key.keysym.sym) {
@@ -125,9 +126,9 @@ void skbar::SDLApplication::ProcessEvents() {
                     running = false;
                     break;
 
-                // TODO Add other events here
-
                 default:
+                    // TODO Add other events here
+                    eventProcessor.ProcessKeyboard(event.key);
                     break;
             }
         }
@@ -151,10 +152,21 @@ void skbar::SDLApplication::ProcessEvents() {
 
             }
         }
+
+		// Get all mouse events
+		switch (event.type) {
+			case SDL_MOUSEBUTTONDOWN:
+			case SDL_MOUSEBUTTONUP:
+			case SDL_MOUSEMOTION:
+			case SDL_MOUSEWHEEL:
+			case SDL_MOUSEWHEEL_FLIPPED:
+			case SDL_MOUSEWHEEL_NORMAL:
+			case SDL_FINGERDOWN:
+			case SDL_FINGERUP:
+			case SDL_FINGERMOTION:
+                eventProcessor.ProcessMouse(event);
+				break;
+			}
     }
 }
 
-
-void skbar::SDLApplication::ProcessRealtimeEvents() {
-
-}
