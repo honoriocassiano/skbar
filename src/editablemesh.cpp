@@ -39,6 +39,17 @@ bool skbar::EditableMesh::Load(const std::string &filename) {
 }
 
 std::tuple<OpenMesh::Vec3f, OpenMesh::Vec3f> skbar::EditableMesh::GetBoundingBox() const {
-#warning "Implement this"
-    // TODO Implement bounding box
+
+    OpenMesh::Vec3f bbMin, bbMax;
+
+    auto it = quadMesh.vertices().begin();
+
+    bbMin = bbMax = quadMesh.point(it);
+
+    for (it++; it != quadMesh.vertices().end(); it++) {
+        bbMin.minimize(quadMesh.point(it));
+        bbMax.maximize(quadMesh.point(it));
+    }
+
+    return std::tuple<OpenMesh::Vec3f, OpenMesh::Vec3f>(bbMin, bbMax);
 }
