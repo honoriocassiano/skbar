@@ -1,3 +1,6 @@
+#ifndef VIEWER_H
+#define VIEWER_H
+
 // Local headers
 #include "framebuffer.h"
 
@@ -72,3 +75,5 @@ private:
     FrameBuffer *frameBuffer;
 };
 }
+
+#endif

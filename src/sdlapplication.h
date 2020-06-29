@@ -1,3 +1,6 @@
+#ifndef SDLAPPLICATION_H_
+#define SDLAPPLICATION_H_
+
 #include "application.h"
 #include "eventprocessor.h"
 #include "viewer.h"
@@ -94,3 +97,5 @@ private:
     Viewer *viewer;
 };
 }
+
+#endif

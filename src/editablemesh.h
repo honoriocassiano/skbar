@@ -1,3 +1,6 @@
+#ifndef EDITABLE_MESH_H
+#define EDITABLE_MESH_H
+
 #include "meshtypes.h"
 
 namespace skbar {
@@ -40,3 +43,5 @@ private:
 };
 
 }
+
+#endif
