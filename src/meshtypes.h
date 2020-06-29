@@ -11,6 +11,9 @@
 
 namespace skbar {
 
+    /**
+     * Holds data used by patchgen
+     */
     struct Patchgen {
         int corner_index;
         patchgen::PatchVertexTag tag;
@@ -18,6 +21,9 @@ namespace skbar {
         Patchgen() : corner_index(-1), tag(patchgen::PatchVertexTag::None) {}
     };
 
+    /*
+     * Holds data to use in laplacian calculation
+     */
     struct Laplacian {
         OpenMesh::Vec3d position;
         bool fixed;
@@ -25,10 +31,43 @@ namespace skbar {
         Laplacian() : fixed(false) {}
     };
 
-// define traits
-    struct MyTraits : public OpenMesh::DefaultTraits {
+    /*
+     * Holds data of quad mesh faces
+     */
+    struct QuadFaceData {
+        int id;
+
+        QuadFaceData() : id(-1) {}
+    };
+
+    // Define quad mesh traits
+    struct QuadMeshTraits : public OpenMesh::DefaultTraits {
         // use double valued coordinates
-        typedef OpenMesh::Vec3d Point;
+        typedef OpenMesh::Vec3f Point;
+        // use vertex normals and vertex colors
+        VertexAttributes(OpenMesh::Attributes::Normal |
+                         OpenMesh::Attributes::Color);
+        // store the previous halfedge
+        HalfedgeAttributes(OpenMesh::Attributes::PrevHalfedge);
+        // use face normals
+        // FaceAttributes(OpenMesh::Attributes::Normal);
+        // store a face handle for each vertex
+
+        FaceTraits {
+            QuadFaceData quadFaceData;
+        };
+
+        VertexTraits
+        {
+            Patchgen patchgen;
+            Laplacian laplacian;
+        };
+    };
+
+    // Define tri mesh traits
+    struct TriMeshTraits : public OpenMesh::DefaultTraits {
+        // use double valued coordinates
+        typedef OpenMesh::Vec3f Point;
         // use vertex normals and vertex colors
         VertexAttributes(OpenMesh::Attributes::Normal |
                          OpenMesh::Attributes::Color);
@@ -37,20 +76,20 @@ namespace skbar {
         // use face normals
         FaceAttributes(OpenMesh::Attributes::Normal);
         // store a face handle for each vertex
-//    FaceTraits
-//    {
-//        typename Base::Refs::FaceHandle my_face_handle;
-//    };
-        VertexTraits
-        {
-            Patchgen patchgen;
-            Laplacian laplacian;
+
+        FaceTraits {
+            QuadFaceData quadFaceData;
         };
+
+        // VertexTraits
+        // {
+        // };
     };
-// Select mesh type (TriMesh) and kernel (ArrayKernel)
-// and define my personal mesh type (MyMesh)
-    typedef OpenMesh::TriMesh_ArrayKernelT<MyTraits> TriMesh;
-    typedef OpenMesh::PolyMesh_ArrayKernelT<MyTraits> QuadMesh;
+    // Select mesh type (TriMesh) and kernel (ArrayKernel)
+    // and define my personal mesh type (MyMesh)
+    // typedef OpenMesh::TriMesh_ArrayKernelT<TriMeshTraits> TriMesh;
+    typedef OpenMesh::TriMesh_ArrayKernelT<TriMeshTraits> TriMesh;
+    typedef OpenMesh::PolyMesh_ArrayKernelT<QuadMeshTraits> QuadMesh;
 }
 
 #endif //SKBAR_MESHTYPES_H
