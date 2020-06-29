@@ -98,7 +98,7 @@ void skbar::SDLApplication::InitializeGL() {
 void skbar::SDLApplication::Run() {
     running = true;
 
-	SDL_MaximizeWindow(window);
+	// SDL_MaximizeWindow(window);
 
     while (running) {
         Update();
