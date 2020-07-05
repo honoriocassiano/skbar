@@ -106,6 +106,10 @@ void skbar::GLCamera::SetBox(const skbar::BBox &_bbox) {
     bbox = bbox;
 }
 
+void skbar::GLCamera::Render() const {
+    Apply();
+}
+
 void skbar::GLCamera::Apply() const {
 
     glMatrixMode(GL_PROJECTION);

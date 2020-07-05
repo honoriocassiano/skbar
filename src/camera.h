@@ -17,6 +17,8 @@ public:
     virtual void Drag(float dx, float dy) = 0;
 
     virtual void Zoom(float zoom) = 0;
+
+    virtual void Render() const = 0;
 };
 }
 

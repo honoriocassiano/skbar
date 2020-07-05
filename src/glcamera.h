@@ -27,6 +27,8 @@ public:
 
     void SetBox(const BBox &bbox);
 
+    void Render() const override;
+
 private:
 
     void Apply() const;

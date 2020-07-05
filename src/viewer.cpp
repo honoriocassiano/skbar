@@ -5,18 +5,22 @@
 
 skbar::Viewer::Viewer(int _width, int _height)
     : width(_width), height(_height), bgColor{.3f, .3f, .3f, 1},
-      rotating(false), dragging(false) {
+      rotating(false), dragging(false), needRender(false),
+      frameBuffer(nullptr), camera(nullptr) {
 }
 
 skbar::Viewer::~Viewer() {
     delete frameBuffer;
+    delete camera;
 
     frameBuffer = nullptr;
+    camera = nullptr;
 }
 
 void skbar::Viewer::Initialize() {
 
     frameBuffer = new FrameBuffer(width, height);
+    camera = new GLCamera(width, height);
 
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
@@ -37,6 +41,8 @@ void skbar::Viewer::Initialize() {
 }
 
 void skbar::Viewer::Render() {
+
+    camera->Render();
 
     if (NeedRender()) {
 
@@ -74,16 +80,28 @@ void skbar::Viewer::Render() {
 }
 
 void skbar::Viewer::Resize(int width, int height) {
+#warning "Implement this"
 }
 
 void skbar::Viewer::Update(/* TODO Add parameters */) {
+#warning "Implement this"
 }
 
 bool skbar::Viewer::NeedRender() const {
+#warning "Improve this"
+    return true;
 }
 
 void skbar::Viewer::Zoom(float zoom) {
+#warning "Implement this"
 }
 
 void skbar::Viewer::LoadMesh(const std::string &filename) {
+    mesh.Load(filename);
+
+    ApplyBBox(mesh.GetBBox());
+}
+
+void skbar::Viewer::ApplyBBox(const BBox &bbox) {
+    camera->SetBox(bbox);
 }

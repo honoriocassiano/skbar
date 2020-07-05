@@ -3,6 +3,9 @@
 
 // Local headers
 #include "framebuffer.h"
+#include "commontypes.h"
+#include "editablemesh.h"
+#include "glcamera.h"
 
 // Standard library headers
 #include <string>
@@ -48,6 +51,8 @@ public:
      */
     void LoadMesh(const std::string &filename);
 
+    void ApplyBBox(const BBox &bbox);
+
     /* TODO Add methods to change visualization */
 
 private:
@@ -73,6 +78,11 @@ private:
 
     // Framebuffer to optimize rendering process
     FrameBuffer *frameBuffer;
+
+    EditableMesh mesh;
+
+    // Control visualization itself
+    GLCamera *camera;
 };
 }
 
