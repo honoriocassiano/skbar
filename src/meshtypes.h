@@ -88,8 +88,8 @@ namespace skbar {
     // Select mesh type (TriMesh) and kernel (ArrayKernel)
     // and define my personal mesh type (MyMesh)
     // typedef OpenMesh::TriMesh_ArrayKernelT<TriMeshTraits> TriMesh;
-    typedef OpenMesh::TriMesh_ArrayKernelT<TriMeshTraits> TriMesh;
-    typedef OpenMesh::PolyMesh_ArrayKernelT<QuadMeshTraits> QuadMesh;
+    // typedef OpenMesh::TriMesh_ArrayKernelT<TriMeshTraits> TriMesh;
+    // typedef OpenMesh::PolyMesh_ArrayKernelT<QuadMeshTraits> QuadMesh;
 }
 
 #endif //SKBAR_MESHTYPES_H

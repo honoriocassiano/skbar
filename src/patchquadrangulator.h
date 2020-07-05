@@ -5,12 +5,13 @@
 #ifndef SKBAR_PATCHQUADRANGULATOR_H
 #define SKBAR_PATCHQUADRANGULATOR_H
 
-#include "meshtypes.h"
+#include "opquadmesh.h"
 
 #include "patchgen/generate_topology.hh"
 
-#include <vector>
 #include <Eigen/Sparse>
+
+#include <vector>
 
 namespace skbar {
 
@@ -21,13 +22,13 @@ namespace skbar {
 
     public:
 
-        static patchgen::PatchParam ComputeTopology(const Eigen::VectorXi &patchSides, QuadMesh &mesh);
+        static patchgen::PatchParam ComputeTopology(const Eigen::VectorXi &patchSides, OPQuadMesh &mesh);
 
-        static Eigen::SparseMatrix<double> GetLaplacianMatrix(const QuadMesh &mesh, const patchgen::PatchParam &param);
+        static Eigen::SparseMatrix<double> GetLaplacianMatrix(const OPQuadMesh &mesh, const patchgen::PatchParam &param);
 
-        static Eigen::Matrix<double, -1, 3> GetRightSide(const QuadMesh &mesh, const patchgen::PatchParam &param);
+        static Eigen::Matrix<double, -1, 3> GetRightSide(const OPQuadMesh &mesh, const patchgen::PatchParam &param);
 
-        static void SetLaplacianPositions(QuadMesh &patch, const std::vector<OpenMesh::Vec3d> &positions,
+        static void SetLaplacianPositions(OPQuadMesh &patch, const std::vector<OpenMesh::Vec3d> &positions,
                                           bool positionsIsClockwise);
     };
 }

@@ -3,6 +3,8 @@
 
 #include "meshtypes.h"
 #include "commontypes.h"
+#include "quadmesh.h"
+#include "trimesh.h"
 
 namespace skbar {
 
@@ -19,31 +21,28 @@ public:
     BBox GetBBox() const;
 
     inline QuadMesh &GetQuad() {
-        return quadMesh;
+        return *quadMesh;
     }
 
     inline const QuadMesh &GetQuad() const {
-        return quadMesh;
+        return *quadMesh;
     }
 
     inline TriMesh &GetTri() {
-        return triMesh;
+        return *triMesh;
     }
 
     const inline TriMesh &GetTri() const {
-        return triMesh;
+        return *triMesh;
     }
-
-private:
-    std::tuple<OpenMesh::Vec3f, OpenMesh::Vec3f> GetBoundingBox() const;
 
 private:
 
     // Triangulated mesh
-    TriMesh triMesh;
+    TriMesh *triMesh;
 
     // Quad mesh
-    QuadMesh quadMesh;
+    QuadMesh *quadMesh;
 };
 
 }

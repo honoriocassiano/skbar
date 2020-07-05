@@ -10,7 +10,9 @@
 
 namespace skbar {
 
-    void PatchTracer::Trace(QuadMesh &mesh) {
+    void PatchTracer::Trace(OPQuadMesh &baseMesh) {
+
+        auto mesh = baseMesh.Get();
 
         std::set<std::pair<int, int>> edges;
 
@@ -54,7 +56,7 @@ namespace skbar {
         }
     }
 
-    std::set<int> PatchTracer::FindSingularities(const QuadMesh &mesh, bool closed) {
+    std::set<int> PatchTracer::FindSingularities(const OPQuadMesh::QuadMeshImpl &mesh, bool closed) {
 
         std::set<int> singularities;
 
@@ -83,8 +85,11 @@ namespace skbar {
         return singularities;
     }
 
-    std::vector<std::vector<int>> PatchTracer::GetGrid(const QuadMesh &mesh, int patch) {
+    std::vector<std::vector<int>> PatchTracer::GetGrid(const OPQuadMesh &baseMesh, int patch) {
+
         std::vector<std::vector<int>> grid;
+
+        auto mesh = baseMesh.Get();
 
         // TODO Add patch tracing
 
