@@ -19,6 +19,11 @@ public:
 
     std::size_t GetQuadFaceId(std::size_t triangleId) const override;
 
+    void Render() const override;
+
+    TriMeshImpl &Get() { return mesh; }
+
+    const TriMeshImpl &Get() const { return mesh; }
 private:
 
     TriMeshImpl mesh;

@@ -1,6 +1,7 @@
 #include "optrimesh.h"
 
 #include "opquadmesh.h"
+#include "opmeshrenderer.h"
 
 skbar::OPTriMesh::OPTriMesh() {
 
@@ -31,4 +32,8 @@ bool skbar::OPTriMesh::Load(const skbar::QuadMesh &mesh) {
 
 std::size_t skbar::OPTriMesh::GetQuadFaceId(std::size_t triangleId) const {
 
+}
+
+void skbar::OPTriMesh::Render() const {
+    OPMeshRenderer::Render(mesh);
 }
