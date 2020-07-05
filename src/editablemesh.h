@@ -2,17 +2,21 @@
 #define EDITABLE_MESH_H
 
 #include "meshtypes.h"
+#include "commontypes.h"
 
 namespace skbar {
 
 class EditableMesh {
 
 public:
+
     EditableMesh();
 
     virtual ~EditableMesh();
 
     bool Load(const std::string &filename);
+
+    BBox GetBBox() const;
 
     inline QuadMesh &GetQuad() {
         return quadMesh;

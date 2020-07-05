@@ -3,6 +3,8 @@
 
 #include "camera.h"
 
+#include "commontypes.h"
+
 #include "vector.h"
 
 #include <array>
@@ -22,6 +24,8 @@ public:
     void Drag(float dx, float dy) override;
 
     void Zoom(float zoom) override;
+
+    void SetBox(const BBox &bbox);
 
 private:
 
@@ -45,6 +49,8 @@ private:
     Vec3f initialCenter;
     Vec3f initialPosition;
     Vec3f initialUp;
+
+    BBox bbox;
 };
 }
 
