@@ -52,8 +52,6 @@ constexpr std::array<T, N> Dot(const std::array<T, N> &v1, const std::array<T, N
     return sum;
 }
 
-}
-
 #ifdef VECTOR_SET_OPERATORS
 
 template<typename T>
@@ -67,5 +65,7 @@ inline constexpr std::array<T, N> operator*(const std::array<T, N> &v1, const st
 }
 
 #endif
+
+}
 
 #endif
