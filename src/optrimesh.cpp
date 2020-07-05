@@ -11,9 +11,9 @@ skbar::OPTriMesh::~OPTriMesh() {
 
 }
 
-bool Load(skbar::OPTriMesh::TriMeshImpl &mesh, const skbar::OPQuadMesh &baseMesh) {
+bool OPLoad(skbar::OPTriMesh::TriMeshImpl &mesh, const skbar::OPQuadMesh &baseMesh) {
 
-    auto tempTriMesh = baseMesh.Get();
+    auto tempTriMesh = baseMesh.GetTriangulated().Get();
 
     mesh.assign(tempTriMesh);
 
@@ -25,9 +25,9 @@ bool Load(skbar::OPTriMesh::TriMeshImpl &mesh, const skbar::OPQuadMesh &baseMesh
     return true;
 }
 
-bool skbar::OPTriMesh::Load(const skbar::QuadMesh &mesh) {
+bool skbar::OPTriMesh::Load(const skbar::QuadMesh &qmesh) {
 
-    return Load(dynamic_cast<const OPQuadMesh&>(mesh));
+    return OPLoad(mesh, dynamic_cast<const OPQuadMesh &>(qmesh));
 }
 
 std::size_t skbar::OPTriMesh::GetQuadFaceId(std::size_t triangleId) const {
@@ -35,5 +35,8 @@ std::size_t skbar::OPTriMesh::GetQuadFaceId(std::size_t triangleId) const {
 }
 
 void skbar::OPTriMesh::Render() const {
+
+    // printf("%lu\n", mesh.n_faces());
+
     OPMeshRenderer::Render(mesh);
 }

@@ -20,6 +20,8 @@ public:
 
     BBox GetBBox() const;
 
+    void Render() const;
+
     inline QuadMesh &GetQuad() {
         return *quadMesh;
     }

@@ -41,7 +41,7 @@ void skbar::SDLApplication::Initialize() {
 }
 
 void skbar::SDLApplication::LoadMesh(const std::string &filename) {
-
+    viewer->LoadMesh(filename);
 }
 
 void skbar::SDLApplication::SaveMesh(const std::string &filename) {

@@ -23,7 +23,11 @@ void skbar::OPMeshRenderer::Render(const skbar::OPTriMesh::TriMeshImpl &mesh, co
 
 	glBegin(GL_TRIANGLES);
 
+    glColor3f(1, 1, 1);
+
     for (auto it : mesh.faces()) {
+
+        printf("1\n");
 
         auto normal = mesh.normal(it);
 

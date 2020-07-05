@@ -53,6 +53,8 @@ void skbar::Viewer::Render() {
         glClearColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3]);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        mesh.Render();
+
         // Enable depth test
 		glEnable(GL_DEPTH_TEST);
 

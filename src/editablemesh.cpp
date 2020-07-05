@@ -26,3 +26,7 @@ bool skbar::EditableMesh::Load(const std::string &filename) {
 skbar::BBox skbar::EditableMesh::GetBBox() const {
     return quadMesh->GetBBox();
 }
+
+void skbar::EditableMesh::Render() const {
+    triMesh->Render();
+}

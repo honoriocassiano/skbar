@@ -12,19 +12,30 @@
 
 #include "editablemesh.h"
 #include "utils/debug.h"
+#include "vector.h"
+#include "quadmesh.h"
+#include "trimesh.h"
 
 using namespace skbar;
 
 int main(int argc, char *argv[]) {
 
-    // SDLApplication app("SkBaR", 800, 600);
+    SDLApplication app("SkBaR", 800, 600);
+
+    app.Initialize();
+
+    app.LoadMesh("/home/cassiano/Documents/workspace-cpp/skbar/models/3holes_quad.obj");
+
+    app.Run();
+
+    // EditableMesh mesh;
     //
-    // app.Initialize();
-    // app.Run();
-
-    EditableMesh mesh;
-
-    mesh.Load("../models/3holes_quad.obj");
+    // mesh.Load("../models/3holes_quad.obj");
+    //
+    // auto [min, max] = mesh.GetBoundingBox();
+    //
+    // std::cout << min << std::endl;
+    // std::cout << max << std::endl;
 
     return 0;
 }
