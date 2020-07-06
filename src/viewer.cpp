@@ -1,26 +1,31 @@
 #include "viewer.h"
 
+#include "viewereventprocessor.h"
+
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
 
 skbar::Viewer::Viewer(int _width, int _height)
     : width(_width), height(_height), bgColor{.3f, .3f, .3f, 1},
       rotating(false), dragging(false), needRender(false),
-      frameBuffer(nullptr), camera(nullptr) {
+      frameBuffer(nullptr), camera(nullptr), eventProcessor(nullptr) {
 }
 
 skbar::Viewer::~Viewer() {
     delete frameBuffer;
     delete camera;
+    delete eventProcessor;
 
     frameBuffer = nullptr;
     camera = nullptr;
+    eventProcessor = nullptr;
 }
 
 void skbar::Viewer::Initialize() {
 
     frameBuffer = new FrameBuffer(width, height);
     camera = new GLCamera(width, height);
+    eventProcessor = new ViewerEventProcessor(this);
 
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
@@ -106,4 +111,8 @@ void skbar::Viewer::LoadMesh(const std::string &filename) {
 
 void skbar::Viewer::ApplyBBox(const BBox &bbox) {
     camera->SetBox(bbox);
+}
+
+bool skbar::Viewer::ProcessEvent(const skbar::Event &event) {
+    eventProcessor->Process(event);
 }

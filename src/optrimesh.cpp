@@ -35,8 +35,5 @@ std::size_t skbar::OPTriMesh::GetQuadFaceId(std::size_t triangleId) const {
 }
 
 void skbar::OPTriMesh::Render() const {
-
-    // printf("%lu\n", mesh.n_faces());
-
     OPMeshRenderer::Render(mesh);
 }

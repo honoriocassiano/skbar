@@ -27,8 +27,6 @@ void skbar::OPMeshRenderer::Render(const skbar::OPTriMesh::TriMeshImpl &mesh, co
 
     for (auto it : mesh.faces()) {
 
-        printf("1\n");
-
         auto normal = mesh.normal(it);
 
         glNormal3f(normal[0], normal[1], normal[2]);

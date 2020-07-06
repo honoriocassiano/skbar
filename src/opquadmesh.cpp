@@ -24,8 +24,6 @@ bool skbar::OPQuadMesh::Load(const std::string &filename) {
         return false;
     }
 
-    Log("%lu", mesh.n_faces());
-
     // Set data of current quad face id
     for (auto fi : mesh.faces()) {
         mesh.data(fi).quadFaceData.id = fi.idx();

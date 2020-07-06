@@ -6,6 +6,7 @@
 #include "commontypes.h"
 #include "editablemesh.h"
 #include "glcamera.h"
+#include "baseeventprocessor.h"
 
 // Standard library headers
 #include <string>
@@ -53,6 +54,8 @@ public:
 
     void ApplyBBox(const BBox &bbox);
 
+    bool ProcessEvent(const Event &event);
+
     /* TODO Add methods to change visualization */
 
 private:
@@ -83,6 +86,8 @@ private:
 
     // Control visualization itself
     GLCamera *camera;
+
+    BaseEventProcessor *eventProcessor;
 };
 }
 
