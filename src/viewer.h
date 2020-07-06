@@ -57,6 +57,13 @@ public:
     bool ProcessEvent(const Event &event);
 
     /* TODO Add methods to change visualization */
+    GLCamera &GetCamera() { return *camera; }
+
+    const GLCamera &GetCamera() const { return *camera; }
+
+    int GetWidth() const { return width; }
+
+    int GetHeight() const { return height; }
 
 private:
 

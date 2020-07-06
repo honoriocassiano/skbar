@@ -27,6 +27,25 @@ bool skbar::ViewerEventProcessor::Process(const skbar::Event &_event) {
 
 bool skbar::ViewerEventProcessor::ProcessMouseButtonDown(const SDL_Event *event) {
 
+    switch (event->button.button) {
+
+        case SDL_BUTTON_LEFT:
+            rotating = true;
+            dragging = false;
+
+            break;
+
+        case SDL_BUTTON_RIGHT:
+            rotating = false;
+            dragging = true;
+
+            break;
+
+        default:
+            return false;
+    }
+
+    return true;
 }
 
 bool skbar::ViewerEventProcessor::ProcessMouseButtonUp(const SDL_Event *event) {
@@ -50,10 +69,42 @@ bool skbar::ViewerEventProcessor::ProcessMouseButtonUp(const SDL_Event *event) {
 
 bool skbar::ViewerEventProcessor::ProcessMouseWheel(const SDL_Event *event) {
 
+    viewer->GetCamera().Zoom(event->wheel.y);
+
+    return true;
 }
 
 bool skbar::ViewerEventProcessor::ProcessMouseMotion(const SDL_Event *event) {
 
+    bool processed = false;
+
+    auto motion = event->motion;
+
+    if (rotating) {
+
+        auto dx = float(motion.xrel);
+        auto dy = float(-motion.yrel);
+
+        float dtheta = (dx / viewer->GetWidth()) * 2 * M_PI;
+		float dphi = (dy / viewer->GetHeight()) * M_PI;
+
+        viewer->GetCamera().Rotate(dtheta, dphi);
+
+        processed = true;
+
+    } else if (dragging) {
+
+        auto dx = float(-motion.xrel) / 100;
+		auto dy = float(motion.yrel) / 100;
+
+        viewer->GetCamera().Drag(dx, dy);
+
+        processed = true;
+    } else {
+        // TODO Process drawing here
+    }
+
+    return processed;
 }
 
 bool skbar::ViewerEventProcessor::ProcessKeyboard(const SDL_Event *event) {

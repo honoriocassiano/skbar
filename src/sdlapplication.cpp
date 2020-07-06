@@ -1,5 +1,7 @@
 #include "sdlapplication.h"
 
+#include "sdlevent.h"
+
 // Installed libraries
 #include <GL/glew.h>
 
@@ -125,6 +127,11 @@ void skbar::SDLApplication::ProcessEvents() {
     const Uint8 *keyboardState = SDL_GetKeyboardState(nullptr);
 
     while (SDL_PollEvent(&event)) {
+
+        // TODO Refactor this
+        if (viewer->ProcessEvent(SDLEvent(&event))) {
+            continue;
+        }
 
         eventProcessor.ProcessRealTimeKeyboard(keyboardState);
 
