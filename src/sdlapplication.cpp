@@ -165,7 +165,7 @@ void skbar::SDLApplication::ProcessEvents() {
                 case SDL_WINDOWEVENT_SIZE_CHANGED:
                     SDL_GetWindowSize(window, &width, &height);
 
-                    // TODO Resize OpenGL
+                    viewer->Resize(width, height);
                     break;
                 default:
                     break;

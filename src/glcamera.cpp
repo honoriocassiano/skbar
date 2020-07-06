@@ -19,8 +19,12 @@ skbar::GLCamera::~GLCamera() {
 #warning "Implement this"
 }
 
-void skbar::GLCamera::Resize(int width, int height) {
-#warning "Implement this"
+void skbar::GLCamera::Resize(int _width, int _height) {
+
+    if ((width != _width) || (height != _height)) {
+        width = _width;
+        height = _height;
+    }
 }
 
 void skbar::GLCamera::Rotate(float dtheta, float dphi) {

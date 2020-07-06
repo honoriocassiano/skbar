@@ -79,8 +79,22 @@ void skbar::Viewer::Render() {
     needRender = false;
 }
 
-void skbar::Viewer::Resize(int width, int height) {
-#warning "Implement this"
+void skbar::Viewer::Resize(int _width, int _height) {
+
+    if ((width != _width) || (height != _height)) {
+        width = _width;
+        height = _height;
+
+        frameBuffer->Unbind(FrameBuffer::Mode::READ_WRITE);
+
+        delete frameBuffer;
+
+        frameBuffer = new FrameBuffer(width, height);
+
+        camera->Resize(width, height);
+
+        needRender = true;
+    }
 }
 
 void skbar::Viewer::Update(/* TODO Add parameters */) {
