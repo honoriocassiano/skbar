@@ -103,7 +103,7 @@ void skbar::GLCamera::Zoom(float zoom) {
 }
 
 void skbar::GLCamera::SetBox(const skbar::BBox &_bbox) {
-    bbox = bbox;
+    bbox = _bbox;
 }
 
 void skbar::GLCamera::Render() const {
