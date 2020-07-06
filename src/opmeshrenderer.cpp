@@ -15,6 +15,7 @@ skbar::OPMeshRenderer::~OPMeshRenderer() {
 void skbar::OPMeshRenderer::Render(const skbar::OPTriMesh::TriMeshImpl &mesh, const skbar::RenderOptions &options) {
 
 	glEnable(GL_LIGHTING);
+    glEnable(GL_DEPTH_TEST);
 	glEnable(GL_COLOR_MATERIAL);
 
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
@@ -43,6 +44,7 @@ void skbar::OPMeshRenderer::Render(const skbar::OPTriMesh::TriMeshImpl &mesh, co
     glEnd();
 
 	glDisable(GL_POLYGON_OFFSET_FILL);
+    glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 }
 
