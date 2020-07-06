@@ -42,7 +42,7 @@ inline constexpr std::array<T, 3> Cross(const std::array<T, 3> &v1, const std::a
 }
 
 template<typename T, std::size_t N>
-constexpr std::array<T, N> Dot(const std::array<T, N> &v1, const std::array<T, N> &v2) {
+constexpr T Dot(const std::array<T, N> &v1, const std::array<T, N> &v2) {
     T sum = 0;
 
     for (std::size_t i = 0; i < N; i++) {
@@ -52,6 +52,54 @@ constexpr std::array<T, N> Dot(const std::array<T, N> &v1, const std::array<T, N
     return sum;
 }
 
+template<typename T, std::size_t N>
+constexpr std::array<T, N> Mul(const std::array<T, N> &v1, const T &v2) {
+
+    std::array<T, N> result {0};
+
+    for (std::size_t i = 0; i < N; i++) {
+        result[i] = v1[i] * v2;
+    }
+
+    return result;
+}
+
+template<typename T, std::size_t N>
+constexpr std::array<T, N> Div(const std::array<T, N> &v1, const T &v2) {
+
+    std::array<T, N> result {0};
+
+    for (std::size_t i = 0; i < N; i++) {
+        result[i] = v1[i] / v2;
+    }
+
+    return result;
+}
+
+template<typename T, std::size_t N>
+constexpr std::array<T, N> Sum(const std::array<T, N> &v1, const std::array<T, N> &v2) {
+
+    std::array<T, N> result {0};
+
+    for (std::size_t i = 0; i < N; i++) {
+        result[i] = v1[i] + v2[i];
+    }
+
+    return result;
+}
+
+template<typename T, std::size_t N>
+constexpr std::array<T, N> Sub(const std::array<T, N> &v1, const std::array<T, N> &v2) {
+
+    std::array<T, N> result {0};
+
+    for (std::size_t i = 0; i < N; i++) {
+        result[i] = v1[i] - v2[i];
+    }
+
+    return result;
+}
+
 #ifdef VECTOR_SET_OPERATORS
 
 template<typename T>
@@ -59,9 +107,29 @@ inline constexpr std::array<T, 3> operator^(const std::array<T, 3> &v1, const st
     return Cross(v1, v2);
 }
 
-template<typename T>
-inline constexpr std::array<T, N> operator*(const std::array<T, N> &v1, const std::array<T, N> &v2) {
-        return Dot(v1, v2);
+template<typename T, std::size_t N>
+inline constexpr T operator*(const std::array<T, N> &v1, const std::array<T, N> &v2) {
+    return Dot(v1, v2);
+}
+
+template<typename T, std::size_t N>
+inline constexpr std::array<T, N> operator*(const std::array<T, N> &v1, const T &v2) {
+    return Mul(v1, v2);
+}
+
+template<typename T, std::size_t N>
+inline constexpr std::array<T, N> operator/(const std::array<T, N> &v1, const T &v2) {
+    return Div(v1, v2);
+}
+
+template<typename T, std::size_t N>
+constexpr std::array<T, N> operator+(const std::array<T, N> &v1, const std::array<T, N> &v2) {
+    return Sum(v1, v2);
+}
+
+template<typename T, std::size_t N>
+constexpr std::array<T, N> operator-(const std::array<T, N> &v1, const std::array<T, N> &v2) {
+    return Sub(v1, v2);
 }
 
 #endif

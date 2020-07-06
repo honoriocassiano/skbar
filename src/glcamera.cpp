@@ -8,9 +8,11 @@
 
 skbar::GLCamera::GLCamera(int _width, int _height)
     : width(_width), height(_height), initialCenter{0, 0, 0}, initialPosition{0, 0, -1},
-      initialUp{0, 1, 0}, left{1, 0, 0}, center(initialCenter),
-      position(initialPosition), up(initialUp), bbox{std::array{.0f, .0f}, std::array{.0f, .0f}, std::array{.0f, .0f}} {
+      initialUp{0, 1, 0}, left{-1, 0, 0}, bbox{std::array{-1.0f, 1.0f}, std::array{-1.0f, 1.0f}, std::array{-1.0f, 1.0f}} {
 
+    position = initialPosition;
+    center = initialCenter;
+    up = initialUp;
 }
 
 skbar::GLCamera::~GLCamera() {
@@ -33,11 +35,7 @@ void skbar::GLCamera::Rotate(float dtheta, float dphi) {
     using namespace std;
 
     // Direction vector from center to the camera
-    Vec3f dir {
-        position[0] - center[0],
-        position[1] - center[1],
-        position[2] - center[2]
-    };
+    Vec3f dir = Sub(position, center);
 
     // Invert rotation on x-window axis
     float radius = Norm(dir);
@@ -51,24 +49,14 @@ void skbar::GLCamera::Rotate(float dtheta, float dphi) {
     float y = radius * cos(phi);
     float z = radius * cos(theta) * sin(phi);
 
-    // Set new position
-    position[0] = center[0] + x;
-    position[1] = center[1] + y;
-    position[2] = center[2] + z;
+    Vec3f radial {x, y, z};
+    Vec3f normalizedRadial = Normalize(radial);
 
-    // Calc new left
-    Vec3f tempLeft { -z, 0, x };
+    position = Sum(center, Mul(normalizedRadial, radius));
 
-    // Set new left
-    left = Normalize(tempLeft);
+    left = Normalize(Vec3f{-normalizedRadial[2], 0, normalizedRadial[0]});
 
-    // Calc up vector
-    Vec3f tempUp = Cross(left, {x, y, z});
-
-    // Set new up vector
-    up = Normalize(tempUp);
-
-    // TODO Apply here?
+    up = Normalize(Cross(left, radial));
 }
 
 void skbar::GLCamera::Drag(float dx, float dy) {
@@ -92,8 +80,6 @@ void skbar::GLCamera::Drag(float dx, float dy) {
 }
 
 void skbar::GLCamera::Zoom(float zoom) {
-
-    Log("%s", __PRETTY_FUNCTION__);
 
     Vec3f dir = Sub(center, position);
     float normDir = Norm(dir);
