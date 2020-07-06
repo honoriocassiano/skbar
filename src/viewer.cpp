@@ -43,6 +43,8 @@ void skbar::Viewer::Initialize() {
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 
 	glDisable(GL_LIGHTING);
+
+    needRender = true;
 }
 
 void skbar::Viewer::Render() {
