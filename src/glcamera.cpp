@@ -93,13 +93,20 @@ void skbar::GLCamera::Drag(float dx, float dy) {
 
 void skbar::GLCamera::Zoom(float zoom) {
 
-    Vec3f dir = Normalize(Vec3f{
-        center[0] - position[0],
-        center[1] - position[1],
-        center[2] - position[2],
-    });
+    Log("%s", __PRETTY_FUNCTION__);
 
-    // TODO CONTINUE HERE
+    Vec3f dir = Sub(center, position);
+    float normDir = Norm(dir);
+    Vec3f normalizedDir = Normalize(dir);
+
+    // Amount of change
+    Vec3f temp = Mul(normalizedDir, zoom * normDir * 0.05f);
+
+    float distance = Norm(Sub(center, Sum(position, temp)));
+
+    if (distance >= std::numeric_limits<float>::epsilon()) {
+        position = Sum(position, temp);
+    }
 }
 
 void skbar::GLCamera::SetBox(const skbar::BBox &_bbox) {
