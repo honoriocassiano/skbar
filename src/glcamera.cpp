@@ -56,7 +56,7 @@ void skbar::GLCamera::Rotate(float dtheta, float dphi) {
     Vec3f radial {x, y, z};
     Vec3f normalizedRadial = Normalize(radial);
 
-    position = Sum(center, Mul(normalizedRadial, radius));
+    position = Sum(center, radial);
 
     left = Normalize(Vec3f{-normalizedRadial[2], 0, normalizedRadial[0]});
 

@@ -4,6 +4,7 @@
 #include <array>
 #include <algorithm>
 #include <numeric>
+#include <cmath>
 
 namespace skbar {
 
@@ -16,7 +17,7 @@ template<typename T, std::size_t N>
 inline constexpr T Norm(const std::array<T, N> &vec) {
     T sum = std::accumulate(vec.begin(), vec.end(), (T) 0, [](T s, T n) { return n*n + s; });
 
-    return sum;
+    return std::sqrt(sum);
 }
 
 template<typename T, std::size_t N>
