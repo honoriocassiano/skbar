@@ -112,15 +112,14 @@ void skbar::GLCamera::Apply() const {
 
     gluPerspective(45, float(width) / float(height), 0.01, 100);
 
-    // TODO Check this
-    glFrustum(bbox[0][0], bbox[0][1],
-              bbox[1][0], bbox[1][1],
-              bbox[2][0], bbox[2][1]);
+    // // TODO Check this
+    // glFrustum(bbox[0][0], bbox[0][1],
+    //           bbox[1][0], bbox[1][1],
+    //           bbox[2][0], bbox[2][1]);
 
     gluLookAt(position[0], position[1], position[2],
               center[0], center[1], center[2],
               up[0], up[1], up[2]);
 
     glMatrixMode(GL_MODELVIEW);
-    // TODO Apply here?
 }
