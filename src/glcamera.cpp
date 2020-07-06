@@ -8,7 +8,7 @@
 
 skbar::GLCamera::GLCamera(int _width, int _height)
     : width(_width), height(_height), initialCenter{0, 0, 0}, initialPosition{0, 0, -1},
-      initialUp{0, 1, 0}, left{-1, 0, 0}, bbox{std::array{-1.0f, 1.0f}, std::array{-1.0f, 1.0f}, std::array{-1.0f, 1.0f}} {
+      initialUp{0, 1, 0}, left{1, 0, 0}, bbox{std::array{-1.0f, 1.0f}, std::array{-1.0f, 1.0f}, std::array{-1.0f, 1.0f}} {
 
     position = initialPosition;
     center = initialCenter;

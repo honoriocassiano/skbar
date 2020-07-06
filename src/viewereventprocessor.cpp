@@ -98,8 +98,8 @@ bool skbar::ViewerEventProcessor::ProcessMouseMotion(const SDL_Event *event) {
 
     } else if (dragging) {
 
-        auto dx = float(-motion.xrel) / 100;
-		auto dy = float(motion.yrel) / 100;
+        auto dx = float(motion.xrel) / 100;
+		auto dy = float(-motion.yrel) / 100;
 
         viewer->GetCamera().Drag(dx, dy);
 
