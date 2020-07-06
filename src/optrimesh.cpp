@@ -22,6 +22,8 @@ bool OPLoad(skbar::OPTriMesh::TriMeshImpl &mesh, const skbar::OPQuadMesh &baseMe
         mesh.data(fi).quadFaceData.id = tempTriMesh.data(fi).quadFaceData.id;
     }
 
+    mesh.update_normals();
+
     return true;
 }
 

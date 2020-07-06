@@ -58,10 +58,13 @@ void skbar::Viewer::Render() {
         glClearColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3]);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        mesh.Render();
-
         // Enable depth test
 		glEnable(GL_DEPTH_TEST);
+
+        mesh.Render();
+
+        // Disable depth test because it was already tested in framebuffer
+        glDisable(GL_DEPTH_TEST);
 
         // Unbind framework on read mode
         frameBuffer->Unbind(FrameBuffer::Mode::WRITE);
@@ -70,18 +73,12 @@ void skbar::Viewer::Render() {
     // Bind framebuffer on read mode
     frameBuffer->Bind(FrameBuffer::Mode::READ);
 
-    // Clear color of default buffer
-    glClearColor(1, 1, 1, 1);
-
-    // Disable depth test because it was already tested in framebuffer
-    glDisable(GL_DEPTH_TEST);
-
     // Bind framebuffer of size (width, height) on rect (0, 0, width, height)
     glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
 	                  GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
     // Unbind framebuffer on read mode
-    frameBuffer->Bind(FrameBuffer::Mode::READ);
+    frameBuffer->Unbind(FrameBuffer::Mode::READ);
 
     needRender = false;
 }

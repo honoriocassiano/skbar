@@ -2,6 +2,8 @@
 
 #include <GL/gl.h>
 
+#include "utils/debug.h"
+
 skbar::OPMeshRenderer::OPMeshRenderer() {
 
 }
