@@ -2,6 +2,9 @@
 
 build/*
 
+# Vim swap files
+*.swp
+
 # Eclipse folders
 
 .settings
