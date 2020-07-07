@@ -5,7 +5,7 @@
 #ifndef SKBAR_PATCHTRACER_H
 #define SKBAR_PATCHTRACER_H
 
-#include "meshtypes.h"
+#include "opquadmesh.h"
 
 #include <set>
 #include <vector>
@@ -15,14 +15,14 @@ namespace skbar {
     class PatchTracer {
 
     private:
-        static std::set<int> FindSingularities(const QuadMesh &mesh, bool closed = true);
+        static std::set<int> FindSingularities(const OPQuadMesh::QuadMeshImpl &mesh, bool closed = true);
 
         static std::vector<int> FindLine(const OpenMesh::SmartHalfedgeHandle& handle, const std::set<int>& singularities) ;
 
     public:
-        static void Trace(QuadMesh &mesh);
+        static void Trace(OPQuadMesh &mesh);
 
-        static std::vector<std::vector<int>> GetGrid(const QuadMesh& mesh, int patch);
+        static std::vector<std::vector<int>> GetGrid(const OPQuadMesh& mesh, int patch);
     };
 }
 

@@ -12,19 +12,21 @@
 
 const double skbar::PatchQuadrangulator::LAPLACE_CONSTRAINT_WEIGHT = 10 * 1000;
 
-patchgen::PatchParam skbar::PatchQuadrangulator::ComputeTopology(const Eigen::VectorXi &patchSides, QuadMesh &mesh) {
+patchgen::PatchParam skbar::PatchQuadrangulator::ComputeTopology(const Eigen::VectorXi &patchSides, skbar::OPQuadMesh &mesh) {
     patchgen::PatchParam param;
 
-    patchgen::generate_topology<QuadMesh>(patchSides, param, mesh);
+    patchgen::generate_topology<OPQuadMesh::QuadMeshImpl>(patchSides, param, mesh.Get());
 
     return param;
 }
 
-Eigen::SparseMatrix<double> skbar::PatchQuadrangulator::GetLaplacianMatrix(const skbar::QuadMesh &mesh,
+Eigen::SparseMatrix<double> skbar::PatchQuadrangulator::GetLaplacianMatrix(const skbar::OPQuadMesh &meshBase,
                                                                            const patchgen::PatchParam &param) {
 
     typedef Eigen::Triplet<double> Triplet;
     typedef Eigen::SparseMatrix<double> Matrix;
+
+    auto mesh = meshBase.Get();
 
     Matrix laplacianMatrix;
 
@@ -60,8 +62,10 @@ Eigen::SparseMatrix<double> skbar::PatchQuadrangulator::GetLaplacianMatrix(const
     return laplacianMatrix;
 }
 
-Eigen::Matrix<double, -1, 3> skbar::PatchQuadrangulator::GetRightSide(const QuadMesh &mesh,
+Eigen::Matrix<double, -1, 3> skbar::PatchQuadrangulator::GetRightSide(const skbar::OPQuadMesh &baseMesh,
                                                                       const patchgen::PatchParam &param) {
+
+    auto mesh = baseMesh.Get();
 
     auto nv = mesh.n_vertices();
     auto fixedVertexIndex = 0;
@@ -87,12 +91,14 @@ Eigen::Matrix<double, -1, 3> skbar::PatchQuadrangulator::GetRightSide(const Quad
     return b;
 }
 
-void skbar::PatchQuadrangulator::SetLaplacianPositions(QuadMesh &patch,
+void skbar::PatchQuadrangulator::SetLaplacianPositions(skbar::OPQuadMesh &basePatch,
                                                        const std::vector<OpenMesh::Vec3d> &positions,
                                                        bool positionsIsClockwise) {
 
     OpenMesh::SmartVertexHandle currentVertex;
     OpenMesh::SmartHalfedgeHandle currentEdge;
+
+    auto patch = basePatch.Get();
 
     // Find first corner
     for (auto v : patch.vertices()) {
