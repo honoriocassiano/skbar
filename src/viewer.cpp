@@ -1,6 +1,7 @@
 #include "viewer.h"
 
 #include "viewereventprocessor.h"
+#include "gldrawer.h"
 
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
@@ -15,10 +16,12 @@ skbar::Viewer::~Viewer() {
     delete frameBuffer;
     delete camera;
     delete eventProcessor;
+    delete drawer;
 
     frameBuffer = nullptr;
     camera = nullptr;
     eventProcessor = nullptr;
+    drawer = nullptr;
 }
 
 void skbar::Viewer::Initialize() {
@@ -26,6 +29,7 @@ void skbar::Viewer::Initialize() {
     frameBuffer = new FrameBuffer(width, height);
     camera = new GLCamera(width, height);
     eventProcessor = new ViewerEventProcessor(this);
+    drawer = new GLDrawer(&mesh);
 
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);

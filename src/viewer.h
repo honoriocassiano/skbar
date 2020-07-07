@@ -7,6 +7,7 @@
 #include "editablemesh.h"
 #include "glcamera.h"
 #include "baseeventprocessor.h"
+#include "drawer.h"
 
 // Standard library headers
 #include <string>
@@ -65,6 +66,10 @@ public:
 
     int GetHeight() const { return height; }
 
+    Drawer &GetDrawer() { return *drawer; }
+
+    const Drawer &GetDrawer() const { return *drawer; }
+
 private:
 
     // Return if need to re-render the viewer or any other renderable
@@ -95,6 +100,8 @@ private:
     GLCamera *camera;
 
     BaseEventProcessor *eventProcessor;
+
+    Drawer *drawer;
 };
 }
 
