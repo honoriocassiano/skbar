@@ -29,6 +29,8 @@ public:
 
     void Render() const override;
 
+    Line<Vec3f> PositionToRay(int x, int y) const;
+
 private:
 
     void Apply() const;
