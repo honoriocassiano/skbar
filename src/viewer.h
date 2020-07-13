@@ -66,6 +66,10 @@ public:
 
     int GetHeight() const { return height; }
 
+    EditableMesh &GetMesh() { return mesh; }
+
+    const EditableMesh &GetMesh() const { return mesh; }
+
     Drawer &GetDrawer() { return *drawer; }
 
     const Drawer &GetDrawer() const { return *drawer; }
