@@ -19,6 +19,8 @@ public:
 
     std::size_t GetQuadFaceId(std::size_t triangleId) const override;
 
+    bool AddPointOnIntersection(const Line<Vec3f> &ray) override;
+
     void Render() const override;
 
     TriMeshImpl &Get() { return mesh; }

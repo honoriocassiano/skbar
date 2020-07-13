@@ -17,6 +17,8 @@ public:
 
     virtual void Render() const = 0;
 
+    virtual bool AddPointOnIntersection(const Line<Vec3f> &ray) = 0;
+
     // TODO Add methods to manipulate curves
 };
 }
