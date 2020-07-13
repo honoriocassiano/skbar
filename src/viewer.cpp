@@ -121,5 +121,5 @@ void skbar::Viewer::ApplyBBox(const BBox &bbox) {
 }
 
 bool skbar::Viewer::ProcessEvent(const skbar::Event &event) {
-    eventProcessor->Process(event);
+    return eventProcessor->Process(event);
 }
