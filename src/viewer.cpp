@@ -29,7 +29,7 @@ void skbar::Viewer::Initialize() {
     frameBuffer = new FrameBuffer(width, height);
     camera = new GLCamera(width, height);
     eventProcessor = new ViewerEventProcessor(this);
-    drawer = new GLDrawer(&mesh);
+    drawer = new GLDrawer(this);
 
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
