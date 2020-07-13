@@ -5,6 +5,7 @@
 #include "commontypes.h"
 #include "quadmesh.h"
 #include "trimesh.h"
+#include "sketch.h"
 
 namespace skbar {
 
@@ -38,6 +39,14 @@ public:
         return *triMesh;
     }
 
+    inline Sketch &GetSketch() {
+        return *sketch;
+    }
+
+    const inline Sketch &GetSketch() const {
+        return *sketch;
+    }
+
 private:
 
     // Triangulated mesh
@@ -45,6 +54,8 @@ private:
 
     // Quad mesh
     QuadMesh *quadMesh;
+
+    Sketch *sketch;
 };
 
 }
