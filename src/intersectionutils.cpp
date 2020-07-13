@@ -49,7 +49,7 @@ bool skbar::utils::CheckIntersectionTriangleRay(
     float t = f * Dot(edge2, q);
 
     if (t > epsilon) {
-        baricentric = Sum(origin, Mul(direction, t));
+        intersection = Sum(origin, Mul(direction, t));
         return true;
     }
 
