@@ -110,10 +110,6 @@ bool skbar::Viewer::NeedRender() const {
     return true;
 }
 
-void skbar::Viewer::Zoom(float zoom) {
-#warning "Implement this"
-}
-
 void skbar::Viewer::LoadMesh(const std::string &filename) {
     mesh.Load(filename);
 
