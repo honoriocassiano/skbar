@@ -14,6 +14,7 @@ public:
 
     virtual ~DrawerEventProcessor();
 
+private:
     bool Process(const Event &event) override;
 
     bool ProcessMouseButtonDown(const SDL_Event *event);
@@ -22,11 +23,14 @@ public:
 
     bool ProcessMouseMotion(const SDL_Event *event);
 
-    bool CheckMouseState();
+    bool CheckMouseState(unsigned int button);
+
+    bool AddPointToSketch(int x, int y);
 
 private:
     Drawer *drawer;
 
+    // Indicate when user is drawing while keep mouse pressed
     bool drawing;
 
 };
