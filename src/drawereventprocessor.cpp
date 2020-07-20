@@ -112,7 +112,7 @@ bool skbar::DrawerEventProcessor::AddPointToSketch(int x, int y) {
 
     if (intersection.Intersect()) {
 
-        auto sketch = dynamic_cast<OPSketch &>(glDrawer->GetMesh().GetSketch());
+        OPSketch &sketch = dynamic_cast<OPSketch &>(glDrawer->GetMesh().GetSketch());
 
         if (!sketch.IsStarted()) {
             sketch.Start();
