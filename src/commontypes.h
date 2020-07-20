@@ -31,6 +31,26 @@ private:
 
 };
 
+template <typename FacePointerType, typename PositionType>
+class Intersection {
+
+public:
+	Intersection(const FacePointerType &_face, const PositionType &_position,
+				bool _intersect = true)
+	  : face(face), position(position), intersect(intersect) {}
+
+	const FacePointerType &Face() const { return face; }
+
+	const PositionType &Position() const { return position; }
+
+	const bool Intersect() const { return intersect; }
+
+private:
+	FacePointerType face;
+	PositionType position;
+	bool intersect;
+};
+
 }
 
 #endif
