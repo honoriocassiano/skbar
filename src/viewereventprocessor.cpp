@@ -12,18 +12,21 @@ skbar::ViewerEventProcessor::~ViewerEventProcessor() {
 }
 
 bool skbar::ViewerEventProcessor::Process(const skbar::Event &_event) {
-    auto event = dynamic_cast<const SDLEvent &>(_event).Get();
 
-    bool processed = false;
+    bool processed = viewer->GetDrawer().ProcessEvent(_event);
 
-    if (event->type == SDL_MOUSEBUTTONDOWN) {
-        processed = ProcessMouseButtonDown(event);
-    } else if (event->type == SDL_MOUSEBUTTONUP) {
-        processed = ProcessMouseButtonUp(event);
-    } else if (event->type == SDL_MOUSEMOTION) {
-        processed = ProcessMouseMotion(event);
-    } else if (event->type == SDL_MOUSEWHEEL) {
-        processed = ProcessMouseWheel(event);
+    if (!processed) {
+        auto event = dynamic_cast<const SDLEvent &>(_event).Get();
+
+        if (event->type == SDL_MOUSEBUTTONDOWN) {
+            processed = ProcessMouseButtonDown(event);
+        } else if (event->type == SDL_MOUSEBUTTONUP) {
+            processed = ProcessMouseButtonUp(event);
+        } else if (event->type == SDL_MOUSEMOTION) {
+            processed = ProcessMouseMotion(event);
+        } else if (event->type == SDL_MOUSEWHEEL) {
+            processed = ProcessMouseWheel(event);
+        }
     }
 
     return processed;
