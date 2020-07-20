@@ -48,3 +48,24 @@ void skbar::OPMeshRenderer::Render(const skbar::OPTriMesh::TriMeshImpl &mesh, co
 	glDisable(GL_LIGHTING);
 }
 
+void skbar::OPMeshRenderer::RenderSketch(const skbar::OPSketch &sketch, bool closed, const skbar::SketchRenderOptions &options) {
+
+    glDisable(GL_LIGHTING);
+    glDepthFunc(GL_ALWAYS);
+
+    glColor3fv(options.lineColor);
+    glLineWidth(options.lineWidth);
+
+    glBegin(closed ? GL_LINE_LOOP : GL_LINE_STRIP);
+
+    for (std::size_t i = 0; i < sketch.Size(); i++) {
+        auto point = sketch.Data()[i].Position();
+
+        glVertex3f(point[0], point[1], point[2]);
+    }
+
+    glEnd();
+
+    glDepthFunc(GL_LESS);
+    glEnable(GL_LIGHTING);
+}
