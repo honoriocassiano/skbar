@@ -15,6 +15,13 @@ public:
 
     bool Draw(const Vec3f &origin, const Vec3f &direction) override;
 
+    bool ProcessEvent(const Event &event) override;
+
+    bool IsStarted() const override;
+
+    skbar::Intersection<int, skbar::Vec3f> GetClosestIntersection(
+        const Line<Vec3f> &ray) override;
+
     EditableMesh &GetMesh() override { return viewer->GetMesh(); }
 
     const EditableMesh &GetMesh() const override { return viewer->GetMesh(); }
