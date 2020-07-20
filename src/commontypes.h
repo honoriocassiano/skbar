@@ -37,13 +37,13 @@ class Intersection {
 public:
 	Intersection(const FacePointerType &_face, const PositionType &_position,
 				bool _intersect = true)
-	  : face(face), position(position), intersect(intersect) {}
+	  : face(_face), position(_position), intersect(_intersect) {}
 
 	const FacePointerType &Face() const { return face; }
 
 	const PositionType &Position() const { return position; }
 
-	const bool Intersect() const { return intersect; }
+	bool Intersect() const { return intersect; }
 
 private:
 	FacePointerType face;

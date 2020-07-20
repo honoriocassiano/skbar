@@ -36,8 +36,8 @@ namespace skbar {
                         break;
                     }
 
-                    auto p0 = mesh.point(OpenMesh::VertexHandle(pair.first));
-                    auto p1 = mesh.point(OpenMesh::VertexHandle(pair.second));
+                    // auto p0 = mesh.point(OpenMesh::VertexHandle(pair.first));
+                    // auto p1 = mesh.point(OpenMesh::VertexHandle(pair.second));
 
 //                    Log("(%lf, %lf, %lf) -> (%lf, %lf, %lf)", p0[0], p0[1], p0[2], p1[0], p1[1], p1[2]);
 

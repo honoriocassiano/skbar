@@ -124,7 +124,6 @@ skbar::Intersection<int, skbar::Vec3f> skbar::OPTriMesh::GetClosestIntersection(
     bool intersected = false;
 
     Vec3f intersection;
-    // OpenMesh::SmartFaceHandle intersectedFace(-1);
     int intersectedFace = -1;
 
     float minDistance = INFINITY;
@@ -147,12 +146,13 @@ skbar::Intersection<int, skbar::Vec3f> skbar::OPTriMesh::GetClosestIntersection(
                 minDistance = distance;
                 intersection = tempIntersection;
                 intersectedFace = fi.idx();
+                intersected = true;
             }
         }
 
     }
 
-    return Intersection(intersectedFace, intersection);
+    return Intersection(intersectedFace, intersection, intersected);
 }
 
 void skbar::OPTriMesh::Render() const {
