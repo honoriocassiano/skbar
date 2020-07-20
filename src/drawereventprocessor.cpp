@@ -43,19 +43,6 @@ bool skbar::DrawerEventProcessor::ProcessMouseButtonDown(const SDL_Event *event)
 
         // If point was added, so user is drawing and not rotating or dragging
         drawing = processed;
-
-        // auto camera = dynamic_cast<const GLCamera &>(glDrawer->GetCamera());
-
-        // auto ray = camera.PositionToRay(button.x, button.y);
-
-        // if (false) {
-        //     auto sketch = dynamic_cast<OPSketch &>(glDrawer->GetMesh().GetSketch());
-
-        //     if (sketch.AddPoint(ray)) {
-        //         drawing = true;
-        //         processed = true;
-        //     }
-        // }
     }
 
     return processed;
@@ -94,7 +81,7 @@ bool skbar::DrawerEventProcessor::ProcessMouseButtonUp(const SDL_Event *event) {
 }
 
 bool skbar::DrawerEventProcessor::CheckMouseState(unsigned int button) {
-    // TODO Implement this
+
     auto mouseState = SDL_GetMouseState(nullptr, nullptr);
 
     return static_cast<bool>(mouseState & SDL_BUTTON(button));
@@ -134,6 +121,5 @@ bool skbar::DrawerEventProcessor::AddPointToSketch(int x, int y) {
         processed = sketch.AddPoint(ray, intersection);
     }
 
-    // TODO Change this
     return processed;
 }
