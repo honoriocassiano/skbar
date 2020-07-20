@@ -19,7 +19,12 @@ public:
 
     std::size_t GetQuadFaceId(std::size_t triangleId) const override;
 
-    bool AddPointOnIntersection(const Line<Vec3f> &ray) override;
+    bool AddPointOnIntersection(const Intersection<int, Vec3f> &intersection) override;
+
+    Intersection<int, Vec3f> GetClosestIntersection(const Line<Vec3f> &ray) const override;
+
+    // TODO Add to base class?
+    bool CheckIntersection(const Line<Vec3f> &ray) const override;
 
     void Render() const override;
 

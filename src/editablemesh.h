@@ -23,6 +23,8 @@ public:
 
     void Render() const;
 
+    Intersection<int, Vec3f> GetClosestIntersection(const Line<Vec3f> &ray) const;
+
     inline QuadMesh &GetQuad() {
         return *quadMesh;
     }

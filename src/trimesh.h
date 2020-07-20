@@ -17,7 +17,12 @@ public:
 
     virtual void Render() const = 0;
 
-    virtual bool AddPointOnIntersection(const Line<Vec3f> &ray) = 0;
+    // TODO REMOVE THIS 'INT' AND ADD AS TEMPLATE
+    virtual bool AddPointOnIntersection(const Intersection<int, Vec3f> &ray) = 0;
+
+    virtual bool CheckIntersection(const Line<Vec3f> &ray) const = 0;
+
+    virtual Intersection<int, Vec3f> GetClosestIntersection(const Line<Vec3f> &ray) const = 0;
 
     // TODO Add methods to manipulate curves
 };
