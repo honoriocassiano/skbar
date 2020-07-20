@@ -49,7 +49,9 @@ bool skbar::OPTriMesh::AddPointOnIntersection(
 
         auto point = intersection.Position();
 
-        mesh.split(intersection.Face(), intersection.Position());
+        mesh.split(
+                OpenMesh::SmartFaceHandle(intersection.Face()),
+                OpenMesh::Vec3f(point[0], point[1], point[2]));
 
         added = true;
     }
