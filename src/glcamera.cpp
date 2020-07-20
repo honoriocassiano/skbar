@@ -143,8 +143,7 @@ skbar::Line<skbar::Vec3f> skbar::GLCamera::PositionToRay(int windowX, int window
     // Invert y coordinate because SDL uses top-down coordinates and OpenGL uses bottom-up
 	gluUnProject(windowX, height - windowY, 1, modelview, projection, viewport, &x, &y, &z);
 
-    Vec3f origin {x, y, z};
     Vec3f direction = Normalize(Sub(Vec3f{x, y, z}, position));
 
-    return Line(origin, direction);
+    return Line(position, direction);
 }
