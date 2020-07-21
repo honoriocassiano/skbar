@@ -25,6 +25,8 @@ bool skbar::DrawerEventProcessor::Process(const Event &_event) {
         processed = ProcessMouseButtonUp(event);
     } else if (event->type == SDL_MOUSEMOTION) {
         processed = ProcessMouseMotion(event);
+    } else if (event->type == SDL_KEYUP) {
+        processed = ProcessKeyboard(event);
     }
 
     return processed;
@@ -75,6 +77,25 @@ bool skbar::DrawerEventProcessor::ProcessMouseButtonUp(const SDL_Event *event) {
 
             processed = true;
         }
+    }
+
+    return processed;
+}
+
+bool skbar::DrawerEventProcessor::ProcessKeyboard(const SDL_Event *event) {
+
+    auto processed = false;
+
+    switch (event->key.keysym.sym) {
+
+        case SDLK_r:
+            drawer->Reset();
+            processed = true;
+
+            break;
+
+        default:
+            break;
     }
 
     return processed;

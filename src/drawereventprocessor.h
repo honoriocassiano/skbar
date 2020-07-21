@@ -15,6 +15,7 @@ public:
     virtual ~DrawerEventProcessor();
 
 private:
+
     bool Process(const Event &event) override;
 
     bool ProcessMouseButtonDown(const SDL_Event *event);
@@ -22,6 +23,8 @@ private:
     bool ProcessMouseButtonUp(const SDL_Event *event);
 
     bool ProcessMouseMotion(const SDL_Event *event);
+
+    bool ProcessKeyboard(const SDL_Event *event);
 
     bool CheckMouseState(unsigned int button);
 
