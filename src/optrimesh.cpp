@@ -140,7 +140,7 @@ skbar::Intersection<int, skbar::Vec3f> skbar::OPTriMesh::GetClosestIntersection(
         if (utils::CheckIntersectionTriangleRay(
                 ray, vertices[0], vertices[1], vertices[2], tempIntersection)) {
 
-            auto distance = Norm(Sub(ray.GetOrigin(), intersection));
+            auto distance = Norm(Sub(ray.GetOrigin(), tempIntersection));
 
             if (distance < minDistance) {
                 minDistance = distance;
