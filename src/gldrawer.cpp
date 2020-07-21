@@ -17,6 +17,10 @@ bool skbar::GLDrawer::Draw(const Vec3f &origin, const Vec3f &direction) {
 	return false;
 }
 
+void skbar::GLDrawer::Reset() {
+	GetMesh().GetSketch().Reset();
+}
+
 bool skbar::GLDrawer::ProcessEvent(const skbar::Event &event) {
 	return processor->Process(event);
 }

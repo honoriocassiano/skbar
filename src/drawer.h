@@ -19,6 +19,8 @@ public:
 
     virtual bool IsStarted() const = 0;
 
+    virtual void Reset() = 0;
+
     virtual skbar::Intersection<int, skbar::Vec3f> GetClosestIntersection(
         const Line<Vec3f> &ray) = 0;
 

@@ -19,6 +19,8 @@ public:
 
     bool IsStarted() const override;
 
+    void Reset() override;
+
     skbar::Intersection<int, skbar::Vec3f> GetClosestIntersection(
         const Line<Vec3f> &ray) override;
 
