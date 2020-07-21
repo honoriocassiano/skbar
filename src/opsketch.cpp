@@ -23,9 +23,15 @@ bool skbar::OPSketch::Close() {
     started = false;
 }
 
+void skbar::OPSketch::Reset() {
+    data.clear();
+}
+
 bool skbar::OPSketch::AddPoint(const skbar::Line<skbar::Vec3f> &ray, const skbar::Intersection<int, skbar::Vec3f> &intersection) {
 
     bool added = false;
+
+    // Log("Face after: %d", intersection.Face());
 
     if (started) {
 

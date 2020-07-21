@@ -16,6 +16,8 @@ public:
 
     bool Close() override;
 
+    void Reset() override;
+
     bool AddPoint(const Line<Vec3f> &ray, const Intersection<int, Vec3f> &intersection) override;
 
     const std::vector<SketchVertex> &Data() const override { return data; }

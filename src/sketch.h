@@ -45,6 +45,8 @@ public:
 
     virtual bool Close() = 0;
 
+    virtual void Reset() = 0;
+
     /*
 		Try to add a new point to the sketch if these conditions is filled:
 
