@@ -26,6 +26,8 @@ bool skbar::ViewerEventProcessor::Process(const skbar::Event &_event) {
             processed = ProcessMouseMotion(event);
         } else if (event->type == SDL_MOUSEWHEEL) {
             processed = ProcessMouseWheel(event);
+        } else if(event->type == SDL_KEYUP) {
+            processed = ProcessKeyboardUp(event);
         }
     }
 
@@ -114,6 +116,5 @@ bool skbar::ViewerEventProcessor::ProcessMouseMotion(const SDL_Event *event) {
     return processed;
 }
 
-bool skbar::ViewerEventProcessor::ProcessKeyboard(const SDL_Event *event) {
-
+bool skbar::ViewerEventProcessor::ProcessKeyboardUp(const SDL_Event *event) {
 }
