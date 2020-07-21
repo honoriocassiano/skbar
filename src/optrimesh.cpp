@@ -64,7 +64,7 @@ skbar::Intersection<int, skbar::Vec3f> skbar::OPTriMesh::GetClosestIntersection(
 
     bool intersected = false;
 
-    Vec3f intersection;
+    Vec3f intersectionPoint;
     int intersectedFace = -1;
 
     float minDistance = INFINITY;
@@ -85,7 +85,7 @@ skbar::Intersection<int, skbar::Vec3f> skbar::OPTriMesh::GetClosestIntersection(
 
             if (distance < minDistance) {
                 minDistance = distance;
-                intersection = tempIntersection;
+                intersectionPoint = tempIntersection;
                 intersectedFace = fi.idx();
                 intersected = true;
             }
@@ -93,7 +93,7 @@ skbar::Intersection<int, skbar::Vec3f> skbar::OPTriMesh::GetClosestIntersection(
 
     }
 
-    return Intersection(intersectedFace, intersection, intersected);
+    return Intersection(intersectedFace, intersectionPoint, intersected);
 }
 
 void skbar::OPTriMesh::Render() const {
