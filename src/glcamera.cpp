@@ -126,24 +126,27 @@ void skbar::GLCamera::Apply() const {
               up[0], up[1], up[2]);
 
     glMatrixMode(GL_MODELVIEW);
+
+    {
+        // Always update member 'projection' after apply to OpenGL
+        std::array<double, 16> modelviewMatrix;
+        std::array<double, 16> projectionMatrix;
+        std::array<int, 4> viewport;
+
+        glGetDoublev(GL_MODELVIEW_MATRIX, modelviewMatrix.data());
+        glGetDoublev(GL_PROJECTION_MATRIX, projectionMatrix.data());
+        glGetIntegerv(GL_VIEWPORT, viewport.data());
+
+        projection = GLProjection(modelviewMatrix, projectionMatrix, viewport);
+    }
 }
 
 skbar::Line<skbar::Vec3f> skbar::GLCamera::PositionToRay(int windowX, int windowY) const {
 
-    double x, y, z;
-
-    double modelview[16], projection[16];
-    int viewport[4];
-
-	// Get matrices and viewport
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-	glGetDoublev(GL_PROJECTION_MATRIX, projection);
-	glGetIntegerv(GL_VIEWPORT, viewport);
-
     // Invert y coordinate because SDL uses top-down coordinates and OpenGL uses bottom-up
-	gluUnProject(windowX, height - windowY, 1, modelview, projection, viewport, &x, &y, &z);
+    Vec3f point = projection.UnProject(Vec2f{windowX, height - windowY});
 
-    Vec3f direction = Normalize(Sub(Vec3f{x, y, z}, position));
+    Vec3f direction = Normalize(Sub(point, position));
 
     return Line(position, direction);
 }

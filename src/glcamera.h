@@ -4,7 +4,7 @@
 #include "camera.h"
 
 #include "commontypes.h"
-
+#include "glprojection.h"
 #include "vector.h"
 
 #include <array>
@@ -31,6 +31,8 @@ public:
 
     Line<Vec3f> PositionToRay(int x, int y) const;
 
+    const Projection<float>& GetProjection() const override { return projection; }
+
 private:
 
     void Apply() const;
@@ -55,6 +57,9 @@ private:
     Vec3f initialUp;
 
     BBox bbox;
+
+    // Variable used only to owner an instance of the Projection object
+    mutable GLProjection projection;
 };
 }
 
