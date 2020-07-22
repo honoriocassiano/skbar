@@ -36,6 +36,12 @@ private:
     // Indicate when user is drawing while keep mouse pressed
     bool drawing;
 
+    Intersection<int, Vec3f> lastIntersection;
+
+    Vec2i lastPoint;
+
+    int epsilon;
+
 };
 }
 

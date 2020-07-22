@@ -5,7 +5,7 @@
 #include "opsketch.h"
 
 skbar::DrawerEventProcessor::DrawerEventProcessor(Drawer *_drawer)
-    : drawer(_drawer), drawing(false) {
+    : drawer(_drawer), drawing(false), lastIntersection(-1, Vec3f(), false), epsilon(5) {
 
 }
 
@@ -113,8 +113,13 @@ bool skbar::DrawerEventProcessor::ProcessMouseMotion(const SDL_Event *event) {
     auto motion = event->motion;
     auto processed = false;
 
-    if (CheckMouseState(SDL_BUTTON_LEFT) && drawing) {
-        processed = AddPointToSketch(motion.x, motion.y);
+    auto deltha = Norm(Vec2i{lastPoint[0] - motion.x, lastPoint[1] - motion.y});
+
+    if (CheckMouseState(SDL_BUTTON_LEFT) && drawing && deltha > epsilon) {
+
+        if (lastIntersection.Intersect()) {
+            processed = AddPointToSketch(motion.x, motion.y);
+        }
     }
 
     return processed;
@@ -131,7 +136,7 @@ bool skbar::DrawerEventProcessor::AddPointToSketch(int x, int y) {
 
     auto intersection = drawer->GetClosestIntersection(ray);
 
-    if (intersection.Intersect()) {
+    if (intersection.Intersect() && (lastIntersection.Face() != intersection.Face())) {
 
         OPSketch &sketch = dynamic_cast<OPSketch &>(glDrawer->GetMesh().GetSketch());
 
@@ -140,6 +145,11 @@ bool skbar::DrawerEventProcessor::AddPointToSketch(int x, int y) {
         }
 
         processed = sketch.AddPoint(ray, intersection);
+
+        if (processed) {
+            lastIntersection = intersection;
+            lastPoint = Vec2i{x, y};
+        }
     }
 
     return processed;
