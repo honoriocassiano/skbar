@@ -12,6 +12,8 @@ namespace utils {
 bool CheckIntersectionTriangleRay(const Line<Vec3f> &ray, const Vec3f &p0, const Vec3f &p1,
         const Vec3f &p2, Vec3f &intersection);
 
+bool CheckIntersectionPlaneLine(const Plane<Vec3f> &plane, const Line<Vec3f> &line, Vec3f &intersection);
+
 }
 }
 #endif /* INTERSECTIONUTILS_H */

@@ -1,5 +1,6 @@
 #include "intersectionutils.h"
 
+#include "constants.h"
 #include "vector.h"
 
 bool skbar::utils::CheckIntersectionTriangleRay(
@@ -55,4 +56,25 @@ bool skbar::utils::CheckIntersectionTriangleRay(
 
     // Line intersection but not ray intersection
     return false;
+}
+
+bool skbar::utils::CheckIntersectionPlaneLine(const skbar::Plane<Vec3f> &plane,
+        const skbar::Line<Vec3f> &line, Vec3f &intersection) {
+
+    auto dotNormalDir = Dot(plane.Normal(), line.Direction());
+
+    // Line is parallel to the plane
+    // Has zero or infinite intersections
+    if ((dotNormalDir > -constants::epsilon) && (dotNormalDir < constants::epsilon)) {
+        return false;
+    }
+
+    // Find constant term in plane equation to find intersection point
+    auto d = -Dot(plane.Normal(), plane.Point());
+
+    auto t = (-d - Dot(plane.Normal(), line.Origin())) / Dot(plane.Normal(), line.Direction());
+
+    intersection = Sum(line.Origin(), Mul(line.Direction(), t));
+
+    return true;
 }
