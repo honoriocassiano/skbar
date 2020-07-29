@@ -18,7 +18,8 @@ public:
 
     void Reset() override;
 
-    bool AddPoint(const Line<Vec3f> &ray, const Intersection<int, Vec3f> &intersection) override;
+    bool AddPoint(const Line<Vec3f> &ray, const Intersection<int, Vec3f> &intersection,
+                  const Line<Vec3f> &direction, const Projection<float> &projection) override;
 
     const std::vector<SketchVertex> &Data() const override { return data; }
 

@@ -37,22 +37,22 @@ private:
 
 };
 
-template <typename FacePointerType, typename PositionType>
+template <typename PointerType, typename PositionType>
 class Intersection {
 
 public:
-	Intersection(const FacePointerType &_face, const PositionType &_position,
-				bool _intersect = true)
-	  : face(_face), position(_position), intersect(_intersect) {}
+	Intersection(const PointerType &_face, const PositionType &_position,
+                 bool _intersect = true)
+	  : pointer(_face), position(_position), intersect(_intersect) {}
 
-	const FacePointerType &Face() const { return face; }
+	const PointerType &Pointer() const { return pointer; }
 
 	const PositionType &Position() const { return position; }
 
 	bool Intersect() const { return intersect; }
 
 private:
-	FacePointerType face;
+	PointerType pointer;
 	PositionType position;
 	bool intersect;
 };

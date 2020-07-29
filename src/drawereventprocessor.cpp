@@ -62,21 +62,22 @@ bool skbar::DrawerEventProcessor::ProcessMouseButtonUp(const SDL_Event *event) {
 
     } else if (event->button.button == SDL_BUTTON_RIGHT) {
 
-        drawing = false;
-
-        // If a sketch is started and not closed, close it and disable drawing
-        if (drawer->IsStarted()) {
-
-            auto glDrawer = dynamic_cast<GLDrawer *>(drawer);
-
-            assert((glDrawer != nullptr) && "Drawer is not an instance of GLDrawer");
-
-            auto sketch = dynamic_cast<OPSketch &>(glDrawer->GetMesh().GetSketch());
-
-            sketch.Close();
-
-            processed = true;
-        }
+        // TODO Uncomment this code
+//        drawing = false;
+//
+//        // If a sketch is started and not closed, close it and disable drawing
+//        if (drawer->IsStarted()) {
+//
+//            auto glDrawer = dynamic_cast<GLDrawer *>(drawer);
+//
+//            assert((glDrawer != nullptr) && "Drawer is not an instance of GLDrawer");
+//
+//            auto sketch = dynamic_cast<OPSketch &>(glDrawer->GetMesh().GetSketch());
+//
+//            sketch.Close();
+//
+//            processed = true;
+//        }
     }
 
     return processed;
@@ -136,15 +137,15 @@ bool skbar::DrawerEventProcessor::AddPointToSketch(int x, int y) {
 
     auto intersection = drawer->GetClosestIntersection(ray);
 
-    if (intersection.Intersect() && (lastIntersection.Face() != intersection.Face())) {
+    if (intersection.Intersect() && (lastIntersection.Pointer() != intersection.Pointer())) {
 
-        OPSketch &sketch = dynamic_cast<OPSketch &>(glDrawer->GetMesh().GetSketch());
+        auto& sketch = dynamic_cast<OPSketch &>(glDrawer->GetMesh().GetSketch());
 
         if (!sketch.IsStarted()) {
             sketch.Start();
         }
 
-        processed = sketch.AddPoint(ray, intersection);
+        processed = sketch.AddPoint(ray, intersection, camera.DirectionRay(), camera.GetProjection());
 
         if (processed) {
             lastIntersection = intersection;
