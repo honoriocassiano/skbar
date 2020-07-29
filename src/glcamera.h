@@ -29,6 +29,16 @@ public:
 
     void Render() const override;
 
+    const Vec3f &Position() const { return position; }
+
+    const Vec3f &Center() const { return center; }
+
+    Line<Vec3f> DirectionRay() const { return Line<Vec3f>(position, Sub(center, position)); }
+
+    const Vec3f &Up() const { return up; }
+
+    const Vec3f &Left() const { return left; }
+
     Line<Vec3f> PositionToRay(int x, int y) const;
 
     const Projection<float>& GetProjection() const override { return projection; }
