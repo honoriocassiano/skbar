@@ -14,14 +14,21 @@ skbar::OPMeshRenderer::~OPMeshRenderer() {
 
 void skbar::OPMeshRenderer::Render(const skbar::OPTriMesh::TriMeshImpl &mesh, const skbar::RenderOptions &options) {
 
-	glEnable(GL_LIGHTING);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_POLYGON_OFFSET_FILL);
+
+    glEnable(GL_LIGHTING);
+
+    glPolygonOffset(10.0, 10.0);
+
+    if (options.drawEdges) {
+        RenderEdges(mesh);
+    }
+
+
 	glEnable(GL_COLOR_MATERIAL);
 
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-
-	glEnable(GL_POLYGON_OFFSET_FILL);
-	glPolygonOffset(10.0, 10.0);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	glBegin(GL_TRIANGLES);
@@ -43,9 +50,9 @@ void skbar::OPMeshRenderer::Render(const skbar::OPTriMesh::TriMeshImpl &mesh, co
 
     glEnd();
 
+    glDisable(GL_LIGHTING);
 	glDisable(GL_POLYGON_OFFSET_FILL);
     glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
 }
 
 void skbar::OPMeshRenderer::RenderSketch(const skbar::OPSketch &sketch, bool closed, const skbar::SketchRenderOptions &options) {
@@ -71,4 +78,29 @@ void skbar::OPMeshRenderer::RenderSketch(const skbar::OPSketch &sketch, bool clo
         glDepthFunc(GL_LESS);
         glEnable(GL_LIGHTING);
     }
+}
+
+void skbar::OPMeshRenderer::RenderEdges(const skbar::OPTriMesh::TriMeshImpl &mesh) {
+
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    glEnable(GL_LINE_SMOOTH);
+    glLineWidth(0.1f);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    glColor3f(0.3f, 0.3f, 0.3f);
+
+    glBegin(GL_LINES);
+
+    for (auto edge : mesh.edges()) {
+        auto point1 = mesh.point(edge.v0());
+        auto point2 = mesh.point(edge.v1());
+
+        glVertex3f(point1[0], point1[1], point1[2]);
+        glVertex3f(point2[0], point2[1], point2[2]);
+    }
+
+    glEnd();
+
+    glDisable(GL_LINE_SMOOTH);
 }

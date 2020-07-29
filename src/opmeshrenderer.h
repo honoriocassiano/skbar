@@ -8,10 +8,7 @@
 namespace skbar {
 
 struct RenderOptions {
-
-    RenderOptions() {}
-    virtual ~RenderOptions() {}
-
+    bool drawEdges;
 };
 
 struct SketchRenderOptions {
@@ -36,6 +33,8 @@ public:
 
     static void RenderSketch(const OPSketch &sketch, bool closed, const SketchRenderOptions &options = SketchRenderOptions());
 
+private:
+    static void RenderEdges(const OPTriMesh::TriMeshImpl &mesh);
 };
 
 }
