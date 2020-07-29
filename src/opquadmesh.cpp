@@ -1,6 +1,7 @@
 #include "opquadmesh.h"
 
 #include "utils/debug.h"
+#include "opmeshrenderer.h"
 
 #include <OpenMesh/Core/IO/MeshIO.hh>
 
@@ -29,6 +30,8 @@ bool skbar::OPQuadMesh::Load(const std::string &filename) {
         mesh.data(fi).quadFaceData.id = fi.idx();
     }
 
+    mesh.update_normals();
+
     return true;
 }
 
@@ -54,6 +57,10 @@ skbar::QuadMesh *skbar::OPQuadMesh::GetPatch(std::size_t patchId) {
 
 void skbar::OPQuadMesh::ReplacePatch(size_t patchId, const skbar::QuadMesh &patch) {
 
+}
+
+void skbar::OPQuadMesh::Render() const {
+    renderer::Render(mesh, renderer::MeshOptions{ true });
 }
 
 skbar::BBox skbar::OPQuadMesh::GetBBox() const {

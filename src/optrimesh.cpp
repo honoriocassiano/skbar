@@ -250,5 +250,5 @@ skbar::Intersection<int, skbar::Vec3f> skbar::OPTriMesh::GetClosestIntersection(
 
 void skbar::OPTriMesh::Render() const {
     // TODO Add options as parameter
-    OPMeshRenderer::Render(mesh, RenderOptions{true});
+    renderer::Render(mesh, renderer::MeshOptions{true});
 }

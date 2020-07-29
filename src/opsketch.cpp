@@ -74,5 +74,5 @@ bool skbar::OPSketch::IsStarted() const {
 }
 
 void skbar::OPSketch::Render() const {
-    OPMeshRenderer::RenderSketch(*this, !started);
+    renderer::RenderSketch(*this, !started);
 }

@@ -35,7 +35,9 @@ skbar::BBox skbar::EditableMesh::GetBBox() const {
 }
 
 void skbar::EditableMesh::Render() const {
-    triMesh->Render();
+    // TODO Check this
+    // triMesh->Render();
+    quadMesh->Render();
     sketch->Render();
 }
 

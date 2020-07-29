@@ -50,7 +50,7 @@ namespace skbar {
         // store the previous halfedge
         HalfedgeAttributes(OpenMesh::Attributes::PrevHalfedge);
         // use face normals
-        // FaceAttributes(OpenMesh::Attributes::Normal);
+        FaceAttributes(OpenMesh::Attributes::Normal);
         // store a face handle for each vertex
 
         FaceTraits {
