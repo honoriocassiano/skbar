@@ -137,19 +137,26 @@ bool skbar::DrawerEventProcessor::AddPointToSketch(int x, int y) {
 
     auto intersection = drawer->GetClosestIntersection(ray);
 
-    if (intersection.Intersect() && (lastIntersection.Pointer() != intersection.Pointer())) {
+    if (intersection.Intersect()) {
 
-        auto& sketch = dynamic_cast<OPSketch &>(glDrawer->GetMesh().GetSketch());
+        if ((lastIntersection.Pointer() != intersection.Pointer())) {
+            auto& sketch = dynamic_cast<OPSketch &>(glDrawer->GetMesh().GetSketch());
 
-        if (!sketch.IsStarted()) {
-            sketch.Start();
-        }
+            if (!sketch.IsStarted()) {
+                sketch.Start();
+            }
 
-        processed = sketch.AddPoint(ray, intersection, camera.DirectionRay(), camera.GetProjection());
+            const bool added = sketch.AddPoint(ray, intersection, camera.DirectionRay(), camera.GetProjection());
 
-        if (processed) {
-            lastIntersection = intersection;
-            lastPoint = Vec2i{x, y};
+            if (added) {
+                lastIntersection = intersection;
+                lastPoint = Vec2i{x, y};
+            }
+
+            processed = sketch.IsStarted();
+        } else {
+            // Prevent rotation event if intersection is on same face that last intersection
+            processed = true;
         }
     }
 

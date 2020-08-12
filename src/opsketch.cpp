@@ -53,7 +53,10 @@ bool skbar::OPSketch::AddPoint(const skbar::Line<skbar::Vec3f> &ray,
                    data.emplace_back(i.Pointer(), i.Position(), SketchVertex::EType::EDGE);
                }
 
-                data.emplace_back(intersection.Pointer(), intersection.Position(), SketchVertex::EType::FACE);
+               // If has path but are ohn same face
+               if (!result.empty()) {
+                   data.emplace_back(intersection.Pointer(), intersection.Position(), SketchVertex::EType::FACE);
+               }
             }
 
             added = hasPath;
