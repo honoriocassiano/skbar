@@ -4,6 +4,7 @@
 #include "opmeshrenderer.h"
 #include "intersectionutils.h"
 #include "vector.h"
+#include "utils/openmesh.h"
 
 #include <set>
 #include <cmath>
@@ -85,9 +86,6 @@ std::tuple<bool, std::vector<skbar::Intersection<int, skbar::Vec3f>>> skbar::OPT
 //            projectedP2[0], projectedP2[1]);
 
     const Segment<Vec2f> projectedSegment(projectedP1, projectedP2);
-    const Vec3f planeNormal = Cross(viewDirection.Direction(), Sub(p2.Position(), p1.Position()));
-
-    const Plane<Vec3f> plane(p1.Position(), planeNormal);
 
     const OpenMesh::SmartFaceHandle firstFace(p1.Pointer(), &mesh);
     const OpenMesh::SmartFaceHandle lastFace(p2.Pointer(), &mesh);
@@ -118,11 +116,19 @@ std::tuple<bool, std::vector<skbar::Intersection<int, skbar::Vec3f>>> skbar::OPT
             Vec2f windowIntersection;
 
             if (utils::CheckIntersectionSegmentSegment(projectedSegment, projectedEdge, windowIntersection)) {
-                const Line<Vec3f> edgeLine(e1, Sub(e2, e1));
+
+                const auto unprojectedWindowIntersection = projection.UnProject(windowIntersection);
+
+                const auto triangleNormal = utils::ToStdVector(mesh.normal(he.face()));
+
+                const Vec3f intersectionDirection = Normalize(Sub(unprojectedWindowIntersection, viewDirection.GetOrigin()));
+                const Line<Vec3f> intersectionRay(viewDirection.GetOrigin(), intersectionDirection);
+
+                const Plane<Vec3f> trianglePlane(e1, triangleNormal);
 
                 Vec3f worldIntersection;
 
-                utils::CheckIntersectionPlaneLine(plane, edgeLine, worldIntersection);
+                utils::CheckIntersectionPlaneLine(trianglePlane, intersectionRay, worldIntersection);
 
                 result.emplace_back(he.edge().idx(), worldIntersection);
                 visitedFaces.insert(currentFace.idx());
@@ -175,11 +181,19 @@ std::tuple<bool, std::vector<skbar::Intersection<int, skbar::Vec3f>>> skbar::OPT
 
                 // TODO Change to line-segment intersection
                 if (utils::CheckIntersectionSegmentSegment(projectedSegment, projectedEdge, windowIntersection)) {
-                    const Line<Vec3f> edgeLine(e1, Sub(e2, e1));
+
+                    const auto unprojectedWindowIntersection = projection.UnProject(windowIntersection);
+
+                    const auto triangleNormal = utils::ToStdVector(mesh.normal(he.face()));
+
+                    const Vec3f intersectionDirection = Normalize(Sub(unprojectedWindowIntersection, viewDirection.GetOrigin()));
+                    const Line<Vec3f> intersectionRay(viewDirection.GetOrigin(), intersectionDirection);
+
+                    const Plane<Vec3f> trianglePlane(e1, triangleNormal);
 
                     Vec3f worldIntersection;
 
-                    utils::CheckIntersectionPlaneLine(plane, edgeLine, worldIntersection);
+                    utils::CheckIntersectionPlaneLine(trianglePlane, intersectionRay, worldIntersection);
 
                     result.emplace_back(he.edge().idx(), worldIntersection);
                     visitedFaces.insert(currentFace.idx());
