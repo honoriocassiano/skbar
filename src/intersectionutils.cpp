@@ -1,5 +1,7 @@
 #include "intersectionutils.h"
 
+#include <cmath>
+
 #include "constants.h"
 #include "vector.h"
 
@@ -86,31 +88,31 @@ bool skbar::utils::CheckIntersectionSegmentSegment(const skbar::Segment<Vec2f> &
     float slopeS2;
 
     // Grant that slopes is always defined
-    if (s1.P2()[0] != s1.P1()[0]) {
+    if (std::fabs(s1.P2()[0] - s1.P1()[0]) > constants::epsilon) {
         slopeS1 = (s1.P2()[1] - s1.P1()[1]) / (s1.P2()[0] - s1.P1()[0]);
     } else {
         slopeS1 = (s1.P2()[1] - s1.P1()[1]) / constants::epsilon;
     }
 
-    if (s2.P2()[0] != s2.P1()[0]) {
+    if ( std::fabs(s2.P2()[0] - s2.P1()[0]) > constants::epsilon) {
         slopeS2 = (s2.P2()[1] - s2.P1()[1]) / (s2.P2()[0] - s2.P1()[0]);
     } else {
         slopeS2 = (s2.P2()[1] - s2.P1()[1]) / constants::epsilon;
     }
 
     // Segments are parallel
-    if (abs(slopeS1 - slopeS2) <= constants::epsilon ) {
+    if (std::fabs(slopeS1 - slopeS2) <= constants::epsilon ) {
         return false;
     }
 
-    float constantS1 = s1.P1()[1] - (slopeS1 * s1.P1()[0]);
-    float constantS2 = s2.P1()[1] - (slopeS2 * s2.P1()[0]);
+    const float constantS1 = s1.P1()[1] - (slopeS1 * s1.P1()[0]);
+    const float constantS2 = s2.P1()[1] - (slopeS2 * s2.P1()[0]);
 
     float x = (constantS2 - constantS1) / (slopeS1 - slopeS2);
     float y = (slopeS1 * x) + constantS1;
 
     // If x or y is out of bounds of delimiter points, then has a line intersection but not a segment intersection
-    bool onSegment =
+    const bool onSegment =
         (std::min(s1.P1()[0], s1.P2()[0]) <= x) && (x <= std::max(s1.P1()[0], s1.P2()[0])) &&
         (std::min(s1.P1()[1], s1.P2()[1]) <= y) && (y <= std::max(s1.P1()[1], s1.P2()[1]));
 
