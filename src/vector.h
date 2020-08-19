@@ -8,11 +8,6 @@
 
 namespace skbar {
 
-typedef std::array<int, 2> Vec2i;
-typedef std::array<float, 2> Vec2f;
-typedef std::array<int, 3> Vec3i;
-typedef std::array<float, 3> Vec3f;
-
 template<typename T, std::size_t N>
 inline constexpr T Norm(const std::array<T, N> &vec) {
     T sum = std::accumulate(vec.begin(), vec.end(), (T) 0, [](T s, T n) { return n*n + s; });

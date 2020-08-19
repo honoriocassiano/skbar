@@ -25,7 +25,7 @@ private:
 
     bool ProcessMouseMotion(const SDL_Event *event);
 
-    bool ProcessKeyboard(const SDL_Event *event);
+    bool ProcessKeyboardUp(const SDL_Event *event);
 
 private:
     Viewer *viewer;

@@ -2,19 +2,26 @@
 
 #include "opquadmesh.h"
 #include "optrimesh.h"
+#include "opsketch.h"
 #include "utils/debug.h"
 
 #include <set>
 
-skbar::EditableMesh::EditableMesh() : quadMesh(new skbar::OPQuadMesh()), triMesh(new skbar::OPTriMesh()) {
+skbar::EditableMesh::EditableMesh() {
+
+    quadMesh = new skbar::OPQuadMesh();
+    triMesh = new skbar::OPTriMesh();
+    sketch = new OPSketch(this);
 }
 
 skbar::EditableMesh::~EditableMesh() {
     delete quadMesh;
     delete triMesh;
+    delete sketch;
 
     quadMesh = nullptr;
     triMesh = nullptr;
+    sketch = nullptr;
 }
 
 bool skbar::EditableMesh::Load(const std::string &filename) {
@@ -28,5 +35,12 @@ skbar::BBox skbar::EditableMesh::GetBBox() const {
 }
 
 void skbar::EditableMesh::Render() const {
-    triMesh->Render();
+    // TODO Check this
+    // triMesh->Render();
+    quadMesh->Render();
+    sketch->Render();
+}
+
+skbar::Intersection<int, skbar::Vec3f> skbar::EditableMesh::GetClosestIntersection(const Line<Vec3f> &ray) const {
+    return triMesh->GetClosestIntersection(ray);
 }

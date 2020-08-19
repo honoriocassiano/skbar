@@ -12,18 +12,23 @@ skbar::ViewerEventProcessor::~ViewerEventProcessor() {
 }
 
 bool skbar::ViewerEventProcessor::Process(const skbar::Event &_event) {
-    auto event = dynamic_cast<const SDLEvent &>(_event).Get();
 
-    bool processed = false;
+    bool processed = viewer->GetDrawer().ProcessEvent(_event);
 
-    if (event->type == SDL_MOUSEBUTTONDOWN) {
-        processed = ProcessMouseButtonDown(event);
-    } else if (event->type == SDL_MOUSEBUTTONUP) {
-        processed = ProcessMouseButtonUp(event);
-    } else if (event->type == SDL_MOUSEMOTION) {
-        processed = ProcessMouseMotion(event);
-    } else if (event->type == SDL_MOUSEWHEEL) {
-        processed = ProcessMouseWheel(event);
+    if (!processed) {
+        auto event = dynamic_cast<const SDLEvent &>(_event).Get();
+
+        if (event->type == SDL_MOUSEBUTTONDOWN) {
+            processed = ProcessMouseButtonDown(event);
+        } else if (event->type == SDL_MOUSEBUTTONUP) {
+            processed = ProcessMouseButtonUp(event);
+        } else if (event->type == SDL_MOUSEMOTION) {
+            processed = ProcessMouseMotion(event);
+        } else if (event->type == SDL_MOUSEWHEEL) {
+            processed = ProcessMouseWheel(event);
+        } else if(event->type == SDL_KEYUP) {
+            processed = ProcessKeyboardUp(event);
+        }
     }
 
     return processed;
@@ -98,8 +103,8 @@ bool skbar::ViewerEventProcessor::ProcessMouseMotion(const SDL_Event *event) {
 
     } else if (dragging) {
 
-        auto dx = float(motion.xrel) / 100;
-		auto dy = float(-motion.yrel) / 100;
+        auto dx = float(motion.xrel) / 500;
+		auto dy = float(-motion.yrel) / 500;
 
         viewer->GetCamera().Drag(dx, dy);
 
@@ -111,6 +116,5 @@ bool skbar::ViewerEventProcessor::ProcessMouseMotion(const SDL_Event *event) {
     return processed;
 }
 
-bool skbar::ViewerEventProcessor::ProcessKeyboard(const SDL_Event *event) {
-
+bool skbar::ViewerEventProcessor::ProcessKeyboardUp(const SDL_Event *event) {
 }

@@ -5,6 +5,7 @@
 #include "commontypes.h"
 #include "quadmesh.h"
 #include "trimesh.h"
+#include "sketch.h"
 
 namespace skbar {
 
@@ -22,6 +23,8 @@ public:
 
     void Render() const;
 
+    Intersection<int, Vec3f> GetClosestIntersection(const Line<Vec3f> &ray) const;
+
     inline QuadMesh &GetQuad() {
         return *quadMesh;
     }
@@ -38,6 +41,14 @@ public:
         return *triMesh;
     }
 
+    inline Sketch &GetSketch() {
+        return *sketch;
+    }
+
+    const inline Sketch &GetSketch() const {
+        return *sketch;
+    }
+
 private:
 
     // Triangulated mesh
@@ -45,6 +56,8 @@ private:
 
     // Quad mesh
     QuadMesh *quadMesh;
+
+    Sketch *sketch;
 };
 
 }
