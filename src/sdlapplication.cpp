@@ -78,8 +78,8 @@ void skbar::SDLApplication::InitializeSDL() {
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
-    // SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-    // SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
+     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
 
     SDL_WindowFlags window_flags = (SDL_WindowFlags) (SDL_WINDOW_OPENGL
 		| SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
@@ -103,13 +103,13 @@ void skbar::SDLApplication::InitializeGL() {
 		throw std::runtime_error("Failed to initialize GLEW!");
 	}
 
-    // glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-    // glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 
-    // glEnable(GL_MULTISAMPLE);
+     glEnable(GL_MULTISAMPLE);
 
-    // glEnable(GL_LINE_SMOOTH);
-    // glEnable(GL_POLYGON_SMOOTH);
+     glEnable(GL_LINE_SMOOTH);
+     glEnable(GL_POLYGON_SMOOTH);
 }
 
 void skbar::SDLApplication::Run() {
