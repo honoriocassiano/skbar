@@ -58,7 +58,7 @@ void skbar::Viewer::Render() {
     if (NeedRender()) {
 
         // Bind screen on write mode
-        frameBuffer->Bind(FrameBuffer::Mode::WRITE);
+//        frameBuffer->Bind(FrameBuffer::Mode::WRITE);
 
         /// Clear color buffers
         glClearColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3]);
@@ -67,18 +67,18 @@ void skbar::Viewer::Render() {
         mesh.Render();
 
         // Unbind framework on read mode
-        frameBuffer->Unbind(FrameBuffer::Mode::WRITE);
+//        frameBuffer->Unbind(FrameBuffer::Mode::WRITE);
     }
 
     // Bind framebuffer on read mode
-    frameBuffer->Bind(FrameBuffer::Mode::READ);
+//    frameBuffer->Bind(FrameBuffer::Mode::READ);
 
     // Bind framebuffer of size (width, height) on rect (0, 0, width, height)
-    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
-	                  GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+//    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
+//	                  GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
     // Unbind framebuffer on read mode
-    frameBuffer->Unbind(FrameBuffer::Mode::READ);
+//    frameBuffer->Unbind(FrameBuffer::Mode::READ);
 
     needRender = false;
 }
