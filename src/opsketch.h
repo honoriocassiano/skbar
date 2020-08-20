@@ -25,8 +25,6 @@ public:
 
     std::size_t Size() const override { return data.size(); }
 
-    void Render() const override;
-
     bool IsStarted() const override;
 
 private:

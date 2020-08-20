@@ -34,13 +34,6 @@ skbar::BBox skbar::EditableMesh::GetBBox() const {
     return quadMesh->GetBBox();
 }
 
-void skbar::EditableMesh::Render() const {
-    // TODO Check this
-    // triMesh->Render();
-    quadMesh->Render();
-    sketch->Render();
-}
-
 skbar::Intersection<int, skbar::Vec3f> skbar::EditableMesh::GetClosestIntersection(const Line<Vec3f> &ray) const {
     return triMesh->GetClosestIntersection(ray);
 }

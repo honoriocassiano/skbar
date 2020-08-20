@@ -27,8 +27,6 @@ public:
 
     Intersection<int, Vec3f> GetClosestIntersection(const Line<Vec3f> &ray) const override;
 
-    void Render() const override;
-
     TriMeshImpl &Get() { return mesh; }
 
     const TriMeshImpl &Get() const { return mesh; }

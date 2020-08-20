@@ -26,8 +26,6 @@ public:
 
     void ReplacePatch(size_t patchId, const QuadMesh &patch) override;
 
-    void Render() const override;
-
     BBox GetBBox() const override;
 
     const QuadMeshImpl& Get() const { return mesh; }

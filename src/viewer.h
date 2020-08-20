@@ -6,8 +6,10 @@
 #include "commontypes.h"
 #include "editablemesh.h"
 #include "glcamera.h"
+#include "renderoptions.h"
 #include "baseeventprocessor.h"
 #include "drawer.h"
+#include "meshrenderer.h"
 
 // Standard library headers
 #include <string>
@@ -74,6 +76,8 @@ public:
 
     const Drawer &GetDrawer() const { return *drawer; }
 
+    void ToggleDrawPatches();
+
 private:
 
     // Return if need to re-render the viewer or any other renderable
@@ -99,6 +103,10 @@ private:
     FrameBuffer *frameBuffer;
 
     EditableMesh mesh;
+
+    renderer::Options renderOptions;
+
+    renderer::MeshRenderer *meshRenderer;
 
     // Control visualization itself
     GLCamera *camera;

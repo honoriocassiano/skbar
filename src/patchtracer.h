@@ -7,23 +7,28 @@
 
 #include "opquadmesh.h"
 
-#include <set>
+#include <unordered_set>
 #include <vector>
 
 namespace skbar {
 
-    class PatchTracer {
+class PatchTracer {
 
-    private:
-        static std::set<int> FindSingularities(const OPQuadMesh::QuadMeshImpl &mesh, bool closed = true);
+private:
+    /**
+     * Returns all singularities ordered by vertex id
+     */
+    static std::vector<int> FindSingularities(const OPQuadMesh::QuadMeshImpl &mesh, bool closed = true);
 
-        static std::vector<int> FindLine(const OpenMesh::SmartHalfedgeHandle& handle, const std::set<int>& singularities) ;
+    static std::unordered_set<int> GetEdges(const OPQuadMesh::QuadMeshImpl &mesh, const std::vector<int> &singularities);
 
-    public:
-        static void Trace(OPQuadMesh &mesh);
+    static std::vector<int> FindLine(const OpenMesh::SmartHalfedgeHandle& handle, const std::vector<int>& singularities);
 
-        static std::vector<std::vector<int>> GetGrid(const OPQuadMesh& mesh, int patch);
-    };
+public:
+    static void Trace(OPQuadMesh &mesh);
+
+    static std::vector<std::vector<int>> GetGrid(const OPQuadMesh& mesh, int patch);
+};
 }
 
 #endif //SKBAR_PATCHTRACER_H
