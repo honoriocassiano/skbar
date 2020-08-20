@@ -5,54 +5,103 @@
 #include "patchtracer.h"
 
 #include <algorithm>
+#include <queue>
 
 #include "utils/debug.h"
 
+#define BFIND(container, value) (std::binary_search(container.begin(), container.end(), value))
+
 void skbar::PatchTracer::Trace(skbar::OPQuadMesh &baseMesh) {
 
-    auto mesh = baseMesh.Get();
+    auto &mesh = baseMesh.Get();
 
-    std::set<int> edges;
+    const auto singularities = FindSingularities(mesh);
 
-    auto singularities = FindSingularities(mesh);
+    const auto tracedEdges = GetEdges(mesh, singularities);
 
-    for (const auto &v: singularities) {
-        const auto startHE = mesh.halfedge_handle(OpenMesh::SmartVertexHandle(v));
+    for (const auto edge : tracedEdges) {
+        mesh.data(OpenMesh::EdgeHandle(edge)).quadEdgeData.patchEdge = true;
+    }
 
-        for (const auto itHE : startHE.from().outgoing_halfedges()) {
-            auto currentHE = itHE;
+    // Count the patches that was not visited yet
+    std::vector<int> patchesVisitedCount(singularities.size());
 
-            do {
+    for (std::size_t i = 0; i < singularities.size(); i++) {
+        patchesVisitedCount[i] = mesh.valence(OpenMesh::VertexHandle(singularities[i]));
+    }
 
-//                auto pair = std::make_pair(std::min(currentHE.from().idx(), currentHE.to().idx()),
-//                                           std::max(currentHE.from().idx(), currentHE.to().idx()));
-                    const auto edge = currentHE.edge().idx();
+    int currentPatch = 0;
 
-                if (edges.find(edge) == edges.end()) {
-                    edges.insert(edge);
-                } else {
-                    // If already visited, skip
-                    break;
-                }
+    unsigned int faceToStartCheck = 0;
 
-                // auto p0 = mesh.point(OpenMesh::VertexHandle(pair.first));
-                // auto p1 = mesh.point(OpenMesh::VertexHandle(pair.second));
+    while (faceToStartCheck < mesh.n_faces()) {
 
-//                    Log("(%lf, %lf, %lf) -> (%lf, %lf, %lf)", p0[0], p0[1], p0[2], p1[0], p1[1], p1[2]);
+        const auto startF = mesh.face_handle(faceToStartCheck);
 
-                if (std::binary_search(singularities.begin(), singularities.end(), currentHE.to().idx())) {
-                    break;
-                }
+        std::queue<unsigned int> facesToCheck;
 
-                // Just seek the border
-                if (currentHE.face().idx() == -1) {
+        facesToCheck.push(faceToStartCheck);
+
+        while (!facesToCheck.empty()) {
+            const auto currentF = OpenMesh::make_smart(mesh.face_handle(facesToCheck.front()), &mesh);
+            auto currentHE = currentF.halfedge();
+
+            if (mesh.data(currentF).quadFaceData.patchId == -1) {
+                for (int i = 0; i < 4; i++) {
+                    const auto neighborF = currentHE.opp().face();
+
+                    if ((tracedEdges.find(currentHE.edge().idx()) == tracedEdges.end())
+                        && (mesh.data(neighborF).quadFaceData.patchId == -1)) {
+
+                        facesToCheck.push(neighborF.idx());
+                    }
+
                     currentHE = currentHE.next();
-                } else {
+                }
+
+                mesh.data(currentF).quadFaceData.patchId = currentPatch;
+            }
+
+            facesToCheck.pop();
+        }
+
+        // Skip faces that was already traced
+        do {
+            faceToStartCheck++;
+        } while (mesh.data(startF).quadFaceData.patchId == -1);
+
+        currentPatch++;
+    }
+}
+
+std::unordered_set<int> skbar::PatchTracer::GetEdges(const skbar::OPQuadMesh::QuadMeshImpl &mesh,
+                                                     const std::vector<int> &singularities) {
+
+    std::unordered_set<int> result;
+
+    for (const auto singularity : singularities) {
+
+        const auto vertex = OpenMesh::SmartVertexHandle(singularity, &mesh);
+
+        for (const auto startHE : vertex.outgoing_halfedges()) {
+
+            // Skip if the edge was already traced
+            if (result.find(startHE.edge().idx()) == result.end()) {
+                auto currentHE = startHE;
+
+                while (!BFIND(singularities, currentHE.to().idx())) {
+                    result.insert(currentHE.edge().idx());
+
                     currentHE = currentHE.next().opp().next();
                 }
-            } while (true);
+
+                // Don't forget to add the last one
+                result.insert(currentHE.edge().idx());
+            }
         }
     }
+
+    return result;
 }
 
 std::vector<int> skbar::PatchTracer::FindSingularities(const skbar::OPQuadMesh::QuadMeshImpl &mesh, bool closed) {
@@ -91,7 +140,7 @@ std::vector<std::vector<int>> skbar::PatchTracer::GetGrid(const skbar::OPQuadMes
     // TODO Add patch tracing
 
     // TODO Change parameter "closed"
-    const auto singularities = FindSingularities(mesh, false);
+    const auto singularities = FindSingularities(mesh, true);
 
     const auto v = *singularities.begin();
 
@@ -103,11 +152,14 @@ std::vector<std::vector<int>> skbar::PatchTracer::GetGrid(const skbar::OPQuadMes
     bool flipFirst = (firstInLineHE.face().idx() == -1);
 
     do {
-        grid.push_back(FindLine(firstInLineHE, singularities));
+        const auto gridLine = FindLine(firstInLineHE, singularities);
 
+        grid.push_back(gridLine);
+
+        // Check if reached another singular vertex
         if ((firstInLineHE.from().idx() != startHE.from().idx())
             && (std::binary_search(singularities.begin(),
-                    singularities.end(), firstInLineHE.from().idx()))) {
+                                   singularities.end(), firstInLineHE.from().idx()))) {
             break;
         }
 

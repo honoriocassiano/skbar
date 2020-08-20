@@ -7,7 +7,7 @@
 
 #include "opquadmesh.h"
 
-#include <set>
+#include <unordered_set>
 #include <vector>
 
 namespace skbar {
@@ -20,7 +20,9 @@ private:
      */
     static std::vector<int> FindSingularities(const OPQuadMesh::QuadMeshImpl &mesh, bool closed = true);
 
-    static std::vector<int> FindLine(const OpenMesh::SmartHalfedgeHandle& handle, const std::vector<int>& singularities) ;
+    static std::unordered_set<int> GetEdges(const OPQuadMesh::QuadMeshImpl &mesh, const std::vector<int> &singularities);
+
+    static std::vector<int> FindLine(const OpenMesh::SmartHalfedgeHandle& handle, const std::vector<int>& singularities);
 
 public:
     static void Trace(OPQuadMesh &mesh);

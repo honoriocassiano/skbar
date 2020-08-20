@@ -2,6 +2,7 @@
 
 #include "utils/debug.h"
 #include "opmeshrenderer.h"
+#include "patchtracer.h"
 
 #include <OpenMesh/Core/IO/MeshIO.hh>
 
@@ -29,6 +30,8 @@ bool skbar::OPQuadMesh::Load(const std::string &filename) {
     for (auto fi : mesh.faces()) {
         mesh.data(fi).quadFaceData.id = fi.idx();
     }
+
+    PatchTracer::Trace(*this);
 
     mesh.update_normals();
 

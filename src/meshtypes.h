@@ -36,8 +36,15 @@ namespace skbar {
      */
     struct QuadFaceData {
         int id;
+        int patchId;
 
-        QuadFaceData() : id(-1) {}
+        QuadFaceData() : id(-1), patchId(-1) {}
+    };
+
+    struct QuadEdgeData {
+        bool patchEdge;
+
+        QuadEdgeData() : patchEdge(false) {}
     };
 
     // Define quad mesh traits
@@ -55,6 +62,10 @@ namespace skbar {
 
         FaceTraits {
             QuadFaceData quadFaceData;
+        };
+
+        EdgeTraits {
+            QuadEdgeData quadEdgeData;
         };
 
         VertexTraits
