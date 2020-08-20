@@ -71,7 +71,8 @@ skbar::Vec3f skbar::renderer::OPMeshRenderer::GetColor(int patch) {
     }
 }
 
-void skbar::renderer::OPMeshRenderer::Render(const skbar::EditableMesh &mesh, const skbar::renderer::Options &options) {
+void skbar::renderer::OPMeshRenderer::Render(const skbar::EditableMesh &mesh,
+        const skbar::renderer::Options &options) {
     if (options.mesh == Options::Mesh::QUAD) {
         RenderQuad(mesh, options);
     } else if (options.mesh == Options::Mesh::TRI) {
@@ -79,7 +80,8 @@ void skbar::renderer::OPMeshRenderer::Render(const skbar::EditableMesh &mesh, co
     }
 }
 
-void skbar::renderer::OPMeshRenderer::Render(const skbar::OPTriMesh::TriMeshImpl &mesh, const skbar::renderer::Options &options) {
+void skbar::renderer::OPMeshRenderer::Render(const skbar::OPTriMesh::TriMeshImpl &mesh,
+        const skbar::renderer::Options &options) {
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_POLYGON_OFFSET_FILL);
@@ -150,11 +152,11 @@ void skbar::renderer::OPMeshRenderer::RenderSketch(const skbar::OPSketch &sketch
 void skbar::renderer::OPMeshRenderer::RenderPatches(const skbar::OPQuadMesh::QuadMeshImpl &mesh) {
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
     glEnable(GL_LINE_SMOOTH);
-    glLineWidth(2.0f);
+    glLineWidth(4.5f);
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    glColor3f(0, 0, 0);
+    glColor3f(0.3f, 0.3f, 0.3f);
 
     glBegin(GL_LINES);
 

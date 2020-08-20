@@ -37,7 +37,7 @@ private:
     void RenderEdges(const OPMesh &mesh) {
         glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
         glEnable(GL_LINE_SMOOTH);
-        glLineWidth(0.1f);
+        glLineWidth(2.0f);
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
