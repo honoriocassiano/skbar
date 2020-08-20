@@ -23,8 +23,6 @@ public:
 
     virtual void ReplacePatch(size_t patchId, const QuadMesh &patch) = 0;
 
-    virtual void Render() const = 0;
-
     virtual BBox GetBBox() const = 0;
 };
 }

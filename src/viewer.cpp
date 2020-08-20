@@ -2,14 +2,12 @@
 
 #include "viewereventprocessor.h"
 #include "gldrawer.h"
-
-#include <GL/glew.h>
-#include <SDL2/SDL.h>
+#include "opmeshrenderer.h"
 
 skbar::Viewer::Viewer(int _width, int _height)
     : width(_width), height(_height), bgColor{.3f, .3f, .3f, 1},
-      rotating(false), dragging(false), needRender(false),
-      frameBuffer(nullptr), camera(nullptr), eventProcessor(nullptr) {
+      rotating(false), dragging(false), needRender(false), frameBuffer(nullptr),
+      meshRenderer(nullptr), camera(nullptr), eventProcessor(nullptr), drawer(nullptr) {
 }
 
 skbar::Viewer::~Viewer() {
@@ -17,11 +15,13 @@ skbar::Viewer::~Viewer() {
     delete camera;
     delete eventProcessor;
     delete drawer;
+    delete meshRenderer;
 
     frameBuffer = nullptr;
     camera = nullptr;
     eventProcessor = nullptr;
     drawer = nullptr;
+    meshRenderer = nullptr;
 }
 
 void skbar::Viewer::Initialize() {
@@ -30,6 +30,7 @@ void skbar::Viewer::Initialize() {
     camera = new GLCamera(width, height);
     eventProcessor = new ViewerEventProcessor(this);
     drawer = new GLDrawer(this);
+    meshRenderer = new renderer::OPMeshRenderer();
 
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
@@ -64,7 +65,7 @@ void skbar::Viewer::Render() {
         glClearColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3]);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        mesh.Render();
+        meshRenderer->Render(mesh, renderOptions);
 
         // Unbind framework on read mode
 //        frameBuffer->Unbind(FrameBuffer::Mode::WRITE);

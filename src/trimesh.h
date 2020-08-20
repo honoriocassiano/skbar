@@ -19,8 +19,6 @@ public:
 
     virtual std::size_t GetQuadFaceId(std::size_t triangleId) const = 0;
 
-    virtual void Render() const = 0;
-
     virtual std::tuple<bool, std::vector<Intersection<int, Vec3f>>> GetIntersectionsBetween(
         const Intersection<int, Vec3f> &p1, const Intersection<int, Vec3f> &p2,
         const skbar::Line<Vec3f> &viewDirection, const Projection<float> &projection) const = 0;

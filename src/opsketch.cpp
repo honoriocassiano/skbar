@@ -75,7 +75,3 @@ bool skbar::OPSketch::AddPoint(const skbar::Line<skbar::Vec3f> &ray,
 bool skbar::OPSketch::IsStarted() const {
     return started;
 }
-
-void skbar::OPSketch::Render() const {
-    renderer::RenderSketch(*this, !started);
-}

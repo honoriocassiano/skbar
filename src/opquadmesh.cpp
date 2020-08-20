@@ -62,10 +62,6 @@ void skbar::OPQuadMesh::ReplacePatch(size_t patchId, const skbar::QuadMesh &patc
 
 }
 
-void skbar::OPQuadMesh::Render() const {
-    renderer::Render(mesh, renderer::MeshOptions{ true });
-}
-
 skbar::BBox skbar::OPQuadMesh::GetBBox() const {
 
 }

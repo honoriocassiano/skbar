@@ -62,8 +62,6 @@ public:
     // TODO Change this return type
     virtual const std::vector<SketchVertex> &Data() const = 0;
 
-    virtual void Render() const = 0;
-
     virtual bool IsStarted() const = 0;
 
 };

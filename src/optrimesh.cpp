@@ -261,8 +261,3 @@ skbar::Intersection<int, skbar::Vec3f> skbar::OPTriMesh::GetClosestIntersection(
 
     return Intersection(intersectedFace, intersectionPoint, intersected);
 }
-
-void skbar::OPTriMesh::Render() const {
-    // TODO Add options as parameter
-    renderer::Render(mesh, renderer::MeshOptions{true});
-}
