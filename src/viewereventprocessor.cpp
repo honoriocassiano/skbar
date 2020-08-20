@@ -3,7 +3,7 @@
 #include "sdlevent.h"
 
 skbar::ViewerEventProcessor::ViewerEventProcessor(Viewer *_viewer)
-    : viewer(_viewer), rotating(false), dragging(false) {
+        : viewer(_viewer), rotating(false), dragging(false) {
 
 }
 
@@ -26,7 +26,7 @@ bool skbar::ViewerEventProcessor::Process(const skbar::Event &_event) {
             processed = ProcessMouseMotion(event);
         } else if (event->type == SDL_MOUSEWHEEL) {
             processed = ProcessMouseWheel(event);
-        } else if(event->type == SDL_KEYUP) {
+        } else if (event->type == SDL_KEYUP) {
             processed = ProcessKeyboardUp(event);
         }
     }
@@ -95,7 +95,7 @@ bool skbar::ViewerEventProcessor::ProcessMouseMotion(const SDL_Event *event) {
         auto dy = float(-motion.yrel);
 
         float dtheta = (dx / viewer->GetWidth()) * 2 * M_PI;
-		float dphi = (dy / viewer->GetHeight()) * M_PI;
+        float dphi = (dy / viewer->GetHeight()) * M_PI;
 
         viewer->GetCamera().Rotate(dtheta, dphi);
 
@@ -104,7 +104,7 @@ bool skbar::ViewerEventProcessor::ProcessMouseMotion(const SDL_Event *event) {
     } else if (dragging) {
 
         auto dx = float(motion.xrel) / 500;
-		auto dy = float(-motion.yrel) / 500;
+        auto dy = float(-motion.yrel) / 500;
 
         viewer->GetCamera().Drag(dx, dy);
 
@@ -117,4 +117,19 @@ bool skbar::ViewerEventProcessor::ProcessMouseMotion(const SDL_Event *event) {
 }
 
 bool skbar::ViewerEventProcessor::ProcessKeyboardUp(const SDL_Event *event) {
+
+    bool processed = false;
+
+    switch (event->key.keysym.sym) {
+        case SDLK_p:
+            viewer->ToggleDrawPatches();
+            processed = true;
+
+            break;
+
+        default:
+            break;
+    }
+
+    return processed;
 }

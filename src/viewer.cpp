@@ -61,7 +61,7 @@ void skbar::Viewer::Render() {
         // Bind screen on write mode
 //        frameBuffer->Bind(FrameBuffer::Mode::WRITE);
 
-        /// Clear color buffers
+        // Clear color buffers
         glClearColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3]);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -123,4 +123,8 @@ void skbar::Viewer::ApplyBBox(const BBox &bbox) {
 
 bool skbar::Viewer::ProcessEvent(const skbar::Event &event) {
     return eventProcessor->Process(event);
+}
+
+void skbar::Viewer::ToggleDrawPatches() {
+    renderOptions.quadOptions.drawPatches = !renderOptions.quadOptions.drawPatches;
 }
