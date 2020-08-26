@@ -90,7 +90,7 @@ void skbar::renderer::OPMeshRenderer::RenderTri(const skbar::EditableMesh &eMesh
 
     glEnable(GL_LIGHTING);
 
-    glPolygonOffset(10.0, 10.0);
+    glPolygonOffset(1.0, 1.0);
 
     if (options.triOptions.drawEdges) {
         RenderEdges(mesh);
@@ -142,9 +142,6 @@ void skbar::renderer::OPMeshRenderer::RenderSketch(const skbar::OPSketch &sketch
         glLineWidth(options.skOptions.lineWidth);
 
         glBegin(closed ? GL_LINE_LOOP : GL_LINE_STRIP);
-//        glPointSize(5.0f);
-//        glBegin(GL_POINTS);
-
 
         for (std::size_t i = 0; i < sketch.Size(); i++) {
             auto point = sketch.Data()[i].Position();
@@ -193,7 +190,7 @@ skbar::renderer::OPMeshRenderer::RenderQuad(const skbar::EditableMesh &eMesh,
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_POLYGON_OFFSET_FILL);
 
-    glPolygonOffset(10.0, 10.0);
+    glPolygonOffset(1.0, 1.0);
 
     if (options.quadOptions.drawEdges) {
         RenderEdges(mesh);
