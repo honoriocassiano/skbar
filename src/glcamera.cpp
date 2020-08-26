@@ -15,10 +15,6 @@ skbar::GLCamera::GLCamera(int _width, int _height)
     up = initialUp;
 }
 
-skbar::GLCamera::~GLCamera() {
-#warning "Implement this"
-}
-
 void skbar::GLCamera::Resize(int _width, int _height) {
 
     if ((width != _width) || (height != _height)) {

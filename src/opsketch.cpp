@@ -10,10 +10,6 @@ skbar::OPSketch::OPSketch(EditableMesh *_mesh) : mesh(_mesh),
 
 }
 
-skbar::OPSketch::~OPSketch() {
-
-}
-
 bool skbar::OPSketch::Start() {
     started = true;
 

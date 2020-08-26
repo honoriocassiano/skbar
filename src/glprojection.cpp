@@ -3,20 +3,12 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 
-skbar::GLProjection::GLProjection() {
-	#warning "TODO Initialize with identity"
-}
-
 skbar::GLProjection::GLProjection(const std::array<double, 16> &_modelview, const std::array<double, 16> &_projection,
 		const std::array<int, 4> &_viewport) {
 
 	modelview = _modelview;
 	projection = _projection;
 	viewport = _viewport;
-}
-
-skbar::GLProjection::~GLProjection() {
-
 }
 
 skbar::Vec2f skbar::GLProjection::Project(const skbar::Vec3f &worldPoint) const {

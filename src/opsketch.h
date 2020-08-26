@@ -10,7 +10,7 @@ class OPSketch : public Sketch {
 public:
     OPSketch(EditableMesh *mesh);
 
-    virtual ~OPSketch();
+    virtual ~OPSketch() = default;
 
     bool Start() override;
 
