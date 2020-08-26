@@ -6,7 +6,7 @@
 #include "utils/debug.h"
 
 skbar::OPSketch::OPSketch(EditableMesh *_mesh) : mesh(_mesh),
-    started(false) {
+                                                 started(false) {
 
 }
 
@@ -17,10 +17,13 @@ skbar::OPSketch::~OPSketch() {
 bool skbar::OPSketch::Start() {
     started = true;
 
-    // TODO Reset sketch here
+    return true;
 }
+
 bool skbar::OPSketch::Close() {
     started = false;
+
+    return true;
 }
 
 void skbar::OPSketch::Reset() {
@@ -28,8 +31,8 @@ void skbar::OPSketch::Reset() {
 }
 
 bool skbar::OPSketch::AddPoint(const skbar::Line<skbar::Vec3f> &ray,
-        const skbar::Intersection<int, skbar::Vec3f> &intersection,
-        const Line<Vec3f> &direction, const Projection<float> &projection) {
+                               const skbar::Intersection<int, skbar::Vec3f> &intersection,
+                               const Line<Vec3f> &direction, const Projection<float> &projection) {
 
     bool added = false;
 
@@ -39,30 +42,50 @@ bool skbar::OPSketch::AddPoint(const skbar::Line<skbar::Vec3f> &ray,
 
         auto &trimesh = dynamic_cast<OPTriMesh &>(mesh->GetTri());
 
-        #warning "TODO Uncomment this"
+#warning "TODO Uncomment this"
         // added = trimesh.AddPointOnIntersection(intersection);
 
         if (!data.empty()) {
-            auto [hasPath, result] = trimesh.GetIntersectionsBetween(Intersection<int, Vec3f>(data.back().Pointer(), data.back().Position()),
-                                                                 intersection, direction, projection);
 
-            Log("%d: %lu", hasPath, result.size());
+            const auto firstQuadFace = trimesh.GetQuadFaceId(data.front().Pointer());
+            const auto currentQuadFace = trimesh.GetQuadFaceId(intersection.Pointer());
 
-            if (hasPath) {
-               for (auto i : result) {
-                   data.emplace_back(i.Pointer(), i.Position(), SketchVertex::EType::EDGE);
-               }
+            const auto sameQuadFace = (firstQuadFace == currentQuadFace);
 
-               // If has path but are ohn same face
-               if (!result.empty()) {
-                   data.emplace_back(intersection.Pointer(), intersection.Position(), SketchVertex::EType::FACE);
-               }
+            if ((data.size() < 7) || (data.size() >= 7 && !sameQuadFace)) {
+                const auto[hasPath, result] = trimesh.GetIntersectionsBetween(
+                        Intersection<int, Vec3f>(data.back().Pointer(), data.back().Position()),
+                        intersection, direction, projection);
+
+                if (hasPath) {
+                    for (auto i : result) {
+                        data.emplace_back(i.Pointer(), i.Position(), SketchVertex::EType::EDGE);
+                    }
+
+                    if (!result.empty()) {
+                        data.emplace_back(intersection.Pointer(), intersection.Position(), SketchVertex::EType::FACE);
+                    }
+                }
+
+                added = hasPath;
+            } else {
+
+                const Intersection<int, Vec3f> firstIntersection(data.front().Pointer(), data.front().Position());
+
+                const auto[hasPath, result] = trimesh.GetIntersectionsBetween(intersection, firstIntersection,
+                                                                        direction, projection);
+
+                for (auto i : result) {
+                    data.emplace_back(i.Pointer(), i.Position(), SketchVertex::EType::EDGE);
+                }
+
+                Close();
             }
 
-            added = hasPath;
+
         } else {
 
-            #warning "TODO Change this face type"
+#warning "TODO Change this face type"
             data.emplace_back(intersection.Pointer(), intersection.Position(), SketchVertex::EType::FACE);
 
             added = true;
