@@ -54,8 +54,8 @@ public:
 		- The sketch is not closed
 		- The ray intersect the mesh
     */
-    virtual bool AddPoint(const Line<Vec3f> &ray, const Intersection<int, Vec3f> &intersection,
-            const Line<Vec3f> &direction, const Projection<float> &projection) = 0;
+    virtual bool AddPoint(const Line <Vec3f> &ray, const skbar::Intersection<int, skbar::Vec3f> &intersection,
+                          const Projection<float> &projection) = 0;
 
     virtual std::size_t Size() const = 0;
 

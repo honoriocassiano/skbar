@@ -6,15 +6,7 @@
 
 #include <OpenMesh/Core/IO/MeshIO.hh>
 
-skbar::OPQuadMesh::OPQuadMesh() {
-
-}
-
 skbar::OPQuadMesh::OPQuadMesh(const skbar::OPQuadMesh::QuadMeshImpl &_mesh) : mesh(_mesh) {
-
-}
-
-skbar::OPQuadMesh::~OPQuadMesh() {
 
 }
 

@@ -10,14 +10,6 @@
 #include <cmath>
 #include <utils/debug.h>
 
-skbar::OPTriMesh::OPTriMesh() {
-
-}
-
-skbar::OPTriMesh::~OPTriMesh() {
-
-}
-
 bool OPLoad(skbar::OPTriMesh::TriMeshImpl &mesh, const skbar::OPQuadMesh &baseMesh) {
 
     auto tempTriMesh = baseMesh.GetTriangulated().Get();

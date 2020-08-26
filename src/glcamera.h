@@ -15,7 +15,7 @@ class GLCamera : public Camera {
 
 public:
     GLCamera(int width, int height);
-    virtual ~GLCamera();
+    virtual ~GLCamera() = default;
 
     void Resize(int width, int height) override;
 

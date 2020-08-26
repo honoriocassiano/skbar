@@ -7,10 +7,6 @@ skbar::ViewerEventProcessor::ViewerEventProcessor(Viewer *_viewer)
 
 }
 
-skbar::ViewerEventProcessor::~ViewerEventProcessor() {
-
-}
-
 bool skbar::ViewerEventProcessor::Process(const skbar::Event &_event) {
 
     bool processed = viewer->GetDrawer().ProcessEvent(_event);

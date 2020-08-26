@@ -10,7 +10,7 @@ class OPSketch : public Sketch {
 public:
     OPSketch(EditableMesh *mesh);
 
-    virtual ~OPSketch();
+    virtual ~OPSketch() = default;
 
     bool Start() override;
 
@@ -18,8 +18,8 @@ public:
 
     void Reset() override;
 
-    bool AddPoint(const Line<Vec3f> &ray, const Intersection<int, Vec3f> &intersection,
-                  const Line<Vec3f> &direction, const Projection<float> &projection) override;
+    bool AddPoint(const Line <Vec3f> &ray, const skbar::Intersection<int, skbar::Vec3f> &intersection,
+                  const Projection<float> &projection) override;
 
     const std::vector<SketchVertex> &Data() const override { return data; }
 

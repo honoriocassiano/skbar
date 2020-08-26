@@ -11,8 +11,8 @@ class OPQuadMesh : public QuadMesh {
 public:
     typedef OpenMesh::PolyMesh_ArrayKernelT<QuadMeshTraits> QuadMeshImpl;
 
-    OPQuadMesh();
-    virtual ~OPQuadMesh();
+    OPQuadMesh() = default;
+    virtual ~OPQuadMesh() = default;
 
     bool Load(const std::string &filename) override;
 

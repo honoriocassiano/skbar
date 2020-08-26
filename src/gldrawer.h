@@ -13,11 +13,7 @@ public:
     GLDrawer(Viewer *viewer);
     virtual ~GLDrawer();
 
-    bool Draw(const Vec3f &origin, const Vec3f &direction) override;
-
     bool ProcessEvent(const Event &event) override;
-
-    bool IsStarted() const override;
 
     void Reset() override;
 

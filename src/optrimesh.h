@@ -11,9 +11,9 @@ class OPTriMesh : public TriMesh {
 public:
     typedef OpenMesh::TriMesh_ArrayKernelT<TriMeshTraits> TriMeshImpl;
 
-    OPTriMesh();
+    OPTriMesh() = default;
 
-    virtual ~OPTriMesh();
+    virtual ~OPTriMesh() = default;
 
     bool Load(const QuadMesh &mesh) override;
 

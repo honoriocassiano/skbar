@@ -12,7 +12,7 @@ class ViewerEventProcessor : public BaseEventProcessor {
 
 public:
     ViewerEventProcessor(Viewer *viewer);
-    virtual ~ViewerEventProcessor();
+    virtual ~ViewerEventProcessor() = default;
 
     bool Process(const Event &event) override;
 

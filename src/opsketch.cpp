@@ -10,10 +10,6 @@ skbar::OPSketch::OPSketch(EditableMesh *_mesh) : mesh(_mesh),
 
 }
 
-skbar::OPSketch::~OPSketch() {
-
-}
-
 bool skbar::OPSketch::Start() {
     started = true;
 
@@ -30,9 +26,9 @@ void skbar::OPSketch::Reset() {
     data.clear();
 }
 
-bool skbar::OPSketch::AddPoint(const skbar::Line<skbar::Vec3f> &ray,
+bool skbar::OPSketch::AddPoint(const Line<Vec3f> &ray,
                                const skbar::Intersection<int, skbar::Vec3f> &intersection,
-                               const Line<Vec3f> &direction, const Projection<float> &projection) {
+                               const Projection<float> &projection) {
 
     bool added = false;
 
@@ -55,7 +51,7 @@ bool skbar::OPSketch::AddPoint(const skbar::Line<skbar::Vec3f> &ray,
             if ((data.size() < 7) || (data.size() >= 7 && !sameQuadFace)) {
                 const auto[hasPath, result] = trimesh.GetIntersectionsBetween(
                         Intersection<int, Vec3f>(data.back().Pointer(), data.back().Position()),
-                        intersection, direction, projection);
+                        intersection, ray, projection);
 
                 if (hasPath) {
                     for (auto i : result) {
@@ -73,7 +69,7 @@ bool skbar::OPSketch::AddPoint(const skbar::Line<skbar::Vec3f> &ray,
                 const Intersection<int, Vec3f> firstIntersection(data.front().Pointer(), data.front().Position());
 
                 const auto[hasPath, result] = trimesh.GetIntersectionsBetween(intersection, firstIntersection,
-                                                                        direction, projection);
+                                                                              ray, projection);
 
                 for (auto i : result) {
                     data.emplace_back(i.Pointer(), i.Position(), SketchVertex::EType::EDGE);

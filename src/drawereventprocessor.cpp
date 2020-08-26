@@ -146,7 +146,7 @@ bool skbar::DrawerEventProcessor::AddPointToSketch(int x, int y) {
                 sketch.Start();
             }
 
-            const bool added = sketch.AddPoint(ray, intersection, camera.DirectionRay(), camera.GetProjection());
+            const bool added = sketch.AddPoint(camera.DirectionRay(), intersection, camera.GetProjection());
 
             if (added) {
                 lastIntersection = intersection;
