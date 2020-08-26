@@ -72,16 +72,18 @@ skbar::Vec3f skbar::renderer::OPMeshRenderer::GetColor(int patch) {
 }
 
 void skbar::renderer::OPMeshRenderer::Render(const skbar::EditableMesh &mesh,
-        const skbar::renderer::Options &options) {
+                                             const skbar::renderer::Options &options) {
     if (options.mesh == Options::Mesh::QUAD) {
         RenderQuad(mesh, options);
     } else if (options.mesh == Options::Mesh::TRI) {
-        Render(dynamic_cast<const OPTriMesh &>(mesh.GetTri()).Get(), options);
+        RenderTri(mesh, options);
     }
 }
 
-void skbar::renderer::OPMeshRenderer::Render(const skbar::OPTriMesh::TriMeshImpl &mesh,
-        const skbar::renderer::Options &options) {
+void skbar::renderer::OPMeshRenderer::RenderTri(const skbar::EditableMesh &eMesh,
+                                                const skbar::renderer::Options &options) {
+
+    const auto &mesh = dynamic_cast<const OPTriMesh &>(eMesh.GetTri()).Get();
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_POLYGON_OFFSET_FILL);
@@ -119,6 +121,14 @@ void skbar::renderer::OPMeshRenderer::Render(const skbar::OPTriMesh::TriMeshImpl
     glEnd();
 
     glDisable(GL_LIGHTING);
+
+    if (options.drawSketch) {
+        const auto &opSketch = dynamic_cast<const OPSketch &>(eMesh.GetSketch());
+
+        RenderSketch(opSketch, !opSketch.IsStarted());
+    }
+
+
     glDisable(GL_POLYGON_OFFSET_FILL);
     glDisable(GL_DEPTH_TEST);
 }

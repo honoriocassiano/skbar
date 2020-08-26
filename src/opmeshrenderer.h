@@ -25,7 +25,7 @@ public:
 private:
     void RenderQuad(const EditableMesh &mesh, const Options &options = Options());
 
-    void Render(const OPTriMesh::TriMeshImpl &mesh, const Options &options = Options());
+    void RenderTri(const skbar::EditableMesh &mesh, const Options &options = Options());
 
     void RenderPatches(const OPQuadMesh::QuadMeshImpl &mesh);
 
