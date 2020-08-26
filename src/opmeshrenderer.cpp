@@ -138,13 +138,13 @@ void skbar::renderer::OPMeshRenderer::RenderSketch(const skbar::OPSketch &sketch
 
     if (sketch.Size() > 0) {
 
-        glDisable(GL_LIGHTING);
-        glDepthFunc(GL_ALWAYS);
-
         glColor3fv(options.skOptions.lineColor);
         glLineWidth(options.skOptions.lineWidth);
 
         glBegin(closed ? GL_LINE_LOOP : GL_LINE_STRIP);
+//        glPointSize(5.0f);
+//        glBegin(GL_POINTS);
+
 
         for (std::size_t i = 0; i < sketch.Size(); i++) {
             auto point = sketch.Data()[i].Position();
@@ -153,9 +153,6 @@ void skbar::renderer::OPMeshRenderer::RenderSketch(const skbar::OPSketch &sketch
         }
 
         glEnd();
-
-        glDepthFunc(GL_LESS);
-        glEnable(GL_LIGHTING);
     }
 }
 
@@ -206,12 +203,6 @@ skbar::renderer::OPMeshRenderer::RenderQuad(const skbar::EditableMesh &eMesh,
         RenderPatches(mesh);
     }
 
-    if (options.drawSketch) {
-        const auto &opSketch = dynamic_cast<const OPSketch &>(eMesh.GetSketch());
-
-        RenderSketch(opSketch, !opSketch.IsStarted());
-    }
-
     glEnable(GL_LIGHTING);
     glEnable(GL_COLOR_MATERIAL);
 
@@ -236,17 +227,33 @@ skbar::renderer::OPMeshRenderer::RenderQuad(const skbar::EditableMesh &eMesh,
 
         glNormal3f(normal[0], normal[1], normal[2]);
 
-        for (auto vit : it.vertices()) {
-            auto pos = mesh.point(vit);
+        const auto startHE = mesh.halfedge_handle(it);
+        auto currentHE = startHE;
+
+         do {
+
+            const auto v = currentHE.from();
+            auto pos = mesh.point(v);
 
             glVertex3f(pos[0], pos[1], pos[2]);
-        }
+
+            currentHE = currentHE.next();
+        } while (currentHE != startHE);
+
     }
 
     glEnd();
 
-    glDisable(GL_LIGHTING);
     glDisable(GL_POLYGON_OFFSET_FILL);
+    glDisable(GL_LIGHTING);
+
+    if (options.drawSketch) {
+        const auto &opSketch = dynamic_cast<const OPSketch &>(eMesh.GetSketch());
+
+        RenderSketch(opSketch, !opSketch.IsStarted());
+    }
+
+
     glDisable(GL_DEPTH_TEST);
 }
 
