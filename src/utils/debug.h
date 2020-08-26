@@ -6,11 +6,21 @@
 
 namespace skbar {
 
-    namespace debug {
-        static bool active = true;
-    }
-
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+
+template<typename ...T>
+void CLog(const char *file, int line, const char *format, T... params) {
+    printf("[%s : %d] ", file, line);
+    printf(format, params...);
+    printf("\n");
+}
+
+template<typename ...T>
+void CError(const char *file, int line, const char *format, T... params) {
+    fprintf(stderr, "[%s : %d] ", file, line);
+    fprintf(stderr, format, params...);
+    fprintf(stderr, "\n");
+}
 
 #ifdef USE_DEBUG_COLORS
 
@@ -36,17 +46,8 @@ namespace skbar {
 
 #else
 
-#define Log(args...) \
-        if(debug::active) {\
-        printf("[%s : %d] ", __FILENAME__, __LINE__); \
-        printf(args); \
-        printf("\n");}
-
-#define Error(args...) \
-        if(debug::active) {\
-        fprintf(stderr, "[%s : %d] ", __FILENAME__, __LINE__); \
-        fprintf(stderr, args); \
-        fprintf(stderr, "\n");}
+#define Log(format, ...) CLog(__FILENAME__, __LINE__, format, __VA_ARGS__)
+#define Error(format, ...) CError(__FILENAME__, __LINE__, format, __VA_ARGS__)
 
 #endif
 
