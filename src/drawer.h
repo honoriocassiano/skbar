@@ -13,8 +13,6 @@ public:
     Drawer() {}
     virtual ~Drawer() {}
 
-    virtual bool Draw(const Vec3f &origin, const Vec3f &direction) = 0;
-
     virtual bool ProcessEvent(const Event &event) = 0;
 
     virtual bool IsStarted() const = 0;

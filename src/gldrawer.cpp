@@ -12,11 +12,6 @@ skbar::GLDrawer::~GLDrawer() {
 	processor = nullptr;
 }
 
-bool skbar::GLDrawer::Draw(const Vec3f &origin, const Vec3f &direction) {
-	// TODO Implement this
-	return false;
-}
-
 void skbar::GLDrawer::Reset() {
 	GetMesh().GetSketch().Reset();
 }
