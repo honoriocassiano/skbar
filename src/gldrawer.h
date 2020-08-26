@@ -15,8 +15,6 @@ public:
 
     bool ProcessEvent(const Event &event) override;
 
-    bool IsStarted() const override;
-
     void Reset() override;
 
     skbar::Intersection<int, skbar::Vec3f> GetClosestIntersection(

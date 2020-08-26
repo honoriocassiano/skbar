@@ -20,19 +20,8 @@ bool skbar::GLDrawer::ProcessEvent(const skbar::Event &event) {
 	return processor->Process(event);
 }
 
-bool skbar::GLDrawer::IsStarted() const {
-	return GetMesh().GetSketch().IsStarted();
-}
-
 skbar::Intersection<int, skbar::Vec3f> skbar::GLDrawer::GetClosestIntersection(
 	const skbar::Line<skbar::Vec3f> &ray) {
 
 	return viewer->GetMesh().GetClosestIntersection(ray);
 }
-
-// skbar::Line<skbar::Vec3f> skbar::GLDrawer::GetLine() const {
-//     auto camera = dynamic_cast<const GLCamera &>(viewer->GetCamera());
-//
-//     camera.
-// }
-//

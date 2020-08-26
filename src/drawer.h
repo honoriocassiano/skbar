@@ -15,8 +15,6 @@ public:
 
     virtual bool ProcessEvent(const Event &event) = 0;
 
-    virtual bool IsStarted() const = 0;
-
     virtual void Reset() = 0;
 
     virtual skbar::Intersection<int, skbar::Vec3f> GetClosestIntersection(
