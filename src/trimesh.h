@@ -17,7 +17,7 @@ public:
 
     virtual bool Load(const QuadMesh &mesh) = 0;
 
-    virtual std::size_t GetQuadFaceId(std::size_t triangleId) const = 0;
+    virtual int GetQuadFaceId(int triangleId) const = 0;
 
     virtual std::tuple<bool, std::vector<Intersection<int, Vec3f>>> GetIntersectionsBetween(
         const Intersection<int, Vec3f> &p1, const Intersection<int, Vec3f> &p2,
