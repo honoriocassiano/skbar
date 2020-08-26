@@ -10,8 +10,8 @@ namespace skbar {
 class Drawer {
 
 public:
-    Drawer() {}
-    virtual ~Drawer() {}
+    Drawer() = default;
+    virtual ~Drawer() = default;
 
     virtual bool ProcessEvent(const Event &event) = 0;
 
