@@ -25,9 +25,6 @@ public:
     virtual EditableMesh &GetMesh() = 0;
 
     virtual const EditableMesh &GetMesh() const = 0;
-
-    // virtual Line<Vec3f> GetLine() const = 0;
-
 };
 }
 
