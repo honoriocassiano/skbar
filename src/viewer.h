@@ -78,6 +78,8 @@ public:
 
     void ToggleDrawPatches();
 
+    void ToggleMesh();
+
 private:
 
     // Return if need to re-render the viewer or any other renderable

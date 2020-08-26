@@ -72,23 +72,25 @@ skbar::Vec3f skbar::renderer::OPMeshRenderer::GetColor(int patch) {
 }
 
 void skbar::renderer::OPMeshRenderer::Render(const skbar::EditableMesh &mesh,
-        const skbar::renderer::Options &options) {
+                                             const skbar::renderer::Options &options) {
     if (options.mesh == Options::Mesh::QUAD) {
         RenderQuad(mesh, options);
     } else if (options.mesh == Options::Mesh::TRI) {
-        Render(dynamic_cast<const OPTriMesh &>(mesh.GetTri()).Get(), options);
+        RenderTri(mesh, options);
     }
 }
 
-void skbar::renderer::OPMeshRenderer::Render(const skbar::OPTriMesh::TriMeshImpl &mesh,
-        const skbar::renderer::Options &options) {
+void skbar::renderer::OPMeshRenderer::RenderTri(const skbar::EditableMesh &eMesh,
+                                                const skbar::renderer::Options &options) {
+
+    const auto &mesh = dynamic_cast<const OPTriMesh &>(eMesh.GetTri()).Get();
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_POLYGON_OFFSET_FILL);
 
     glEnable(GL_LIGHTING);
 
-    glPolygonOffset(10.0, 10.0);
+    glPolygonOffset(1.0, 1.0);
 
     if (options.triOptions.drawEdges) {
         RenderEdges(mesh);
@@ -119,6 +121,14 @@ void skbar::renderer::OPMeshRenderer::Render(const skbar::OPTriMesh::TriMeshImpl
     glEnd();
 
     glDisable(GL_LIGHTING);
+
+    if (options.drawSketch) {
+        const auto &opSketch = dynamic_cast<const OPSketch &>(eMesh.GetSketch());
+
+        RenderSketch(opSketch, !opSketch.IsStarted());
+    }
+
+
     glDisable(GL_POLYGON_OFFSET_FILL);
     glDisable(GL_DEPTH_TEST);
 }
@@ -127,9 +137,6 @@ void skbar::renderer::OPMeshRenderer::RenderSketch(const skbar::OPSketch &sketch
                                                    const skbar::renderer::Options &options) {
 
     if (sketch.Size() > 0) {
-
-        glDisable(GL_LIGHTING);
-        glDepthFunc(GL_ALWAYS);
 
         glColor3fv(options.skOptions.lineColor);
         glLineWidth(options.skOptions.lineWidth);
@@ -143,9 +150,6 @@ void skbar::renderer::OPMeshRenderer::RenderSketch(const skbar::OPSketch &sketch
         }
 
         glEnd();
-
-        glDepthFunc(GL_LESS);
-        glEnable(GL_LIGHTING);
     }
 }
 
@@ -186,7 +190,7 @@ skbar::renderer::OPMeshRenderer::RenderQuad(const skbar::EditableMesh &eMesh,
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_POLYGON_OFFSET_FILL);
 
-    glPolygonOffset(10.0, 10.0);
+    glPolygonOffset(1.0, 1.0);
 
     if (options.quadOptions.drawEdges) {
         RenderEdges(mesh);
@@ -194,12 +198,6 @@ skbar::renderer::OPMeshRenderer::RenderQuad(const skbar::EditableMesh &eMesh,
 
     if (options.quadOptions.drawPatches) {
         RenderPatches(mesh);
-    }
-
-    if (options.drawSketch) {
-        const auto &opSketch = dynamic_cast<const OPSketch &>(eMesh.GetSketch());
-
-        RenderSketch(opSketch, !opSketch.IsStarted());
     }
 
     glEnable(GL_LIGHTING);
@@ -226,16 +224,83 @@ skbar::renderer::OPMeshRenderer::RenderQuad(const skbar::EditableMesh &eMesh,
 
         glNormal3f(normal[0], normal[1], normal[2]);
 
-        for (auto vit : it.vertices()) {
-            auto pos = mesh.point(vit);
+        const auto startHE = mesh.halfedge_handle(it);
+        auto currentHE = startHE;
+
+         do {
+
+            const auto v = currentHE.from();
+            auto pos = mesh.point(v);
 
             glVertex3f(pos[0], pos[1], pos[2]);
+
+            currentHE = currentHE.next();
+        } while (currentHE != startHE);
+
+    }
+
+    glEnd();
+
+    glDisable(GL_POLYGON_OFFSET_FILL);
+    glDisable(GL_LIGHTING);
+
+    if (options.drawSketch) {
+        const auto &opSketch = dynamic_cast<const OPSketch &>(eMesh.GetSketch());
+
+        RenderSketch(opSketch, !opSketch.IsStarted());
+    }
+
+
+    glDisable(GL_DEPTH_TEST);
+}
+
+void skbar::renderer::OPMeshRenderer::RenderEdges(const skbar::OPQuadMesh::QuadMeshImpl &mesh) {
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    glEnable(GL_LINE_SMOOTH);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    glLineWidth(2.0f);
+    glColor3f(0.0f, 0.0f, 0.0f);
+
+    glBegin(GL_QUADS);
+
+    for (const auto &face : mesh.faces()) {
+
+        for (const auto v : face.vertices()) {
+            const auto p = mesh.point(v);
+
+            glVertex3f(p[0], p[1], p[2]);
         }
     }
 
     glEnd();
 
-    glDisable(GL_LIGHTING);
-    glDisable(GL_POLYGON_OFFSET_FILL);
-    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LINE_SMOOTH);
 }
+
+void skbar::renderer::OPMeshRenderer::RenderEdges(const skbar::OPTriMesh::TriMeshImpl &mesh) {
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    glEnable(GL_LINE_SMOOTH);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    glLineWidth(2.0f);
+    glColor3f(0.3f, 0.3f, 0.3f);
+
+    glBegin(GL_TRIANGLES);
+
+    for (const auto &face : mesh.faces()) {
+
+        for (const auto v : face.vertices()) {
+            const auto p = mesh.point(v);
+
+            glVertex3f(p[0], p[1], p[2]);
+        }
+    }
+
+    glEnd();
+
+    glDisable(GL_LINE_SMOOTH);
+}
+

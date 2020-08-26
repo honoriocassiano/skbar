@@ -74,8 +74,6 @@ std::tuple<bool, std::vector<skbar::Intersection<int, skbar::Vec3f>>> skbar::OPT
 
     // No intersections if on same face
     if (p1.Pointer() == p2.Pointer()) {
-        Log("SAME FACE!");
-
         return std::make_tuple(hasPath, result);
     }
 
