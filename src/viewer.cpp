@@ -128,3 +128,12 @@ bool skbar::Viewer::ProcessEvent(const skbar::Event &event) {
 void skbar::Viewer::ToggleDrawPatches() {
     renderOptions.quadOptions.drawPatches = !renderOptions.quadOptions.drawPatches;
 }
+
+void skbar::Viewer::ToggleMesh() {
+
+    if (renderOptions.mesh == renderer::Options::Mesh::QUAD) {
+        renderOptions.mesh = renderer::Options::Mesh::TRI;
+    } else {
+        renderOptions.mesh = renderer::Options::Mesh::QUAD;
+    }
+}

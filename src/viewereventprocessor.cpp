@@ -121,6 +121,12 @@ bool skbar::ViewerEventProcessor::ProcessKeyboardUp(const SDL_Event *event) {
     bool processed = false;
 
     switch (event->key.keysym.sym) {
+        case SDLK_m:
+            viewer->ToggleMesh();
+            processed = true;
+
+            break;
+
         case SDLK_p:
             viewer->ToggleDrawPatches();
             processed = true;
