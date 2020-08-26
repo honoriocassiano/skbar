@@ -17,7 +17,7 @@ public:
 
     bool Load(const QuadMesh &mesh) override;
 
-    std::size_t GetQuadFaceId(std::size_t triangleId) const override;
+    [[nodiscard]] int GetQuadFaceId(int triangleId) const override;
 
     bool AddPointOnIntersection(const Intersection<int, Vec3f> &intersection) override;
 

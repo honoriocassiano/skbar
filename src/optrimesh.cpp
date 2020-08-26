@@ -39,8 +39,8 @@ bool skbar::OPTriMesh::Load(const skbar::QuadMesh &qmesh) {
     return OPLoad(mesh, dynamic_cast<const OPQuadMesh &>(qmesh));
 }
 
-std::size_t skbar::OPTriMesh::GetQuadFaceId(std::size_t triangleId) const {
-
+int skbar::OPTriMesh::GetQuadFaceId(int triangleId) const {
+    return mesh.data(mesh.face_handle(triangleId)).quadFaceData.id;
 }
 
 bool skbar::OPTriMesh::AddPointOnIntersection(
