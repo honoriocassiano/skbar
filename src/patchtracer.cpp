@@ -30,7 +30,7 @@ void skbar::PatchTracer::Trace(skbar::OPQuadMesh &baseMesh) {
         patchesVisitedCount[i] = mesh.valence(OpenMesh::VertexHandle(singularities[i]));
     }
 
-    int currentPatch = 0;
+    unsigned int currentPatch = 0;
 
     unsigned int faceToStartCheck = 0;
 
@@ -38,39 +38,42 @@ void skbar::PatchTracer::Trace(skbar::OPQuadMesh &baseMesh) {
 
         const auto startF = mesh.face_handle(faceToStartCheck);
 
-        std::queue<unsigned int> facesToCheck;
+        // Compute only faces not visited yet
+        if (mesh.data(startF).quadFaceData.patchId == -1) {
+            std::queue<unsigned int> facesToCheck;
 
-        facesToCheck.push(faceToStartCheck);
+            facesToCheck.push(faceToStartCheck);
 
-        while (!facesToCheck.empty()) {
-            const auto currentF = OpenMesh::make_smart(mesh.face_handle(facesToCheck.front()), &mesh);
-            auto currentHE = currentF.halfedge();
+            while (!facesToCheck.empty()) {
+                const auto currentF = OpenMesh::make_smart(mesh.face_handle(facesToCheck.front()), &mesh);
+                auto currentHE = currentF.halfedge();
 
-            if (mesh.data(currentF).quadFaceData.patchId == -1) {
-                for (int i = 0; i < 4; i++) {
-                    const auto neighborF = currentHE.opp().face();
+                if (mesh.data(currentF).quadFaceData.patchId == -1) {
+                    for (int i = 0; i < 4; i++) {
+                        const auto neighborF = currentHE.opp().face();
 
-                    if ((tracedEdges.find(currentHE.edge().idx()) == tracedEdges.end())
-                        && (mesh.data(neighborF).quadFaceData.patchId == -1)) {
+                        if ((tracedEdges.find(currentHE.edge().idx()) == tracedEdges.end())
+                            && (mesh.data(neighborF).quadFaceData.patchId == -1)) {
 
-                        facesToCheck.push(neighborF.idx());
+                            facesToCheck.push(neighborF.idx());
+                        }
+
+                        currentHE = currentHE.next();
                     }
 
-                    currentHE = currentHE.next();
+                    mesh.data(currentF).quadFaceData.patchId = int(currentPatch);
                 }
 
-                mesh.data(currentF).quadFaceData.patchId = currentPatch;
+                facesToCheck.pop();
             }
 
-            facesToCheck.pop();
+            currentPatch++;
         }
 
         // Skip faces that was already traced
         do {
             faceToStartCheck++;
         } while (mesh.data(startF).quadFaceData.patchId == -1);
-
-        currentPatch++;
     }
 }
 
