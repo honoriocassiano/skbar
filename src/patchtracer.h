@@ -24,10 +24,10 @@ private:
 
     static std::vector<int> FindLine(const OpenMesh::SmartHalfedgeHandle& handle, const std::vector<int>& singularities);
 
+    static void TraceGrid(OPQuadMesh::QuadMeshImpl &mesh, unsigned int numPatches);
+
 public:
     static void Trace(OPQuadMesh &mesh);
-
-    static std::vector<std::vector<int>> GetGrid(const OPQuadMesh& mesh, int patch);
 };
 }
 

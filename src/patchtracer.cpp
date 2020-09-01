@@ -75,6 +75,8 @@ void skbar::PatchTracer::Trace(skbar::OPQuadMesh &baseMesh) {
             faceToStartCheck++;
         } while (mesh.data(startF).quadFaceData.patchId == -1);
     }
+
+    TraceGrid(mesh, currentPatch);
 }
 
 std::unordered_set<int> skbar::PatchTracer::GetEdges(const skbar::OPQuadMesh::QuadMeshImpl &mesh,
@@ -134,53 +136,6 @@ std::vector<int> skbar::PatchTracer::FindSingularities(const skbar::OPQuadMesh::
     return singularities;
 }
 
-std::vector<std::vector<int>> skbar::PatchTracer::GetGrid(const skbar::OPQuadMesh &baseMesh, int patch) {
-
-    std::vector<std::vector<int>> grid;
-
-    auto mesh = baseMesh.Get();
-
-    // TODO Add patch tracing
-
-    // TODO Change parameter "closed"
-    const auto singularities = FindSingularities(mesh, true);
-
-    const auto v = *singularities.begin();
-
-    // TODO Set to half-edge inside the patch
-    const auto startHE = mesh.halfedge_handle(OpenMesh::SmartVertexHandle(v));
-
-    auto firstInLineHE = startHE;
-
-    bool flipFirst = (firstInLineHE.face().idx() == -1);
-
-    do {
-        const auto gridLine = FindLine(firstInLineHE, singularities);
-
-        grid.push_back(gridLine);
-
-        // Check if reached another singular vertex
-        if ((firstInLineHE.from().idx() != startHE.from().idx())
-            && (std::binary_search(singularities.begin(),
-                                   singularities.end(), firstInLineHE.from().idx()))) {
-            break;
-        }
-
-        auto p0 = mesh.point(OpenMesh::VertexHandle(firstInLineHE.from().idx()));
-        auto p1 = mesh.point(OpenMesh::VertexHandle(firstInLineHE.to().idx()));
-
-//        Log("(%lf, %lf, %lf) -> (%lf, %lf, %lf)", p0[0], p0[1], p0[2], p1[0], p1[1], p1[2]);
-
-        if (flipFirst) {
-            firstInLineHE = firstInLineHE.opp().next().next();
-        } else {
-            firstInLineHE = firstInLineHE.next().next().opp();
-        }
-    } while (true);
-
-    return grid;
-}
-
 std::vector<int> skbar::PatchTracer::FindLine(const OpenMesh::SmartHalfedgeHandle &handle,
                                               const std::vector<int> &singularities) {
     std::vector<int> line;
@@ -213,5 +168,127 @@ std::vector<int> skbar::PatchTracer::FindLine(const OpenMesh::SmartHalfedgeHandl
     } while (samePatch);
 
     return line;
+}
+
+void skbar::PatchTracer::TraceGrid(skbar::OPQuadMesh::QuadMeshImpl &mesh,
+                                                                    const unsigned int numPatches) {
+
+    std::unordered_set<int> tracedPatches;
+
+    std::set<int> cornerVertices;
+
+    for (const auto vertex : mesh.vertices()) {
+
+        std::unordered_set<int> delimitedPatches;
+
+        for (const auto he : vertex.outgoing_halfedges()) {
+
+            const auto patchId = mesh.data(he.face()).quadFaceData.patchId;
+
+            delimitedPatches.insert(patchId);
+        }
+
+        if (delimitedPatches.size() == mesh.valence(vertex)) {
+            cornerVertices.insert(vertex.idx());
+        }
+    }
+
+    for (const auto vertexId : cornerVertices) {
+
+        if (tracedPatches.size() == numPatches) {
+            // Stop if all patches was already traced
+            break;
+        }
+
+        const auto vertex = OpenMesh::SmartVertexHandle(vertexId, &mesh);
+
+        for (const auto firstHE : vertex.outgoing_halfedges()) {
+
+            const int currentPatch = mesh.data(firstHE.face()).quadFaceData.patchId;
+
+            if (tracedPatches.find(currentPatch) == tracedPatches.end()) {
+                auto currentHE = firstHE;
+                auto firstInLineHE = currentHE;
+
+                // Start with minimum vertices grid size
+                int gridWidth = 2;
+                int gridHeight = 2;
+
+                // Find vertex grid dimensions
+                {
+                    // Don't count the first and the last vertices
+                    while (cornerVertices.find(currentHE.to().idx()) == cornerVertices.end()) {
+                        gridWidth++;
+
+                        currentHE = currentHE.next().opp().next();
+                    }
+
+                    // Rotate to find the last columns
+                    currentHE = currentHE.next();
+
+                    // Don't count the first and the last vertices
+                    while (cornerVertices.find(currentHE.to().idx()) == cornerVertices.end()) {
+                        gridHeight++;
+
+                        currentHE = currentHE.next().opp().next();
+                    }
+                }
+
+                int currentLine;
+
+                for (currentLine = 0; currentLine < gridHeight - 1; currentLine++) {
+
+                    int currentColumn;
+
+                    currentHE = firstInLineHE;
+
+                    for (currentColumn = 0; currentColumn < gridWidth - 1; currentColumn++) {
+
+                        const Vec2f coordinate{float(currentLine) / float(gridHeight - 1),
+                                               float(currentColumn) / float(gridWidth - 1)};
+
+                        mesh.data(currentHE.from()).quadVertexData.patchParametrizations[currentPatch] =
+                                coordinate;
+
+                        currentHE = currentHE.next().opp().next();
+                    }
+
+                    // Don't forget to add the last one
+                    mesh.data(currentHE.to()).quadVertexData.patchParametrizations[currentPatch] =
+                            Vec2f{float(currentLine) / float(gridHeight - 1),
+                                  float(currentColumn) / float(gridWidth - 1)};
+
+                    firstInLineHE = firstInLineHE.next().next().opp();
+                }
+
+                currentHE = firstInLineHE;
+
+                // Add the last vertices line
+                {
+                    int currentColumn;
+
+                    currentHE = firstInLineHE;
+
+                    for (currentColumn = 0; currentColumn < gridWidth - 1; currentColumn++) {
+
+                        const Vec2f coordinate{float(currentLine) / float(gridHeight - 1),
+                                               float(currentColumn) / float(gridWidth - 1)};
+
+                        mesh.data(currentHE.from()).quadVertexData.patchParametrizations[currentPatch] =
+                                coordinate;
+
+                        currentHE = currentHE.next().opp().next();
+                    }
+
+                    // Don't forget to add the last one
+                    mesh.data(currentHE.to()).quadVertexData.patchParametrizations[currentPatch] =
+                            Vec2f{float(currentLine) / float(gridHeight - 1),
+                                  float(currentColumn) / float(gridWidth - 1)};
+                }
+
+                tracedPatches.insert(currentPatch);
+            }
+        }
+    }
 }
 
