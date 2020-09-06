@@ -46,10 +46,11 @@ void skbar::PatchTracer::Trace(skbar::OPQuadMesh &baseMesh) {
 
             while (!facesToCheck.empty()) {
                 const auto currentF = OpenMesh::make_smart(mesh.face_handle(facesToCheck.front()), &mesh);
-                auto currentHE = currentF.halfedge();
 
                 if (mesh.data(currentF).quadFaceData.patchId == -1) {
-                    for (int i = 0; i < 4; i++) {
+
+                    for (const auto currentHE : currentF.halfedges()) {
+
                         const auto neighborF = currentHE.opp().face();
 
                         if ((tracedEdges.find(currentHE.edge().idx()) == tracedEdges.end())
@@ -57,8 +58,6 @@ void skbar::PatchTracer::Trace(skbar::OPQuadMesh &baseMesh) {
 
                             facesToCheck.push(neighborF.idx());
                         }
-
-                        currentHE = currentHE.next();
                     }
 
                     mesh.data(currentF).quadFaceData.patchId = int(currentPatch);
