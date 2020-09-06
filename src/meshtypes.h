@@ -9,6 +9,9 @@
 #include <OpenMesh/Core/Mesh/PolyMesh_ArrayKernelT.hh>
 #include <PatchVertexTag.hh>
 
+#include <map>
+#include <array>
+
 namespace skbar {
 
     /**
@@ -29,6 +32,12 @@ namespace skbar {
         bool fixed;
 
         Laplacian() : fixed(false) {}
+    };
+
+    struct QuadVertexData {
+        std::map<int, std::array<float, 2>> patchParametrizations;
+
+        QuadVertexData() = default;
     };
 
     /*
@@ -72,6 +81,7 @@ namespace skbar {
         {
             Patchgen patchgen;
             Laplacian laplacian;
+            QuadVertexData quadVertexData;
         };
     };
 
