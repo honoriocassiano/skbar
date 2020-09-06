@@ -212,14 +212,14 @@ void skbar::PatchTracer::TraceGrid(skbar::OPQuadMesh::QuadMeshImpl &mesh,
                 auto firstInLineHE = currentHE;
 
                 // Start with minimum vertices grid size
-                int gridWidth = 2;
-                int gridHeight = 2;
+                int gridColumns = 2;
+                int gridLines = 2;
 
                 // Find vertex grid dimensions
                 {
                     // Don't count the first and the last vertices
                     while (cornerVertices.find(currentHE.to().idx()) == cornerVertices.end()) {
-                        gridWidth++;
+                        gridColumns++;
 
                         currentHE = currentHE.next().opp().next();
                     }
@@ -229,7 +229,7 @@ void skbar::PatchTracer::TraceGrid(skbar::OPQuadMesh::QuadMeshImpl &mesh,
 
                     // Don't count the first and the last vertices
                     while (cornerVertices.find(currentHE.to().idx()) == cornerVertices.end()) {
-                        gridHeight++;
+                        gridLines++;
 
                         currentHE = currentHE.next().opp().next();
                     }
@@ -237,16 +237,16 @@ void skbar::PatchTracer::TraceGrid(skbar::OPQuadMesh::QuadMeshImpl &mesh,
 
                 int currentLine;
 
-                for (currentLine = 0; currentLine < gridHeight - 1; currentLine++) {
+                for (currentLine = 0; currentLine < gridLines - 1; currentLine++) {
 
                     int currentColumn;
 
                     currentHE = firstInLineHE;
 
-                    for (currentColumn = 0; currentColumn < gridWidth - 1; currentColumn++) {
+                    for (currentColumn = 0; currentColumn < gridColumns - 1; currentColumn++) {
 
-                        const Vec2f coordinate{float(currentLine) / float(gridHeight - 1),
-                                               float(currentColumn) / float(gridWidth - 1)};
+                        const Vec2f coordinate{float(currentLine) / float(gridLines - 1),
+                                               float(currentColumn) / float(gridColumns - 1)};
 
                         mesh.data(currentHE.from()).quadVertexData.patchParametrizations[currentPatch] =
                                 coordinate;
@@ -256,8 +256,8 @@ void skbar::PatchTracer::TraceGrid(skbar::OPQuadMesh::QuadMeshImpl &mesh,
 
                     // Don't forget to add the last one
                     mesh.data(currentHE.to()).quadVertexData.patchParametrizations[currentPatch] =
-                            Vec2f{float(currentLine) / float(gridHeight - 1),
-                                  float(currentColumn) / float(gridWidth - 1)};
+                            Vec2f{float(currentLine) / float(gridLines - 1),
+                                  float(currentColumn) / float(gridColumns - 1)};
 
                     firstInLineHE = firstInLineHE.next().next().opp();
                 }
@@ -270,10 +270,10 @@ void skbar::PatchTracer::TraceGrid(skbar::OPQuadMesh::QuadMeshImpl &mesh,
 
                     currentHE = firstInLineHE;
 
-                    for (currentColumn = 0; currentColumn < gridWidth - 1; currentColumn++) {
+                    for (currentColumn = 0; currentColumn < gridColumns - 1; currentColumn++) {
 
-                        const Vec2f coordinate{float(currentLine) / float(gridHeight - 1),
-                                               float(currentColumn) / float(gridWidth - 1)};
+                        const Vec2f coordinate{float(currentLine) / float(gridLines - 1),
+                                               float(currentColumn) / float(gridColumns - 1)};
 
                         mesh.data(currentHE.from()).quadVertexData.patchParametrizations[currentPatch] =
                                 coordinate;
@@ -283,8 +283,8 @@ void skbar::PatchTracer::TraceGrid(skbar::OPQuadMesh::QuadMeshImpl &mesh,
 
                     // Don't forget to add the last one
                     mesh.data(currentHE.to()).quadVertexData.patchParametrizations[currentPatch] =
-                            Vec2f{float(currentLine) / float(gridHeight - 1),
-                                  float(currentColumn) / float(gridWidth - 1)};
+                            Vec2f{float(currentLine) / float(gridLines - 1),
+                                  float(currentColumn) / float(gridColumns - 1)};
                 }
 
                 tracedPatches.insert(currentPatch);
