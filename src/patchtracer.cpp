@@ -73,7 +73,8 @@ void skbar::PatchTracer::Trace(skbar::OPQuadMesh &baseMesh) {
         // Skip faces that was already traced
         do {
             faceToStartCheck++;
-        } while (mesh.data(startF).quadFaceData.patchId == -1);
+        } while (faceToStartCheck < mesh.n_faces() &&
+                 (mesh.data(mesh.face_handle(faceToStartCheck)).quadFaceData.patchId != -1));
     }
 
     TraceGrid(mesh, currentPatch);
@@ -171,7 +172,7 @@ std::vector<int> skbar::PatchTracer::FindLine(const OpenMesh::SmartHalfedgeHandl
 }
 
 void skbar::PatchTracer::TraceGrid(skbar::OPQuadMesh::QuadMeshImpl &mesh,
-                                                                    const unsigned int numPatches) {
+                                   const unsigned int numPatches) {
 
     std::unordered_set<int> tracedPatches;
 
