@@ -123,7 +123,39 @@ skbar::OPSketch::GetParametricPositions(int pointer, const skbar::Vec3f &positio
     const auto quadmesh = dynamic_cast<const OPQuadMesh &>(mesh->GetQuad()).Get();
 
     if (type == SketchVertex::EType::FACE) {
-        // TODO Implement this
+
+        const auto triFace = OpenMesh::SmartFaceHandle(pointer, &trimesh);
+        const auto quadFace = OpenMesh::SmartFaceHandle(trimesh.data(triFace).quadFaceData.id, &quadmesh);
+
+        const auto patch = quadmesh.data(quadFace).quadFaceData.patchId;
+
+        const auto vertices = triFace.vertices().to_vector();
+
+        assert((vertices.size() == 3) && "The face is not a triangle!");
+
+        const std::array<Vec3f, 3> positions{
+                utils::ToStdVector(trimesh.point(vertices[0])),
+                utils::ToStdVector(trimesh.point(vertices[1])),
+                utils::ToStdVector(trimesh.point(vertices[2]))
+        };
+
+        const auto barycentricPosition = GetBarycentricCoordinate(position, positions[0],
+                                                                  positions[1], positions[2]);
+
+        Vec2f parametricPosition{0, 0};
+
+        for (auto i = 0; i < 3; i++) {
+
+            const auto &v = vertices[i];
+
+            const auto &vParametricPosition = quadmesh.data(
+                    OpenMesh::VertexHandle(v.idx())).quadVertexData.patchParametrizations.at(patch);
+
+            parametricPosition = Sum(parametricPosition, Mul(vParametricPosition, barycentricPosition[i]));
+        }
+
+        result[patch] = parametricPosition;
+
     } else if (type == SketchVertex::EType::EDGE) {
 
         const auto edge = OpenMesh::SmartEdgeHandle(pointer, &trimesh);
@@ -164,6 +196,32 @@ skbar::OPSketch::GetParametricPositions(int pointer, const skbar::Vec3f &positio
             result[patch] = parametricPosition;
         }
     }
+
+    return result;
+}
+
+skbar::Vec3f
+skbar::OPSketch::GetBarycentricCoordinate(const skbar::Vec3f &position, const skbar::Vec3f &p0, const skbar::Vec3f &p1,
+                                          const skbar::Vec3f &p2) {
+
+    // https://gamedev.stackexchange.com/questions/23743/whats-the-most-efficient-way-to-find-barycentric-coordinates
+    const auto v0 = Sub(p1, p0);
+    const auto v1 = Sub(p2, p0);
+    const auto v2 = Sub(position, p0);
+
+    const auto d00 = Dot(v0, v0);
+    const auto d01 = Dot(v0, v1);
+    const auto d11 = Dot(v1, v1);
+    const auto d20 = Dot(v2, v0);
+    const auto d21 = Dot(v2, v1);
+
+    const auto denominator = d00 * d11 - d01 * d01;
+
+    Vec3f result;
+
+    result[1] = (d11 * d20 - d01 * d21) / denominator;
+    result[2] = (d00 * d21 - d01 * d20) / denominator;
+    result[0] = 1.0f - result[1] - result[2];
 
     return result;
 }
