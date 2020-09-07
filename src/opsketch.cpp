@@ -152,7 +152,7 @@ skbar::OPSketch::GetParametricPositions(int pointer, const skbar::Vec3f &positio
             }
         }
 
-        assert((patchesToCheck.size() > 0) && "Must have at least one common patch");
+        assert((!patchesToCheck.empty()) && "Must have at least one common patch");
 
         for (const auto &patch : patchesToCheck) {
 
