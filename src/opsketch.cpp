@@ -125,7 +125,7 @@ skbar::OPSketch::GetParametricPositions(int pointer, const skbar::Vec3f &positio
     if (type == SketchVertex::EType::FACE) {
 
         const auto triFace = OpenMesh::SmartFaceHandle(pointer, &trimesh);
-        const auto quadFace = OpenMesh::SmartFaceHandle(trimesh.data(triFace).quadFaceData.id, &quadmesh);
+        const auto quadFace = OpenMesh::SmartFaceHandle(trimesh.data(triFace).triFaceData.quadFaceId, &quadmesh);
 
         const auto patch = quadmesh.data(quadFace).quadFaceData.patchId;
 

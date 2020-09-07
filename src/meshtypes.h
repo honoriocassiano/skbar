@@ -85,6 +85,12 @@ namespace skbar {
         };
     };
 
+    struct TriFaceData {
+        int quadFaceId;
+
+        TriFaceData() : quadFaceId(-1) {}
+    };
+
     // Define tri mesh traits
     struct TriMeshTraits : public OpenMesh::DefaultTraits {
         // use double valued coordinates
@@ -99,7 +105,7 @@ namespace skbar {
         // store a face handle for each vertex
 
         FaceTraits {
-            QuadFaceData quadFaceData;
+            TriFaceData triFaceData;
         };
 
         // VertexTraits
