@@ -119,8 +119,8 @@ skbar::OPSketch::GetParametricPositions(int pointer, const skbar::Vec3f &positio
 
     std::map<int, Vec2f> result;
 
-    const auto trimesh = dynamic_cast<const OPTriMesh &>(mesh->GetTri()).Get();
-    const auto quadmesh = dynamic_cast<const OPQuadMesh &>(mesh->GetQuad()).Get();
+    const auto &trimesh = dynamic_cast<const OPTriMesh &>(mesh->GetTri()).Get();
+    const auto &quadmesh = dynamic_cast<const OPQuadMesh &>(mesh->GetQuad()).Get();
 
     if (type == SketchVertex::EType::FACE) {
 

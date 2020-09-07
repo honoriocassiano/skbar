@@ -5,7 +5,7 @@
 #include "opsketch.h"
 
 skbar::DrawerEventProcessor::DrawerEventProcessor(Drawer *_drawer)
-    : drawer(_drawer), drawing(false), lastIntersection(-1, Vec3f(), false), epsilon(5) {
+        : drawer(_drawer), drawing(false), lastIntersection(-1, Vec3f(), false), epsilon(5) {
 
 }
 
@@ -131,7 +131,7 @@ bool skbar::DrawerEventProcessor::AddPointToSketch(int x, int y) {
     auto processed = false;
 
     auto glDrawer = dynamic_cast<GLDrawer *>(drawer);
-    auto camera = dynamic_cast<const GLCamera &>(glDrawer->GetCamera());
+    auto &camera = dynamic_cast<const GLCamera &>(glDrawer->GetCamera());
 
     auto ray = camera.PositionToRay(x, y);
 
@@ -140,7 +140,7 @@ bool skbar::DrawerEventProcessor::AddPointToSketch(int x, int y) {
     if (intersection.Intersect()) {
 
         if ((lastIntersection.Pointer() != intersection.Pointer())) {
-            auto& sketch = dynamic_cast<OPSketch &>(glDrawer->GetMesh().GetSketch());
+            auto &sketch = dynamic_cast<OPSketch &>(glDrawer->GetMesh().GetSketch());
 
             if (!sketch.IsStarted()) {
                 sketch.Start();
