@@ -4,6 +4,7 @@
 #include "commontypes.h"
 
 #include <vector>
+#include <map>
 
 namespace skbar {
 
@@ -17,8 +18,10 @@ public:
     };
 
     // TODO REMOVE TYPE 'INT' AND ADD AS TEMPLATE
-    SketchVertex(const int &_pointer, const Vec3f &_position, const EType &_type)
-        : pointer(_pointer), position(_position), type(_type) {}
+    SketchVertex(const int &_pointer, const Vec3f &_position, const EType &_type,
+                 const std::map<int, Vec2f> &_parametricPositionsByPatch)
+            : pointer(_pointer), position(_position), type(_type),
+              parametricPositionsByPatch(_parametricPositionsByPatch) {}
 
     virtual ~SketchVertex() {}
 
@@ -28,10 +31,13 @@ public:
 
     const EType &Type() const { return type; }
 
+    const std::map<int, Vec2f> &ParametricPositionsByPatch() const { return parametricPositionsByPatch; }
+
 private:
     int pointer;
     Vec3f position;
     EType type;
+    std::map<int, Vec2f> parametricPositionsByPatch;
 };
 
 class Sketch {

@@ -2,6 +2,8 @@
 
 #include "optrimesh.h"
 #include "opmeshrenderer.h"
+#include "vector.h"
+#include "utils/openmesh.h"
 
 #include "utils/debug.h"
 
@@ -55,11 +57,20 @@ bool skbar::OPSketch::AddPoint(const Line<Vec3f> &ray,
 
                 if (hasPath) {
                     for (auto i : result) {
-                        data.emplace_back(i.Pointer(), i.Position(), SketchVertex::EType::EDGE);
+
+                        const auto parametricPositions = GetParametricPositions(i.Pointer(), i.Position(),
+                                                                                SketchVertex::EType::EDGE);
+
+                        data.emplace_back(i.Pointer(), i.Position(), SketchVertex::EType::EDGE, parametricPositions);
                     }
 
                     if (!result.empty()) {
-                        data.emplace_back(intersection.Pointer(), intersection.Position(), SketchVertex::EType::FACE);
+                        const auto parametricPositions = GetParametricPositions(intersection.Pointer(),
+                                                                                intersection.Position(),
+                                                                                SketchVertex::EType::FACE);
+
+                        data.emplace_back(intersection.Pointer(), intersection.Position(), SketchVertex::EType::FACE,
+                                          parametricPositions);
                     }
                 }
 
@@ -72,7 +83,10 @@ bool skbar::OPSketch::AddPoint(const Line<Vec3f> &ray,
                                                                               ray, projection);
 
                 for (auto i : result) {
-                    data.emplace_back(i.Pointer(), i.Position(), SketchVertex::EType::EDGE);
+                    const auto parametricPositions = GetParametricPositions(i.Pointer(), i.Position(),
+                                                                            SketchVertex::EType::EDGE);
+
+                    data.emplace_back(i.Pointer(), i.Position(), SketchVertex::EType::EDGE, parametricPositions);
                 }
 
                 Close();
@@ -82,7 +96,11 @@ bool skbar::OPSketch::AddPoint(const Line<Vec3f> &ray,
         } else {
 
 #warning "TODO Change this face type"
-            data.emplace_back(intersection.Pointer(), intersection.Position(), SketchVertex::EType::FACE);
+            const auto parametricPositions = GetParametricPositions(intersection.Pointer(), intersection.Position(),
+                                                                    SketchVertex::EType::FACE);
+
+            data.emplace_back(intersection.Pointer(), intersection.Position(), SketchVertex::EType::FACE,
+                              parametricPositions);
 
             added = true;
         }
@@ -93,4 +111,117 @@ bool skbar::OPSketch::AddPoint(const Line<Vec3f> &ray,
 
 bool skbar::OPSketch::IsStarted() const {
     return started;
+}
+
+std::map<int, skbar::Vec2f>
+skbar::OPSketch::GetParametricPositions(int pointer, const skbar::Vec3f &position,
+                                        const skbar::SketchVertex::EType &type) const {
+
+    std::map<int, Vec2f> result;
+
+    const auto &trimesh = dynamic_cast<const OPTriMesh &>(mesh->GetTri()).Get();
+    const auto &quadmesh = dynamic_cast<const OPQuadMesh &>(mesh->GetQuad()).Get();
+
+    if (type == SketchVertex::EType::FACE) {
+
+        const auto triFace = OpenMesh::SmartFaceHandle(pointer, &trimesh);
+        const auto quadFace = OpenMesh::SmartFaceHandle(trimesh.data(triFace).triFaceData.quadFaceId, &quadmesh);
+
+        const auto patch = quadmesh.data(quadFace).quadFaceData.patchId;
+
+        const auto vertices = triFace.vertices().to_vector();
+
+        assert((vertices.size() == 3) && "The face is not a triangle!");
+
+        const std::array<Vec3f, 3> positions{
+                utils::ToStdVector(trimesh.point(vertices[0])),
+                utils::ToStdVector(trimesh.point(vertices[1])),
+                utils::ToStdVector(trimesh.point(vertices[2]))
+        };
+
+        const auto barycentricPosition = GetBarycentricCoordinate(position, positions[0],
+                                                                  positions[1], positions[2]);
+
+        Vec2f parametricPosition{0, 0};
+
+        for (auto i = 0; i < 3; i++) {
+
+            const auto &v = vertices[i];
+
+            const auto &vParametricPosition = quadmesh.data(
+                    OpenMesh::VertexHandle(v.idx())).quadVertexData.patchParametrizations.at(patch);
+
+            parametricPosition = Sum(parametricPosition, Mul(vParametricPosition, barycentricPosition[i]));
+        }
+
+        result[patch] = parametricPosition;
+
+    } else if (type == SketchVertex::EType::EDGE) {
+
+        const auto edge = OpenMesh::SmartEdgeHandle(pointer, &trimesh);
+
+        const auto v0 = OpenMesh::SmartVertexHandle(edge.v0().idx(), &quadmesh);
+        const auto v1 = OpenMesh::SmartVertexHandle(edge.v1().idx(), &quadmesh);
+
+        const auto v0Data = quadmesh.data(v0).quadVertexData.patchParametrizations;
+        const auto v1Data = quadmesh.data(v1).quadVertexData.patchParametrizations;
+
+        const auto v0Position = utils::ToStdVector(quadmesh.point(v0));
+        const auto v1Position = utils::ToStdVector(quadmesh.point(v1));
+
+        const auto edgeLength = Norm(Sub(v1Position, v0Position));
+
+        const auto A = Norm(Sub(position, utils::ToStdVector(quadmesh.point(v0)))) / edgeLength;
+        const auto B = 1 - A;
+
+        std::vector<int> patchesToCheck;
+
+        for (const auto &entry : v0Data) {
+            const auto patch = entry.first;
+
+            if (v1Data.find(patch) != v1Data.end()) {
+                patchesToCheck.push_back(patch);
+            }
+        }
+
+        assert((!patchesToCheck.empty()) && "Must have at least one common patch");
+
+        for (const auto &patch : patchesToCheck) {
+
+            const auto v0ParametricPosition = quadmesh.data(v0).quadVertexData.patchParametrizations.at(patch);
+            const auto v1ParametricPosition = quadmesh.data(v1).quadVertexData.patchParametrizations.at(patch);
+
+            const auto parametricPosition = Sum(Mul(v0ParametricPosition, A), Mul(v1ParametricPosition, B));
+
+            result[patch] = parametricPosition;
+        }
+    }
+
+    return result;
+}
+
+skbar::Vec3f
+skbar::OPSketch::GetBarycentricCoordinate(const skbar::Vec3f &position, const skbar::Vec3f &p0, const skbar::Vec3f &p1,
+                                          const skbar::Vec3f &p2) {
+
+    // https://gamedev.stackexchange.com/questions/23743/whats-the-most-efficient-way-to-find-barycentric-coordinates
+    const auto v0 = Sub(p1, p0);
+    const auto v1 = Sub(p2, p0);
+    const auto v2 = Sub(position, p0);
+
+    const auto d00 = Dot(v0, v0);
+    const auto d01 = Dot(v0, v1);
+    const auto d11 = Dot(v1, v1);
+    const auto d20 = Dot(v2, v0);
+    const auto d21 = Dot(v2, v1);
+
+    const auto denominator = d00 * d11 - d01 * d01;
+
+    Vec3f result;
+
+    result[1] = (d11 * d20 - d01 * d21) / denominator;
+    result[2] = (d00 * d21 - d01 * d20) / denominator;
+    result[0] = 1.0f - result[1] - result[2];
+
+    return result;
 }

@@ -18,7 +18,7 @@ bool OPLoad(skbar::OPTriMesh::TriMeshImpl &mesh, const skbar::OPQuadMesh &baseMe
 
     // Copy data from quad mesh
     for (auto fi : mesh.faces()) {
-        mesh.data(fi).quadFaceData.id = tempTriMesh.data(fi).quadFaceData.id;
+        mesh.data(fi).triFaceData.quadFaceId = tempTriMesh.data(fi).quadFaceData.id;
     }
 
     mesh.update_normals();
@@ -32,7 +32,7 @@ bool skbar::OPTriMesh::Load(const skbar::QuadMesh &qmesh) {
 }
 
 int skbar::OPTriMesh::GetQuadFaceId(int triangleId) const {
-    return mesh.data(mesh.face_handle(triangleId)).quadFaceData.id;
+    return mesh.data(mesh.face_handle(triangleId)).triFaceData.quadFaceId;
 }
 
 bool skbar::OPTriMesh::AddPointOnIntersection(
