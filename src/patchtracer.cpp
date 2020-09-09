@@ -190,6 +190,8 @@ void skbar::PatchTracer::TraceGrid(skbar::OPQuadMesh::QuadMeshImpl &mesh,
 
         if (delimitedPatches.size() == mesh.valence(vertex)) {
             cornerVertices.insert(vertex.idx());
+
+            mesh.data(vertex).quadVertexData.isCorner = true;
         }
     }
 
