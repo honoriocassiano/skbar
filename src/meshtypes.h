@@ -53,8 +53,9 @@ struct QuadFaceData {
 
 struct QuadEdgeData {
     bool patchEdge;
+    int id;
 
-    QuadEdgeData() : patchEdge(false) {}
+    QuadEdgeData() : patchEdge(false), id(-1) {}
 };
 
 // Define quad mesh traits
@@ -94,6 +95,14 @@ struct TriFaceData {
     TriFaceData() : quadFaceId(-1) {}
 };
 
+struct TriEdgeData {
+    int quadEdgeId;
+
+    bool IsQuadEdge() const { return quadEdgeId != -1; }
+
+    TriEdgeData() : quadEdgeId(-1) {}
+};
+
 // Define tri mesh traits
 struct TriMeshTraits : public OpenMesh::DefaultTraits {
     // use double valued coordinates
@@ -110,6 +119,11 @@ struct TriMeshTraits : public OpenMesh::DefaultTraits {
     FaceTraits
     {
         TriFaceData triFaceData;
+    };
+
+    EdgeTraits
+    {
+        TriEdgeData triEdgeData;
     };
 
     // VertexTraits
