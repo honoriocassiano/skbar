@@ -21,10 +21,13 @@ public:
     void RequadrangulatePatch(int patch);
 
 private:
+    std::vector<std::vector<Vec2f>> FindSidesOfPatch(const SketchVertex &firstSV, const SketchVertex &lastSV) const;
+
+    static std::vector<int> FindCommonPatches(const SketchVertex &sv0, const SketchVertex &sv1) ;
 
 
 private:
-    EditableMesh *mesh;
+    EditableMesh *editableMesh;
 };
 }
 
