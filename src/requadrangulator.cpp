@@ -220,6 +220,13 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
             // TODO Check if in == out
             auto reachedLastEdge = false;
 
+            // Add the first sketch vertex position
+            if (startingFromOut) {
+                borderVertexPositions.push_back(sketch.Data().at(outId).ParametricPositionsByPatch().at(patch));
+            } else {
+                borderVertexPositions.push_back(sketch.Data().at(inId).ParametricPositionsByPatch().at(patch));
+            }
+
             while (!reachedLastEdge) {
 
                 auto reachedCorner = quadmesh.data(currentHE.to()).quadVertexData.isCorner;
@@ -245,13 +252,13 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
                     reachedCorner = quadmesh.data(currentHE.to()).quadVertexData.isCorner;
                 }
 
-                const auto &parametricPosition = quadmesh.data(
-                        currentHE.to()).quadVertexData.patchParametrizations[patch];
-
-                // Don't forget the last vertex
-                borderVertexPositions.push_back(parametricPosition);
-
                 if (!reachedLastEdge) {
+                    const auto &parametricPosition = quadmesh.data(
+                            currentHE.to()).quadVertexData.patchParametrizations[patch];
+
+                    // Don't forget the last vertex
+                    borderVertexPositions.push_back(parametricPosition);
+
                     currentHE = currentHE.next();
                 }
 
@@ -266,11 +273,11 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
             };
 
             {
-                const auto first = startingFromOut ? outId : inId;
-                const auto last = startingFromOut ? inId : outId;
+                const auto first = startingFromOut ? inId : outId;
+                const auto last = startingFromOut ? outId : inId;
 
                 for (std::size_t i = first; i != static_cast<std::size_t>(last);
-                     i = next(i, sketch.Size(), startingFromOut)) {
+                     i = next(i, sketch.Size(), !startingFromOut)) {
 
                     const auto &sketchVertex = sketch.Data().at(i);
 
@@ -297,7 +304,7 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
 
         std::get<1>(halfEdgesToCheck.at(firstHE)) = true;
 
-        // TODO Find a better place for this
+        // TODO Find a better place to do this
         {
             Eigen::VectorXi sides(edgesBySide.size());
             std::vector<OpenMesh::Vec3d> parametricPositions;
@@ -306,17 +313,19 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
                 sides(i) = edgesBySide[i];
             }
 
-            for (const auto &position : borderVertexPositions) {
+            const auto borderSize = borderVertexPositions.size();
+
+            for (std::size_t i = 0; i < borderSize; i++) {
+                const auto position = borderVertexPositions[i];
+
                 parametricPositions.emplace_back(position[0], position[1], 0);
             }
 
-            const auto newPolygon = PatchQuadrangulator::Quadrangulate(sides, parametricPositions, false);
+            const auto newPolygonCCW = PatchQuadrangulator::Quadrangulate(sides, parametricPositions, false);
+            const auto newPolygonCW = PatchQuadrangulator::Quadrangulate(sides, parametricPositions, true);
 
-            if (newPolygon.Save("./test.obj")) {
-                Log("File saved!", "");
-            } else {
-                Log("Cannot save file!", "");
-            }
+            newPolygonCCW.Save("./test_ccw.obj");
+            newPolygonCW.Save("./test_cw.obj");
         }
 
         // TODO Check other HEs
