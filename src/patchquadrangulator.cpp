@@ -12,7 +12,37 @@
 
 const double skbar::PatchQuadrangulator::LAPLACE_CONSTRAINT_WEIGHT = 10 * 1000;
 
-patchgen::PatchParam skbar::PatchQuadrangulator::ComputeTopology(const Eigen::VectorXi &patchSides, skbar::OPQuadMesh &mesh) {
+skbar::OPQuadMesh
+skbar::PatchQuadrangulator::Quadrangulate(const Eigen::VectorXi &patchSides,
+                                          const std::vector<OpenMesh::Vec3d> &positions,
+                                          bool positionsIsClockwise) {
+
+    OPQuadMesh newPolygon;
+    auto &newMesh = newPolygon.Get();
+
+    const auto param = PatchQuadrangulator::ComputeTopology(patchSides, newPolygon);
+
+    PatchQuadrangulator::SetLaplacianPositions(newPolygon, positions, positionsIsClockwise);
+
+    const auto L = PatchQuadrangulator::GetLaplacianMatrix(newPolygon, param);
+    const auto b = PatchQuadrangulator::GetRightSide(newPolygon, param);
+
+    auto solver = new Eigen::SimplicialCholesky<Eigen::SparseMatrix<double>>(L.transpose() * L);
+
+    Eigen::Matrix<double, -1, 3> x = solver->solve(L.transpose() * b);
+
+    for (const auto &it : newMesh.vertices()) {
+
+        const auto pos = OpenMesh::Vec3f(x(it.idx(), 0), x(it.idx(), 1), x(it.idx(), 2));
+
+        newMesh.set_point(it, pos);
+    }
+
+    return newPolygon;
+}
+
+patchgen::PatchParam
+skbar::PatchQuadrangulator::ComputeTopology(const Eigen::VectorXi &patchSides, skbar::OPQuadMesh &mesh) {
     patchgen::PatchParam param;
 
     patchgen::generate_topology<OPQuadMesh::QuadMeshImpl>(patchSides, param, mesh.Get());

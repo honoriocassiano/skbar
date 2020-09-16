@@ -22,6 +22,10 @@ private:
 
 public:
 
+    static OPQuadMesh
+    Quadrangulate(const Eigen::VectorXi &patchSides, const std::vector<OpenMesh::Vec3d> &positions,
+                  bool positionsIsClockwise);
+
     static patchgen::PatchParam ComputeTopology(const Eigen::VectorXi &patchSides, OPQuadMesh &mesh);
 
     static Eigen::SparseMatrix<double> GetLaplacianMatrix(const OPQuadMesh &mesh, const patchgen::PatchParam &param);
