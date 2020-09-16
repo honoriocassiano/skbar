@@ -15,6 +15,8 @@ public:
 
     virtual bool Load(const std::string &filename) = 0;
 
+    virtual bool Save(const std::string &filename) const = 0;
+
     virtual void FindPatches() = 0;
 
     virtual std::size_t GetNumPatches() const = 0;

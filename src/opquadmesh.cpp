@@ -61,3 +61,14 @@ void skbar::OPQuadMesh::ReplacePatch(size_t patchId, const skbar::QuadMesh &patc
 skbar::BBox skbar::OPQuadMesh::GetBBox() const {
 
 }
+
+bool skbar::OPQuadMesh::Save(const std::string &filename) const {
+
+    if (!OpenMesh::IO::write_mesh(mesh, filename)) {
+        Error("Cannot write file %s", filename.c_str());
+
+        return false;
+    }
+
+    return true;
+}
