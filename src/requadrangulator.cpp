@@ -16,6 +16,8 @@
 #include <algorithm>
 #include <iterator>
 
+#include <Eigen/Sparse>
+
 skbar::Requadrangulator::Requadrangulator(skbar::EditableMesh *_mesh) : editableMesh(_mesh) {
 
 }
@@ -294,6 +296,28 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
         }
 
         std::get<1>(halfEdgesToCheck.at(firstHE)) = true;
+
+        // TODO Find a better place for this
+        {
+            Eigen::VectorXi sides(edgesBySide.size());
+            std::vector<OpenMesh::Vec3d> parametricPositions;
+
+            for (std::size_t i = 0; i < edgesBySide.size(); i++) {
+                sides(i) = edgesBySide[i];
+            }
+
+            for (const auto &position : borderVertexPositions) {
+                parametricPositions.emplace_back(position[0], position[1], 0);
+            }
+
+            const auto newPolygon = PatchQuadrangulator::Quadrangulate(sides, parametricPositions, false);
+
+            if (newPolygon.Save("./test.obj")) {
+                Log("File saved!", "");
+            } else {
+                Log("Cannot save file!", "");
+            }
+        }
 
         // TODO Check other HEs
         break;

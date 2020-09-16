@@ -5,6 +5,8 @@
 #include "vector.h"
 #include "utils/openmesh.h"
 
+#include "requadrangulator.h"
+
 #include "utils/debug.h"
 
 skbar::OPSketch::OPSketch(EditableMesh *_mesh) : mesh(_mesh),
@@ -90,6 +92,12 @@ bool skbar::OPSketch::AddPoint(const Line<Vec3f> &ray,
                 }
 
                 Close();
+
+                // TODO Find a better place to do this
+                {
+                    Requadrangulator r(mesh);
+                    r.RequadrangulateAll();
+                }
             }
 
 
