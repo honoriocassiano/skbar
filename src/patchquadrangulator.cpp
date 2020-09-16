@@ -128,7 +128,7 @@ void skbar::PatchQuadrangulator::SetLaplacianPositions(skbar::OPQuadMesh &basePa
     OpenMesh::SmartVertexHandle currentVertex;
     OpenMesh::SmartHalfedgeHandle currentEdge;
 
-    auto patch = basePatch.Get();
+    auto &patch = basePatch.Get();
 
     // Find first corner
     for (auto v : patch.vertices()) {
