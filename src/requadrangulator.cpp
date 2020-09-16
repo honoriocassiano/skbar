@@ -178,9 +178,6 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
 
     std::map<OpenMesh::SmartHalfedgeHandle, std::tuple<unsigned int, bool>> halfEdgesToCheck;
 
-//        std::map<int, bool> checkedHalfEdges;
-
-//        for (const auto &inOut : inOuts) {
     for (unsigned int i = 0; i < inOuts.size(); i++) {
         const auto &[in, out] = inOuts[i];
 
@@ -206,15 +203,8 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
         const auto &firstHE = entry.first;
         const auto[inOutId, checked] = entry.second;
 
-        Log("%d", firstHE.edge().idx());
-
         if (!checked) {
             const auto[inId, outId] = inOuts[inOutId];
-
-            Log("In: %d, Out: %d", sketch.Data().at(inId).Pointer(), sketch.Data().at(outId).Pointer());
-
-//                const auto &startEdge = (firstHE.edge().idx() == std::get<0>(inOut))
-//                                        ? firstHE.edge() : OpenMesh::SmartEdgeHandle(std::get<1>(inOut), &quadmesh);
 
             // Used to add sketch vertices in reverse order if is true
             const auto startingFromOut = (firstHE.edge().idx() == sketch.Data().at(outId).Pointer());
@@ -223,11 +213,7 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
                                    ? OpenMesh::SmartEdgeHandle(sketch.Data().at(inId).Pointer(), &quadmesh)
                                    : OpenMesh::SmartEdgeHandle(sketch.Data().at(outId).Pointer(), &quadmesh);
 
-            Log("%d", firstHE.edge().idx());
-
             auto currentHE = firstHE;
-
-            Log("%d", currentHE.edge().idx());
 
             // TODO Check if in == out
             auto reachedLastEdge = false;
@@ -239,9 +225,6 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
                 auto countEdges = 1;
 
                 while (!reachedCorner) {
-
-                    Log("Current: %d, First: %d, Last: %d", currentHE.edge().idx(), firstHE.edge().idx(),
-                        lastEdge.idx());
 
                     if (currentHE.edge() == lastEdge) {
                         reachedLastEdge = true;
@@ -259,9 +242,6 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
 
                     reachedCorner = quadmesh.data(currentHE.to()).quadVertexData.isCorner;
                 }
-
-                Log("Current: %d, First: %d, Last: %d", currentHE.edge().idx(), firstHE.edge().idx(),
-                    lastEdge.idx());
 
                 const auto &parametricPosition = quadmesh.data(
                         currentHE.to()).quadVertexData.patchParametrizations[patch];
@@ -364,8 +344,6 @@ skbar::Requadrangulator::FindSidesOfPatch(const skbar::SketchVertex &firstSV, co
         while (!reachedCorner && !reachedLastEdge) {
 
 //            Log("Current: %d, Last: %d", currentHE.idx(), lastEdgeId);
-
-            Log("Face: %d", quadmesh.data(currentHE.face()).quadFaceData.patchId);
 
 //            currentEdge = currentHE.edge();
 
