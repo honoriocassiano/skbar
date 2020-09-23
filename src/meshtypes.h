@@ -67,11 +67,11 @@ struct QuadMeshTraits : public OpenMesh::DefaultTraits {
     typedef OpenMesh::Vec3f Point;
     // use vertex normals and vertex colors
     VertexAttributes(OpenMesh::Attributes::Normal |
-                     OpenMesh::Attributes::Color);
+                     OpenMesh::Attributes::Color | OpenMesh::Attributes::Status);
     // store the previous halfedge
-    HalfedgeAttributes(OpenMesh::Attributes::PrevHalfedge);
+    HalfedgeAttributes(OpenMesh::Attributes::PrevHalfedge | OpenMesh::Attributes::Status);
     // use face normals
-    FaceAttributes(OpenMesh::Attributes::Normal);
+    FaceAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Status);
     // store a face handle for each vertex
 
     FaceTraits
@@ -112,11 +112,11 @@ struct TriMeshTraits : public OpenMesh::DefaultTraits {
     typedef OpenMesh::Vec3f Point;
     // use vertex normals and vertex colors
     VertexAttributes(OpenMesh::Attributes::Normal |
-                     OpenMesh::Attributes::Color);
+                     OpenMesh::Attributes::Color | OpenMesh::Attributes::Status);
     // store the previous halfedge
-    HalfedgeAttributes(OpenMesh::Attributes::PrevHalfedge);
+    HalfedgeAttributes(OpenMesh::Attributes::PrevHalfedge | OpenMesh::Attributes::Status);
     // use face normals
-    FaceAttributes(OpenMesh::Attributes::Normal);
+    FaceAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Status);
     // store a face handle for each vertex
 
     FaceTraits

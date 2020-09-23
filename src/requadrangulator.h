@@ -33,6 +33,24 @@ private:
 
     static std::vector<int> FindCommonPatches(const SketchVertex &sv0, const SketchVertex &sv1);
 
+    /***
+     * Insert a new vertex and split the edge
+     * @param edgeId id of edge
+     * @param position position of new vertex
+     * @return index of new vertex
+     */
+    int SplitQuadEdge(unsigned int edgeId, const Vec3f& position);
+
+    /**
+     * Add a new vertex to quadmesh
+     * @param position position of new vertex
+     * @return index of new vertex
+     */
+    int AddQuadVertex(const Vec3f& position);
+
+    void DeletePatchFaces(int patch);
+
+    int AddSketchVertexToQuadMesh(const SketchVertex &sketchVertex);
 
 private:
     EditableMesh *editableMesh;

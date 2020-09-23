@@ -10,6 +10,7 @@
 #include "optrimesh.h"
 #include "patchquadrangulator.h"
 
+#include "utils/openmesh.h"
 #include "utils/debug.h"
 
 #include <queue>
@@ -177,6 +178,7 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
 
     std::vector<int> edgesBySide;
     std::vector<Vec2f> borderVertexPositions;
+    std::vector<OpenMesh::SmartVertexHandle> borderVertices;
 
     std::map<OpenMesh::SmartHalfedgeHandle, std::tuple<unsigned int, bool>> halfEdgesToCheck;
 
@@ -220,11 +222,15 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
             // TODO Check if in == out
             auto reachedLastEdge = false;
 
-            // Add the first sketch vertex position
-            if (startingFromOut) {
-                borderVertexPositions.push_back(sketch.Data().at(outId).ParametricPositionsByPatch().at(patch));
-            } else {
-                borderVertexPositions.push_back(sketch.Data().at(inId).ParametricPositionsByPatch().at(patch));
+//            // Add the first sketch vertex position
+            {
+                const auto &sketchVertexToAdd = sketch.Data().at(startingFromOut ? outId : inId);
+
+                borderVertexPositions.push_back(sketchVertexToAdd.ParametricPositionsByPatch().at(patch));
+
+                const auto newVertexId = AddSketchVertexToQuadMesh(sketchVertexToAdd);
+
+                borderVertices.emplace_back(newVertexId, &quadmesh);
             }
 
             while (!reachedLastEdge) {
@@ -281,6 +287,7 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
 
                     const auto &sketchVertex = sketch.Data().at(i);
 
+                    // TODO Check for vertices on a face
                     if (sketchVertex.Type() == skbar::SketchVertex::EType::EDGE) {
                         const auto triVertex = OpenMesh::EdgeHandle(sketchVertex.Pointer());
 
@@ -291,6 +298,10 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
 
                             sketchPositions.push_back(sketchVertex.ParametricPositionsByPatch().at(patch));
                         }
+
+                        const auto newVertexId = AddSketchVertexToQuadMesh(sketchVertex);
+
+                        borderVertices.emplace_back(newVertexId, &quadmesh);
                     }
                 }
             }
@@ -327,6 +338,8 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
             newPolygonCCW.Save("./test_ccw.obj");
             newPolygonCW.Save("./test_cw.obj");
         }
+
+//        DeletePatchFaces(patch);
 
         // TODO Check other HEs
         break;
@@ -447,4 +460,56 @@ std::vector<int> skbar::Requadrangulator::FindCommonPatches(const skbar::SketchV
                           std::back_inserter(result));
 
     return result;
+}
+
+int skbar::Requadrangulator::SplitQuadEdge(unsigned int edgeId, const skbar::Vec3f &position) {
+    auto &quadmesh = dynamic_cast<OPQuadMesh &>(editableMesh->GetQuad()).Get();
+
+//    const auto pos = utils::ToOPVector(position);
+//
+//    auto v = quadmesh.add_vertex(pos);
+//
+////    quadmesh.data(v).
+////
+////    quadmesh.split_edge(quadmesh.edge_handle(edgeId), OpenMesh::VertexHandle(v.idx()));
+//    return static_cast<unsigned int>(v.idx());
+    return -1;
+}
+
+void skbar::Requadrangulator::DeletePatchFaces(int patch) {
+    auto &quadmesh = dynamic_cast<OPQuadMesh &>(editableMesh->GetQuad()).Get();
+
+    for (const auto &face : quadmesh.faces()) {
+
+        const auto fPatch = quadmesh.data(face).quadFaceData.patchId;
+
+        if (fPatch == patch) {
+            quadmesh.delete_face(face, true);
+        }
+    }
+}
+
+int skbar::Requadrangulator::AddQuadVertex(const skbar::Vec3f &position) {
+    auto &quadmesh = dynamic_cast<OPQuadMesh &>(editableMesh->GetQuad()).Get();
+
+    const OpenMesh::Vec3f pos = utils::ToOPVector(position);
+
+    const auto v = quadmesh.add_vertex(pos);
+
+    return v.idx();
+}
+
+int skbar::Requadrangulator::AddSketchVertexToQuadMesh(const skbar::SketchVertex &sketchVertex) {
+    auto &quadmesh = dynamic_cast<OPQuadMesh &>(editableMesh->GetQuad()).Get();
+
+    // Add vertex to quadmesh
+    const auto newVertexId = AddQuadVertex(sketchVertex.Position());
+    const auto newVertex = OpenMesh::VertexHandle(newVertexId);
+
+    auto &quadVertexData = quadmesh.data(newVertex).quadVertexData;
+
+    quadVertexData.isCorner = false;
+    quadVertexData.patchParametrizations = sketchVertex.ParametricPositionsByPatch();
+
+    return newVertexId;
 }
