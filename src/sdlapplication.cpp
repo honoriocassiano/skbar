@@ -157,6 +157,18 @@ void skbar::SDLApplication::ProcessEvents() {
                     running = false;
                     break;
 
+
+                case SDLK_F5: {
+#warning "Remove this shortcut"
+                    // TODO Remove this case
+                    delete viewer;
+
+                    viewer = new Viewer(width, height);
+                    viewer->Initialize();
+                    LoadMesh("/home/cassiano/Documents/workspace-cpp/skbar/models/3holes_quad.obj");
+                }
+                    break;
+
                 default:
                     // TODO Add other events here
                     eventProcessor.ProcessKeyboard(event.key);
