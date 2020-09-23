@@ -9,6 +9,7 @@
 
 namespace skbar {
 
+// TODO Set methods in this class as static
 class Requadrangulator {
 
 public:
@@ -39,18 +40,31 @@ private:
      * @param position position of new vertex
      * @return index of new vertex
      */
-    int SplitQuadEdge(unsigned int edgeId, const Vec3f& position);
+    int SplitQuadEdge(unsigned int edgeId, const Vec3f &position);
 
     /**
      * Add a new vertex to quadmesh
      * @param position position of new vertex
      * @return index of new vertex
      */
-    int AddQuadVertex(const Vec3f& position);
+    int AddQuadVertex(const Vec3f &position);
+
+    int AddQuadFace(QuadMesh &mesh, const std::vector<int> &verticesId);
 
     void DeletePatchFaces(int patch);
 
     int AddSketchVertexToQuadMesh(const SketchVertex &sketchVertex);
+
+    /**
+     * Map and add the new patch vertices to quad mesh
+     * @param newPatch the new patch
+     * @return a map that maps the vertices on newPatch to vertices on quadmesh
+     */
+    std::map<OpenMesh::SmartVertexHandle, OpenMesh::SmartVertexHandle>
+    MapNewPatchToQuadMesh(QuadMesh &mesh, const QuadMesh &newPatch, const std::vector<int> &borderVertices);
+
+    void CreateNewFacesOnQuadMesh(QuadMesh &mesh, int patch, const QuadMesh &newPatch,
+                                  const std::map<OpenMesh::SmartVertexHandle, OpenMesh::SmartVertexHandle> &newPatchToQuadMesh);
 
 private:
     EditableMesh *editableMesh;

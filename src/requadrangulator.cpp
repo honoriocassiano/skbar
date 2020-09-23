@@ -178,7 +178,7 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
 
     std::vector<int> edgesBySide;
     std::vector<Vec2f> borderVertexPositions;
-    std::vector<OpenMesh::SmartVertexHandle> borderVertices;
+    std::vector<int> borderVertices;
 
     std::map<OpenMesh::SmartHalfedgeHandle, std::tuple<unsigned int, bool>> halfEdgesToCheck;
 
@@ -230,7 +230,7 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
 
                 const auto newVertexId = AddSketchVertexToQuadMesh(sketchVertexToAdd);
 
-                borderVertices.emplace_back(newVertexId, &quadmesh);
+                borderVertices.push_back(newVertexId);
             }
 
             while (!reachedLastEdge) {
@@ -252,6 +252,7 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
                             currentHE.to()).quadVertexData.patchParametrizations[patch];
 
                     borderVertexPositions.push_back(parametricPosition);
+                    borderVertices.push_back(currentHE.to().idx());
 
                     currentHE = currentHE.next().opp().next();
 
@@ -264,6 +265,7 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
 
                     // Don't forget the last vertex
                     borderVertexPositions.push_back(parametricPosition);
+                    borderVertices.push_back(currentHE.to().idx());
 
                     currentHE = currentHE.next();
                 }
@@ -297,11 +299,13 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
                             countEdges++;
 
                             sketchPositions.push_back(sketchVertex.ParametricPositionsByPatch().at(patch));
+
+                            const auto newVertexId = AddSketchVertexToQuadMesh(sketchVertex);
+
+                            borderVertices.push_back(newVertexId);
                         }
 
-                        const auto newVertexId = AddSketchVertexToQuadMesh(sketchVertex);
 
-                        borderVertices.emplace_back(newVertexId, &quadmesh);
                     }
                 }
             }
@@ -337,9 +341,18 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
 
             newPolygonCCW.Save("./test_ccw.obj");
             newPolygonCW.Save("./test_cw.obj");
-        }
 
-//        DeletePatchFaces(patch);
+            const auto newPatchToQuadMesh = MapNewPatchToQuadMesh(editableMesh->GetQuad(), newPolygonCCW,
+                                                                  borderVertices);
+
+            DeletePatchFaces(patch);
+            CreateNewFacesOnQuadMesh(editableMesh->GetQuad(), patch, newPolygonCCW, newPatchToQuadMesh);
+
+            quadmesh.request_face_normals();
+
+//            // TODO Save a copy before clean deleted vertices
+//            quadmesh.garbage_collection();
+        }
 
         // TODO Check other HEs
         break;
@@ -512,4 +525,67 @@ int skbar::Requadrangulator::AddSketchVertexToQuadMesh(const skbar::SketchVertex
     quadVertexData.patchParametrizations = sketchVertex.ParametricPositionsByPatch();
 
     return newVertexId;
+}
+
+int skbar::Requadrangulator::AddQuadFace(skbar::QuadMesh &mesh, const std::vector<int> &verticesId) {
+
+    auto &quadmesh = dynamic_cast<OPQuadMesh &>(mesh).Get();
+
+    std::vector<OpenMesh::VertexHandle> vertices;
+
+    for (const auto& vId : verticesId) {
+        vertices.emplace_back(vId);
+    }
+
+    const auto face = quadmesh.add_face(vertices);
+
+    return face.idx();
+}
+
+std::map<OpenMesh::SmartVertexHandle, OpenMesh::SmartVertexHandle>
+skbar::Requadrangulator::MapNewPatchToQuadMesh(skbar::QuadMesh &mesh, const skbar::QuadMesh &newPatch,
+                                               const std::vector<int> &borderVertices) {
+
+    auto &quadmesh = dynamic_cast<OPQuadMesh &>(mesh).Get();
+    const auto &patch = dynamic_cast<const OPQuadMesh &>(newPatch).Get();
+
+    std::map<OpenMesh::SmartVertexHandle, OpenMesh::SmartVertexHandle> result;
+
+    for (const auto &v  : patch.vertices()) {
+        auto indexOnPositionVector = patch.data(v).patchgen.indexOnPositionVector;
+
+        if (indexOnPositionVector < 0) {
+            const auto pos = patch.point(v);
+
+            const auto newVertexId = AddQuadVertex(utils::ToStdVector(pos));
+
+            result[v] = OpenMesh::SmartVertexHandle(newVertexId, &quadmesh);
+        } else {
+            result[v] = OpenMesh::SmartVertexHandle(borderVertices.at(indexOnPositionVector), &quadmesh);
+        }
+    }
+
+    return result;
+}
+
+void skbar::Requadrangulator::CreateNewFacesOnQuadMesh(
+        skbar::QuadMesh &mesh, int patch, const skbar::QuadMesh &newPatch,
+        const std::map<OpenMesh::SmartVertexHandle, OpenMesh::SmartVertexHandle> &newPatchToQuadMesh) {
+
+    auto &quadmesh = dynamic_cast<OPQuadMesh &>(mesh).Get();
+    const auto &patchTopology = dynamic_cast<const OPQuadMesh &>(newPatch).Get();
+
+    for (const auto &face : patchTopology.faces()) {
+        std::vector<int> verticesOnQuadmeshFace;
+
+        for (const auto &v : face.vertices().to_vector()) {
+            verticesOnQuadmeshFace.push_back(newPatchToQuadMesh.at(v).idx());
+        }
+
+        auto newFaceId = AddQuadFace(mesh, verticesOnQuadmeshFace);
+        auto newFace = quadmesh.face_handle(newFaceId);
+
+        quadmesh.data(newFace).quadFaceData.patchId = patch;
+        quadmesh.data(newFace).quadFaceData.id = newFaceId;
+    }
 }
