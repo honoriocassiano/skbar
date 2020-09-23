@@ -148,19 +148,28 @@ void skbar::PatchQuadrangulator::SetLaplacianPositions(skbar::OPQuadMesh &basePa
 
     // TODO Use DRY principle here
     if (positionsIsClockwise) {
-        for (const auto &position : positions) {
+        for (int i = 0; static_cast<std::size_t>(i) < positions.size(); i++) {
 
-            patch.data(currentVertex).laplacian.position = position;
-            patch.data(currentVertex).laplacian.fixed = true;
+            auto &laplacian = patch.data(currentVertex).laplacian;
+
+            laplacian.position = positions[i];
+            laplacian.fixed = true;
+
+            patch.data(currentVertex).patchgen.indexOnPositionVector = i;
 
             currentEdge = currentEdge.next();
             currentVertex = currentEdge.to();
         }
     } else {
-        for (auto it = positions.rbegin(); it != positions.rend(); it++) {
+        // TODO Check this down-cast
+        for (int i = static_cast<int>(positions.size()) - 1; i >= 0; i--) {
 
-            patch.data(currentVertex).laplacian.position = *it;
-            patch.data(currentVertex).laplacian.fixed = true;
+            auto &laplacian = patch.data(currentVertex).laplacian;
+
+            laplacian.position = positions[i];
+            laplacian.fixed = true;
+
+            patch.data(currentVertex).patchgen.indexOnPositionVector = i;
 
             currentEdge = currentEdge.next();
             currentVertex = currentEdge.to();

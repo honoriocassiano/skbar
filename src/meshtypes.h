@@ -18,10 +18,13 @@ namespace skbar {
  * Holds data used by patchgen
  */
 struct Patchgen {
+    // Internal use of Takayama'S algorithm
     int corner_index;
     patchgen::PatchVertexTag tag;
 
-    Patchgen() : corner_index(-1), tag(patchgen::PatchVertexTag::None) {}
+    int indexOnPositionVector;
+
+    Patchgen() : corner_index(-1), tag(patchgen::PatchVertexTag::None), indexOnPositionVector(-1) {}
 };
 
 /*
