@@ -19,13 +19,21 @@ public:
 
     bool Save(const std::string &filename) const override;
 
+    std::optional<std::vector<std::vector<int>>> GetPatch(int patch) const override;
+
     void FindPatches() override;
 
     OPQuadMesh GetTriangulated() const;
 
     std::size_t GetNumPatches() const override;
 
-    QuadMesh *GetPatch(std::size_t patchId) override;
+    std::map<int, std::vector<std::vector<int>>> &GetPatchFacesMap() {
+        return patchFacesMap;
+    }
+
+    const std::map<int, std::vector<std::vector<int>>> &GetPatchFacesMap() const {
+        return patchFacesMap;
+    }
 
     void ReplacePatch(size_t patchId, const QuadMesh &patch) override;
 
@@ -35,11 +43,15 @@ public:
 
     QuadMeshImpl &Get() { return mesh; }
 
+    std::optional<skbar::Vec2f> GetParametricPosition(int vId, int patch) const override;
+
 private:
     OPQuadMesh(const QuadMeshImpl &mesh);
 
 private:
     QuadMeshImpl mesh;
+
+    std::map<int, std::vector<std::vector<int>>> patchFacesMap;
 };
 
 }
