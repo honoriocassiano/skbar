@@ -72,6 +72,7 @@ constexpr std::array<T, N> Div(const std::array<T, N> &v1, const T &v2) {
     return result;
 }
 
+// TODO Allow variadic parameters
 template<typename T, std::size_t N>
 constexpr std::array<T, N> Sum(const std::array<T, N> &v1, const std::array<T, N> &v2) {
 
