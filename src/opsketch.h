@@ -31,8 +31,6 @@ private:
     std::map<int, skbar::Vec2f>
     GetParametricPositions(int pointer, const Vec3f &position, const SketchVertex::EType &type) const;
 
-    static Vec3f GetBarycentricCoordinate(const Vec3f &position, const Vec3f &p0, const Vec3f &p1, const Vec3f &p2);
-
 private:
     EditableMesh *mesh;
 

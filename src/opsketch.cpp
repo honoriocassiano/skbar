@@ -4,6 +4,7 @@
 #include "opmeshrenderer.h"
 #include "vector.h"
 #include "utils/openmesh.h"
+#include "utils/triangleutils.h"
 
 #include "requadrangulator.h"
 
@@ -147,8 +148,10 @@ skbar::OPSketch::GetParametricPositions(int pointer, const skbar::Vec3f &positio
                 utils::ToStdVector(trimesh.point(vertices[2]))
         };
 
-        const auto barycentricPosition = GetBarycentricCoordinate(position, positions[0],
-                                                                  positions[1], positions[2]);
+        const auto barycentricPosition = utils::GetBarycentricCoordinate(position, positions[0],
+                                                                         positions[1], positions[2]);
+
+        assert(barycentricPosition.has_value() && "Cannot get parametric position!");
 
         Vec2f parametricPosition{0, 0};
 
@@ -159,7 +162,7 @@ skbar::OPSketch::GetParametricPositions(int pointer, const skbar::Vec3f &positio
             const auto &vParametricPosition = quadmesh.data(
                     OpenMesh::VertexHandle(v.idx())).quadVertexData.patchParametrizations.at(patch);
 
-            parametricPosition = Sum(parametricPosition, Mul(vParametricPosition, barycentricPosition[i]));
+            parametricPosition = Sum(parametricPosition, Mul(vParametricPosition, barycentricPosition.value()[i]));
         }
 
         result[patch] = parametricPosition;
@@ -208,28 +211,3 @@ skbar::OPSketch::GetParametricPositions(int pointer, const skbar::Vec3f &positio
     return result;
 }
 
-skbar::Vec3f
-skbar::OPSketch::GetBarycentricCoordinate(const skbar::Vec3f &position, const skbar::Vec3f &p0, const skbar::Vec3f &p1,
-                                          const skbar::Vec3f &p2) {
-
-    // https://gamedev.stackexchange.com/questions/23743/whats-the-most-efficient-way-to-find-barycentric-coordinates
-    const auto v0 = Sub(p1, p0);
-    const auto v1 = Sub(p2, p0);
-    const auto v2 = Sub(position, p0);
-
-    const auto d00 = Dot(v0, v0);
-    const auto d01 = Dot(v0, v1);
-    const auto d11 = Dot(v1, v1);
-    const auto d20 = Dot(v2, v0);
-    const auto d21 = Dot(v2, v1);
-
-    const auto denominator = d00 * d11 - d01 * d01;
-
-    Vec3f result;
-
-    result[1] = (d11 * d20 - d01 * d21) / denominator;
-    result[2] = (d00 * d21 - d01 * d20) / denominator;
-    result[0] = 1.0f - result[1] - result[2];
-
-    return result;
-}
