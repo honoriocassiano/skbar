@@ -533,7 +533,7 @@ int skbar::Requadrangulator::AddQuadFace(skbar::QuadMesh &mesh, const std::vecto
 
     std::vector<OpenMesh::VertexHandle> vertices;
 
-    for (const auto& vId : verticesId) {
+    for (const auto &vId : verticesId) {
         vertices.emplace_back(vId);
     }
 
@@ -542,26 +542,20 @@ int skbar::Requadrangulator::AddQuadFace(skbar::QuadMesh &mesh, const std::vecto
     return face.idx();
 }
 
-std::map<OpenMesh::SmartVertexHandle, OpenMesh::SmartVertexHandle>
+std::map<int, int>
 skbar::Requadrangulator::MapNewPatchToQuadMesh(skbar::QuadMesh &mesh, const skbar::QuadMesh &newPatch,
                                                const std::vector<int> &borderVertices) {
 
     auto &quadmesh = dynamic_cast<OPQuadMesh &>(mesh).Get();
     const auto &patch = dynamic_cast<const OPQuadMesh &>(newPatch).Get();
 
-    std::map<OpenMesh::SmartVertexHandle, OpenMesh::SmartVertexHandle> result;
+    std::map<int, int> result;
 
     for (const auto &v  : patch.vertices()) {
         auto indexOnPositionVector = patch.data(v).patchgen.indexOnPositionVector;
 
-        if (indexOnPositionVector < 0) {
-            const auto pos = patch.point(v);
-
-            const auto newVertexId = AddQuadVertex(utils::ToStdVector(pos));
-
-            result[v] = OpenMesh::SmartVertexHandle(newVertexId, &quadmesh);
-        } else {
-            result[v] = OpenMesh::SmartVertexHandle(borderVertices.at(indexOnPositionVector), &quadmesh);
+        if (indexOnPositionVector >= 0) {
+            result[v.idx()] = borderVertices.at(indexOnPositionVector);
         }
     }
 
@@ -570,7 +564,7 @@ skbar::Requadrangulator::MapNewPatchToQuadMesh(skbar::QuadMesh &mesh, const skba
 
 void skbar::Requadrangulator::CreateNewFacesOnQuadMesh(
         skbar::QuadMesh &mesh, int patch, const skbar::QuadMesh &newPatch,
-        const std::map<OpenMesh::SmartVertexHandle, OpenMesh::SmartVertexHandle> &newPatchToQuadMesh) {
+        const std::map<int, int> &newPatchToQuadMesh) {
 
     auto &quadmesh = dynamic_cast<OPQuadMesh &>(mesh).Get();
     const auto &patchTopology = dynamic_cast<const OPQuadMesh &>(newPatch).Get();
@@ -579,7 +573,7 @@ void skbar::Requadrangulator::CreateNewFacesOnQuadMesh(
         std::vector<int> verticesOnQuadmeshFace;
 
         for (const auto &v : face.vertices().to_vector()) {
-            verticesOnQuadmeshFace.push_back(newPatchToQuadMesh.at(v).idx());
+            verticesOnQuadmeshFace.push_back(newPatchToQuadMesh.at(v.idx()));
         }
 
         auto newFaceId = AddQuadFace(mesh, verticesOnQuadmeshFace);

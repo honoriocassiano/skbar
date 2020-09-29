@@ -60,11 +60,11 @@ private:
      * @param newPatch the new patch
      * @return a map that maps the vertices on newPatch to vertices on quadmesh
      */
-    std::map<OpenMesh::SmartVertexHandle, OpenMesh::SmartVertexHandle>
+    std::map<int, int>
     MapNewPatchToQuadMesh(QuadMesh &mesh, const QuadMesh &newPatch, const std::vector<int> &borderVertices);
 
     void CreateNewFacesOnQuadMesh(QuadMesh &mesh, int patch, const QuadMesh &newPatch,
-                                  const std::map<OpenMesh::SmartVertexHandle, OpenMesh::SmartVertexHandle> &newPatchToQuadMesh);
+                                  const std::map<int, int> &newPatchToQuadMesh);
 
 private:
     EditableMesh *editableMesh;
