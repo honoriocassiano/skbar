@@ -502,8 +502,8 @@ void skbar::Requadrangulator::DeletePatchFaces(int patch) {
     }
 }
 
-int skbar::Requadrangulator::AddQuadVertex(const skbar::Vec3f &position) {
-    auto &quadmesh = dynamic_cast<OPQuadMesh &>(editableMesh->GetQuad()).Get();
+int skbar::Requadrangulator::AddQuadVertex(QuadMesh &mesh, const skbar::Vec3f &position) {
+    auto &quadmesh = dynamic_cast<OPQuadMesh &>(mesh).Get();
 
     const OpenMesh::Vec3f pos = utils::ToOPVector(position);
 
@@ -516,7 +516,7 @@ int skbar::Requadrangulator::AddSketchVertexToQuadMesh(const skbar::SketchVertex
     auto &quadmesh = dynamic_cast<OPQuadMesh &>(editableMesh->GetQuad()).Get();
 
     // Add vertex to quadmesh
-    const auto newVertexId = AddQuadVertex(sketchVertex.Position());
+    const auto newVertexId = AddQuadVertex(editableMesh->GetQuad(), sketchVertex.Position());
     const auto newVertex = OpenMesh::VertexHandle(newVertexId);
 
     auto &quadVertexData = quadmesh.data(newVertex).quadVertexData;

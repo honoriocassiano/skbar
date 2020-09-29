@@ -47,7 +47,7 @@ private:
      * @param position position of new vertex
      * @return index of new vertex
      */
-    int AddQuadVertex(const Vec3f &position);
+    static int AddQuadVertex(QuadMesh &mesh, const Vec3f &position);
 
     int AddQuadFace(QuadMesh &mesh, const std::vector<int> &verticesId);
 
