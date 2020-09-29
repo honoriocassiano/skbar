@@ -129,6 +129,12 @@ bool skbar::ViewerEventProcessor::ProcessKeyboardUp(const SDL_Event *event) {
 
             break;
 
+        case SDLK_f:
+            viewer->ToggleDrawMesh();
+            processed = true;
+
+            break;
+
         default:
             break;
     }
