@@ -9,8 +9,10 @@
 #include "opquadmesh.h"
 #include "optrimesh.h"
 #include "patchquadrangulator.h"
+#include "vector.h"
 
 #include "utils/openmesh.h"
+#include "utils/triangleutils.h"
 #include "utils/debug.h"
 
 #include <queue>
@@ -342,8 +344,19 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
             newPolygonCCW.Save("./test_ccw.obj");
             newPolygonCW.Save("./test_cw.obj");
 
-            const auto newPatchToQuadMesh = MapNewPatchToQuadMesh(editableMesh->GetQuad(), newPolygonCCW,
-                                                                  borderVertices);
+            std::map<int, int> newPatchToQuadMesh;
+
+            {
+                auto newVerticesMap = AddNewVerticesToQuad(editableMesh->GetQuad(), editableMesh->GetTri(),
+                                                           newPolygonCCW, patch);
+
+                auto oldVerticesMap = MapNewPatchToQuadMesh(editableMesh->GetQuad(), newPolygonCCW,
+                                                            borderVertices);
+
+
+                newPatchToQuadMesh.merge(oldVerticesMap);
+                newPatchToQuadMesh.merge(newVerticesMap);
+            }
 
             DeletePatchFaces(patch);
             CreateNewFacesOnQuadMesh(editableMesh->GetQuad(), patch, newPolygonCCW, newPatchToQuadMesh);
@@ -582,4 +595,161 @@ void skbar::Requadrangulator::CreateNewFacesOnQuadMesh(
         quadmesh.data(newFace).quadFaceData.patchId = patch;
         quadmesh.data(newFace).quadFaceData.id = newFaceId;
     }
+}
+
+std::pair<int, int>
+skbar::Requadrangulator::FindQuadTriangles(const skbar::QuadMesh &aQuadMesh, const skbar::TriMesh &aTriMesh,
+                                           int quadId) {
+
+    std::pair<int, int> result{-1, -1};
+
+    const auto &quadmesh = dynamic_cast<const OPQuadMesh &>(aQuadMesh).Get();
+    const auto &trimesh = dynamic_cast<const OPTriMesh &>(aTriMesh).Get();
+
+    if (quadId >= 0) {
+
+        const auto face = OpenMesh::SmartFaceHandle(quadId, &trimesh);
+
+        assert((trimesh.data(face).triFaceData.quadFaceId == quadId) && "Tri and quad mesh are not related!");
+
+        result.first = quadId;
+
+        for (const auto &he : face.halfedges()) {
+
+            const auto &oppFace = he.opp().face();
+            const auto oppQuadId = trimesh.data(oppFace).triFaceData.quadFaceId;
+
+            if ((oppFace != face) && (oppQuadId == quadId)) {
+                result.second = oppQuadId;
+
+                break;
+            }
+        }
+    }
+
+    return result;
+}
+
+skbar::Vec3f
+skbar::Requadrangulator::UnparametrizeVertex(const skbar::QuadMesh &aQuadMesh, const skbar::TriMesh &aTriMesh,
+                                             const int patch,
+                                             const Vec2f parametricPosition) {
+
+    // TODO Add check if parametricPosition is between 0 and 1
+
+    const auto &quadmesh = dynamic_cast<const OPQuadMesh &>(aQuadMesh).Get();
+    const auto &trimesh = dynamic_cast<const OPTriMesh &>(aTriMesh).Get();
+
+    const auto &patchFaces = aQuadMesh.GetPatch(patch);
+
+    assert(patchFaces.has_value() && "Invalid patch!");
+
+    const auto patchHeight = patchFaces.value().size();
+    const auto patchWidth = patchFaces.value().front().size();
+
+    const auto line = std::max(static_cast<int>(ceil(parametricPosition[0] * patchHeight)) - 1, 0);
+    const auto column = std::max(static_cast<int>(ceil(parametricPosition[1] * patchWidth)) - 1, 0);
+
+    const auto faceId = patchFaces.value().at(line).at(column);
+
+    const auto[faceId1, faceId2] = FindQuadTriangles(aQuadMesh, aTriMesh, faceId);
+
+    Vec3f newPosition;
+
+    {
+        auto tempPos = GetUnparametrizedPosition(aQuadMesh, aTriMesh, faceId1, parametricPosition);
+
+        if (tempPos) {
+            newPosition = tempPos.value();
+        } else {
+
+            tempPos = GetUnparametrizedPosition(aQuadMesh, aTriMesh, faceId2, parametricPosition);
+
+            assert(tempPos.has_value() && "Vertex are not inside the triangle!");
+
+            newPosition = tempPos.value();
+        }
+    }
+
+    return newPosition;
+}
+
+std::optional<skbar::Vec3f>
+skbar::Requadrangulator::GetUnparametrizedPosition(const skbar::QuadMesh &aQuadMesh, const skbar::TriMesh &triMesh,
+                                                   const int trifaceId, const skbar::Vec2f &parametricPosition) {
+
+    std::optional<Vec3f> result;
+
+    const auto &quadmesh = dynamic_cast<const OPQuadMesh &>(aQuadMesh).Get();
+    const auto &trimesh = dynamic_cast<const OPTriMesh &>(triMesh).Get();
+
+    const auto f1 = OpenMesh::SmartFaceHandle(trifaceId, &trimesh);
+
+    const auto patch = quadmesh.data(
+            OpenMesh::FaceHandle(trimesh.data(f1).triFaceData.quadFaceId)).quadFaceData.patchId;
+
+    const auto vertices = f1.vertices().to_vector();
+
+    // The vertices of tri and quad mesh are on same indices
+    const auto pp0 = quadmesh.data(
+            OpenMesh::VertexHandle(vertices[0].idx())).quadVertexData.patchParametrizations.at(patch);
+
+    const auto pp1 = quadmesh.data(
+            OpenMesh::VertexHandle(vertices[1].idx())).quadVertexData.patchParametrizations.at(patch);
+
+    const auto pp2 = quadmesh.data(
+            OpenMesh::VertexHandle(vertices[2].idx())).quadVertexData.patchParametrizations.at(patch);
+
+    const auto pp = parametricPosition;
+
+    const auto barycentricPosition = utils::GetBarycentricCoordinate(pp, pp0, pp1, pp2);
+
+    if (barycentricPosition) {
+
+        const auto p0 = utils::ToStdVector(quadmesh.point(OpenMesh::VertexHandle(vertices[0].idx())));
+        const auto p1 = utils::ToStdVector(quadmesh.point(OpenMesh::VertexHandle(vertices[1].idx())));
+        const auto p2 = utils::ToStdVector(quadmesh.point(OpenMesh::VertexHandle(vertices[2].idx())));
+
+        const auto bp0 = barycentricPosition.value().at(0);
+        const auto bp1 = barycentricPosition.value().at(1);
+        const auto bp2 = barycentricPosition.value().at(2);
+
+        const Vec3f newPosition = Sum(Sum(Mul(p0, bp0), Mul(p1, bp1)), Mul(p2, bp2));
+
+        result = newPosition;
+    }
+
+    return result;
+}
+
+std::map<int, int>
+skbar::Requadrangulator::AddNewVerticesToQuad(skbar::QuadMesh &aQuadMesh, const skbar::TriMesh &aTriMesh,
+                                              const skbar::QuadMesh &aPatch, const int patchId) {
+
+    std::map<int, int> result;
+
+    const auto &quadmesh = dynamic_cast<OPQuadMesh &>(aQuadMesh).Get();
+    const auto &trimesh = dynamic_cast<const OPTriMesh &>(aTriMesh).Get();
+
+    const auto &patch = dynamic_cast<const OPQuadMesh &>(aPatch).Get();
+
+    for (const auto &v : patch.vertices()) {
+        auto indexOnPositionVector = patch.data(v).patchgen.indexOnPositionVector;
+
+        const auto &laplacian = patch.data(v).laplacian;
+
+        if (!laplacian.fixed) {
+            const auto tempPos = patch.point(v);
+
+            const Vec2f parametricPosition{tempPos[0], tempPos[1]};
+
+            const auto pos = UnparametrizeVertex(aQuadMesh, aTriMesh, patchId, parametricPosition);
+
+            const auto newVertexId = AddQuadVertex(aQuadMesh, pos);
+
+            result[v.idx()] = newVertexId;
+        }
+    }
+
+    return result;
 }

@@ -34,6 +34,28 @@ private:
 
     static std::vector<int> FindCommonPatches(const SketchVertex &sv0, const SketchVertex &sv1);
 
+    static std::pair<int, int>
+    FindQuadTriangles(const QuadMesh &quadMesh, const TriMesh &triMesh, int quadId);
+
+    /**
+     * Add new vertices to quadmesh and return a map that maps the indices in newPatch to indices in quadmesh
+     *
+     * @param aQuadMesh
+     * @param triMesh
+     * @param newPatch
+     * @param patch
+     * @return
+     */
+    static std::map<int, int>
+    AddNewVerticesToQuad(QuadMesh &aQuadMesh, const TriMesh &triMesh, const QuadMesh &newPatch, int patch);
+
+    static Vec3f UnparametrizeVertex(const QuadMesh &aQuadMesh, const TriMesh &triMesh, int patch,
+                                     const Vec2f parametricPosition);
+
+    static std::optional<Vec3f>
+    GetUnparametrizedPosition(const QuadMesh &aQuadMesh, const TriMesh &triMesh, int triFaceId,
+                              const skbar::Vec2f &parametricPosition);
+
     /***
      * Insert a new vertex and split the edge
      * @param edgeId id of edge
