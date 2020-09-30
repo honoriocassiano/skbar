@@ -361,7 +361,7 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
             DeletePatchFaces(patch);
             CreateNewFacesOnQuadMesh(editableMesh->GetQuad(), patch, newPolygonCCW, newPatchToQuadMesh);
 
-            quadmesh.request_face_normals();
+            quadmesh.update_normals();
 
 //            // TODO Save a copy before clean deleted vertices
 //            quadmesh.garbage_collection();
