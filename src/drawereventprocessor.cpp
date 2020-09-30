@@ -149,12 +149,12 @@ bool skbar::DrawerEventProcessor::AddPointToSketch(int x, int y) {
             if (sketch.IsStarted()) {
                 const bool added = sketch.AddPoint(camera.DirectionRay(), intersection, camera.GetProjection());
 
-                if (added) {
+                if (added && sketch.IsStarted()) {
                     lastIntersection = intersection;
                     lastPoint = Vec2i{x, y};
                 }
 
-                processed = sketch.IsStarted();
+                processed = added;
             }
         } else {
             // Prevent rotation event if intersection is on same face that last intersection

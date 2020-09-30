@@ -92,6 +92,7 @@ bool skbar::OPSketch::AddPoint(const Line<Vec3f> &ray,
                     data.emplace_back(i.Pointer(), i.Position(), SketchVertex::EType::EDGE, parametricPositions);
                 }
 
+                added = true;
                 Close();
 
                 // TODO Find a better place to do this
