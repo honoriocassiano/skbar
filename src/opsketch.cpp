@@ -80,9 +80,12 @@ bool skbar::OPSketch::AddPoint(const Line<Vec3f> &ray,
                 added = hasPath;
             } else {
 
+                // This branch closes the sketch, so the 'intersection' must be discarded
+                // The last points to add are the points between the last known intersection and the first one
                 const Intersection<int, Vec3f> firstIntersection(data.front().Pointer(), data.front().Position());
+                const Intersection<int, Vec3f> lastIntersection(data.back().Pointer(), data.back().Position());
 
-                const auto[hasPath, result] = trimesh.GetIntersectionsBetween(intersection, firstIntersection,
+                const auto[hasPath, result] = trimesh.GetIntersectionsBetween(lastIntersection, firstIntersection,
                                                                               ray, projection);
 
                 for (auto i : result) {
