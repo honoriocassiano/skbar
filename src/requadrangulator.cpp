@@ -772,6 +772,202 @@ skbar::Requadrangulator::AddNewVerticesToQuad(skbar::QuadMesh &aQuadMesh, const 
     return result;
 }
 
+skbar::Requadrangulator::TraceData skbar::Requadrangulator::TracePolygons(
+        skbar::EditableMesh &editableMesh,
+        const std::map<int, std::vector<skbar::Requadrangulator::InOutSKVIndex>> &inOutsByPatchMap) {
+
+    TraceData traceData;
+
+    auto &sketch = dynamic_cast<OPSketch &>(editableMesh.GetSketch());
+
+    auto &quadmesh = dynamic_cast<OPQuadMesh &>(editableMesh.GetQuad()).Get();
+    auto &trimesh = dynamic_cast<OPTriMesh &>(editableMesh.GetTri()).Get();
+
+    for (const auto &entry: inOutsByPatchMap) {
+
+        const auto &patch = entry.first;
+        const auto &inOuts = entry.second;
+
+        std::vector<int> edgesBySide;
+        std::vector<Vec2f> borderVertexPositions;
+        std::vector<int> borderVertices;
+
+        std::map<OpenMesh::SmartHalfedgeHandle, std::tuple<unsigned int, bool>> halfEdgesToCheck;
+
+        // Find half edges to check
+        for (unsigned int i = 0; i < inOuts.size(); i++) {
+            const auto &[in, out] = inOuts[i];
+
+            const auto &inSketchVertex = sketch.Data().at(in);
+            const auto &outSketchVertex = sketch.Data().at(out);
+
+            const auto inEdgeId = trimesh.data(OpenMesh::EdgeHandle(inSketchVertex.Pointer())).triEdgeData.quadEdgeId;
+            const auto outEdgeId = trimesh.data(OpenMesh::EdgeHandle(outSketchVertex.Pointer())).triEdgeData.quadEdgeId;
+
+            const auto inEdge = OpenMesh::SmartEdgeHandle(inEdgeId, &quadmesh);
+            const auto outEdge = OpenMesh::SmartEdgeHandle(outEdgeId, &quadmesh);
+
+            const auto inHE = (quadmesh.data(inEdge.h0().face()).quadFaceData.patchId == patch) ?
+                              inEdge.h0() : inEdge.h1();
+            const auto outHE = (quadmesh.data(outEdge.h0().face()).quadFaceData.patchId == patch) ?
+                               outEdge.h0() : outEdge.h1();
+
+            halfEdgesToCheck[inHE] = std::make_tuple(i, false);
+            halfEdgesToCheck[outHE] = std::make_tuple(i, false);
+        }
+
+        for (const auto &entry : halfEdgesToCheck) {
+            const auto &firstHE = entry.first;
+            const auto[inOutId, checked] = entry.second;
+
+            if (!checked) {
+                const auto[inId, outId] = inOuts[inOutId];
+
+                // Used to add sketch vertices in reverse order if is true
+                const auto startingFromOut = (firstHE.edge().idx() == sketch.Data().at(outId).Pointer());
+
+                const auto &lastEdge = startingFromOut
+                                       ? OpenMesh::SmartEdgeHandle(sketch.Data().at(inId).Pointer(), &quadmesh)
+                                       : OpenMesh::SmartEdgeHandle(sketch.Data().at(outId).Pointer(), &quadmesh);
+
+                auto currentHE = firstHE;
+
+                // TODO Check if in == out
+                auto reachedLastEdge = false;
+
+                // Add the first sketch vertex position
+                {
+                    const auto sKVToAddPosition = startingFromOut ? outId : inId;
+
+                    const auto &sketchVertexToAdd = sketch.Data().at(sKVToAddPosition);
+
+                    borderVertexPositions.push_back(sketchVertexToAdd.ParametricPositionsByPatch().at(patch));
+
+                    int sKVOnMesh = traceData.sketchVertexOnMesh[sKVToAddPosition];
+
+                    // If vertex not add yet, create it on mesh and set its position
+                    if (sKVOnMesh == -1) {
+                        sKVOnMesh = AddSketchVertexToQuadMesh(editableMesh.GetQuad(), sketchVertexToAdd);
+
+                        traceData.sketchVertexOnMesh[sKVToAddPosition] = sKVOnMesh;
+                        traceData.mustSplitEdge[sKVToAddPosition] = true;
+                    }
+
+                    borderVertices.push_back(sKVOnMesh);
+                }
+
+                while (!reachedLastEdge) {
+
+                    auto reachedCorner = quadmesh.data(currentHE.to()).quadVertexData.isCorner;
+
+                    auto countEdges = 1;
+
+                    while (!reachedCorner) {
+
+                        if (currentHE.edge() == lastEdge) {
+                            reachedLastEdge = true;
+                            break;
+                        }
+
+                        countEdges++;
+
+                        const auto &parametricPosition = quadmesh.data(
+                                currentHE.to()).quadVertexData.patchParametrizations[patch];
+
+                        borderVertexPositions.push_back(parametricPosition);
+                        borderVertices.push_back(currentHE.to().idx());
+
+                        currentHE = currentHE.next().opp().next();
+
+                        reachedCorner = quadmesh.data(currentHE.to()).quadVertexData.isCorner;
+                    }
+
+                    if (!reachedLastEdge) {
+                        const auto &parametricPosition = quadmesh.data(
+                                currentHE.to()).quadVertexData.patchParametrizations[patch];
+
+                        // Don't forget the last vertex
+                        borderVertexPositions.push_back(parametricPosition);
+                        borderVertices.push_back(currentHE.to().idx());
+
+                        currentHE = currentHE.next();
+                    }
+
+                    edgesBySide.push_back(countEdges);
+                }
+
+                auto countEdges = 0;
+                std::vector<skbar::Vec2f> sketchPositions;
+
+                auto next = [](auto i, auto size, bool reverse) -> auto {
+                    return reverse ? ((i + size - 1) % size) : ((i + 1) % size);
+                };
+
+                {
+                    const auto first = startingFromOut ? inId : outId;
+                    const auto last = startingFromOut ? outId : inId;
+
+                    for (std::size_t i = first; i != static_cast<std::size_t>(last);
+                         i = next(i, sketch.Size(), !startingFromOut)) {
+
+                        const auto &sketchVertex = sketch.Data().at(i);
+
+                        // TODO Check for vertices on a face
+                        if (sketchVertex.Type() == skbar::SketchVertex::EType::EDGE) {
+                            const auto triVertex = OpenMesh::EdgeHandle(sketchVertex.Pointer());
+
+                            const auto isQuadEdge = trimesh.data(triVertex).triEdgeData.IsQuadEdge();
+
+                            if (isQuadEdge) {
+                                countEdges++;
+
+                                sketchPositions.push_back(sketchVertex.ParametricPositionsByPatch().at(patch));
+
+                                int sKVOnMesh = traceData.sketchVertexOnMesh[i];
+
+                                // If vertex not add yet, create it on mesh and set its position
+                                if (sKVOnMesh == -1) {
+                                    sKVOnMesh = AddSketchVertexToQuadMesh(editableMesh.GetQuad(), sketchVertex);
+
+                                    traceData.sketchVertexOnMesh[i] = sKVOnMesh;
+                                    traceData.mustSplitEdge[i] = true;
+                                }
+
+                                borderVertices.push_back(sKVOnMesh);
+                            }
+
+
+                        }
+                    }
+                }
+
+                edgesBySide.push_back(countEdges);
+
+                borderVertexPositions.insert(borderVertexPositions.end(), sketchPositions.begin(),
+                                             sketchPositions.end());
+
+            }
+
+            std::get<1>(halfEdgesToCheck.at(firstHE)) = true;
+
+            traceData.polygonsData.emplace(patch, PolygonData{
+                    edgesBySide, // edgesBySide
+                    borderVertexPositions, // borderVertexPositions
+                    borderVertices // borderVertices
+            });
+
+            // TODO Check other HEs
+            break;
+        }
+
+        // TODO Check other patches
+        break;
+    }
+
+    return traceData;
+}
+
+
 void
 skbar::Requadrangulator::RequadrangulatePatches(skbar::EditableMesh &editableMesh,
                                                 const std::map<int, std::vector<

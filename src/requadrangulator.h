@@ -17,6 +17,28 @@ class Requadrangulator {
         int out;
     };
 
+    struct PolygonData {
+        // Num of edges on each size of the polygon
+        std::vector<int> edgesBySide;
+
+        // Positions of each vertex on border
+        std::vector<Vec2f> borderVertexPositions;
+
+        // Indices of vertices on border
+        std::vector<int> borderVertices;
+    };
+
+    struct TraceData {
+        // key = patch
+        std::multimap<int, PolygonData> polygonsData;
+
+        // Added vertices according to sketch
+        std::vector<int> sketchVertexOnMesh;
+
+        // Edges that must be splitter according to sketch
+        std::vector<bool> mustSplitEdge;
+    };
+
 public:
     explicit Requadrangulator(EditableMesh *mesh);
 
@@ -38,6 +60,10 @@ private:
     std::vector<std::vector<Vec2f>> FindSidesOfPatch(const SketchVertex &firstSV, const SketchVertex &lastSV) const;
 
     static std::vector<int> FindCommonPatches(const SketchVertex &sv0, const SketchVertex &sv1);
+
+    static TraceData TracePolygons(skbar::EditableMesh &editableMesh,
+                                   const std::map<int,
+                                           std::vector<skbar::Requadrangulator::InOutSKVIndex>> &inOutsByPatchMap);
 
     static std::pair<int, int>
     FindQuadTriangles(const QuadMesh &quadMesh, const TriMesh &triMesh, int quadId);
@@ -87,7 +113,7 @@ private:
     static int AddSketchVertexToQuadMesh(QuadMesh &mesh, const SketchVertex &sketchVertex);
 
     static void SplitQuadEdges(QuadMesh &mesh, const Sketch &sketch, const std::vector<int> &sketchVertexOnMesh,
-                           const std::vector<bool> &mustSplitEdge
+                               const std::vector<bool> &mustSplitEdge
     );
 
     /**
