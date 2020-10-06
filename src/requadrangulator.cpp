@@ -521,6 +521,10 @@ int skbar::Requadrangulator::AddSketchVertexToQuadMesh(QuadMesh &mesh, const skb
     quadVertexData.isCorner = false;
     quadVertexData.patchParametrizations = sketchVertex.ParametricPositionsByPatch();
 
+    if (sketchVertex.Type() == SketchVertex::EType::EDGE) {
+        quadmesh.split_edge(OpenMesh::EdgeHandle(sketchVertex.Pointer()), newVertex);
+    }
+
     return newVertexId;
 }
 
