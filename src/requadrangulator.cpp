@@ -36,8 +36,8 @@ void skbar::Requadrangulator::RequadrangulateAll() {
     }
 }
 
-std::map<int, std::vector<std::tuple<int, int>>> skbar::Requadrangulator::FindAffectedPatches() const {
-    std::map<int, std::vector<std::tuple<int, int>>> result;
+std::map<int, std::vector<skbar::Requadrangulator::InOutSKVIndex>> skbar::Requadrangulator::FindAffectedPatches() const {
+    std::map<int, std::vector<skbar::Requadrangulator::InOutSKVIndex>> result;
 
     auto &sketch = dynamic_cast<OPSketch &>(editableMesh->GetSketch());
 
@@ -136,14 +136,14 @@ std::map<int, std::vector<std::tuple<int, int>>> skbar::Requadrangulator::FindAf
         auto otherSides = FindSidesOfPatch(sketch.Data().at(firstSketchVertex), sketch.Data().at(lastSketchVertex));
 
         result.emplace(currentPatch,
-                       std::vector(1, std::make_tuple(firstSketchVertex, lastSketchVertex)));
+                       std::vector(1, InOutSKVIndex{firstSketchVertex, lastSketchVertex}));
     }
 
 
     return result;
 }
 
-void skbar::Requadrangulator::RequadrangulatePatch(int patch, const std::vector<std::tuple<int, int>> &inOuts) {
+void skbar::Requadrangulator::RequadrangulatePatch(int patch, const std::vector<skbar::Requadrangulator::InOutSKVIndex> &inOuts) {
 
     // If doesn't have any an in-out, then the sketch is contained inside one single patch, creating a hole inside of it
     const auto hasHole = inOuts.empty();
@@ -171,7 +171,7 @@ void skbar::Requadrangulator::RequadrangulatePatch(int patch, const std::vector<
 }
 
 void
-skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::vector<std::tuple<int, int>> &inOuts) {
+skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::vector<skbar::Requadrangulator::InOutSKVIndex> &inOuts) {
 
     auto &sketch = dynamic_cast<OPSketch &>(editableMesh->GetSketch());
 

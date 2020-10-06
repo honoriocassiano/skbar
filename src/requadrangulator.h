@@ -12,6 +12,11 @@ namespace skbar {
 // TODO Set methods in this class as static
 class Requadrangulator {
 
+    struct InOutSKVIndex {
+        int in;
+        int out;
+    };
+
 public:
     explicit Requadrangulator(EditableMesh *mesh);
 
@@ -24,11 +29,11 @@ private:
     /**
      * Return a map indexed by patches that maps to the ins and outs sketch vertex indices
      */
-    std::map<int, std::vector<std::tuple<int, int>>> FindAffectedPatches() const;
+    std::map<int, std::vector<InOutSKVIndex>> FindAffectedPatches() const;
 
-    void RequadrangulatePatch(int patch, const std::vector<std::tuple<int, int>> &inOuts);
+    void RequadrangulatePatch(int patch, const std::vector<InOutSKVIndex> &inOuts);
 
-    void RequadrangulatePatchWithoutHole(int patch, const std::vector<std::tuple<int, int>> &inOuts);
+    void RequadrangulatePatchWithoutHole(int patch, const std::vector<InOutSKVIndex> &inOuts);
 
     std::vector<std::vector<Vec2f>> FindSidesOfPatch(const SketchVertex &firstSV, const SketchVertex &lastSV) const;
 
