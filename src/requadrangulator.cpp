@@ -36,7 +36,9 @@ void skbar::Requadrangulator::RequadrangulateAll() {
     }
 }
 
-std::map<int, std::vector<skbar::Requadrangulator::InOutSKVIndex>> skbar::Requadrangulator::FindAffectedPatches() const {
+std::map<int, std::vector<skbar::Requadrangulator::InOutSKVIndex>>
+skbar::Requadrangulator::FindAffectedPatches() const {
+
     std::map<int, std::vector<skbar::Requadrangulator::InOutSKVIndex>> result;
 
     auto &sketch = dynamic_cast<OPSketch &>(editableMesh->GetSketch());
@@ -47,98 +49,78 @@ std::map<int, std::vector<skbar::Requadrangulator::InOutSKVIndex>> skbar::Requad
     auto firstPatch = -1;
     auto currentPatch = -1;
 
-//    std::vector<Vec2f> points;
-    std::vector<std::vector<Vec2f>> sides;
-    int firstSketchVertex = -1;
-    int lastSketchVertex = -1;
+    int inSKVOnCurrentPatch = -1;
+    int outSKVOnFirstPatch = -1;
 
-    // TODO Check to all patches
-    {
-        for (unsigned int i = 0; i < sketch.Size(); i++) {
+    bool firstPatchAlreadyAdded = false;
 
-            const auto &sv = sketch.Data()[i];
+    for (unsigned int i = 0; i < sketch.Size(); i++) {
+        const auto &sv = sketch.Data()[i];
 
-            if (sv.Type() == SketchVertex::EType::FACE) {
+        if (sv.Type() == SketchVertex::EType::FACE) {
 
-                const auto faceId = trimesh.data(OpenMesh::FaceHandle(sv.Pointer())).triFaceData.quadFaceId;
-                const auto face = OpenMesh::FaceHandle(faceId);
+            const auto faceId = trimesh.data(OpenMesh::FaceHandle(sv.Pointer())).triFaceData.quadFaceId;
+            const auto face = OpenMesh::FaceHandle(faceId);
 
-                currentPatch = quadmesh.data(face).quadFaceData.patchId;
+            currentPatch = quadmesh.data(face).quadFaceData.patchId;
 
-                if (firstPatch == -1) {
-                    firstPatch = currentPatch;
-                }
+            if (firstPatch == -1) {
+                firstPatch = currentPatch;
+            }
 
-            } else if (sv.Type() == SketchVertex::EType::EDGE) {
+        } else if (sv.Type() == SketchVertex::EType::EDGE) {
 
-//            const auto vertex = OpenMesh::SmartVertexHandle(sv.Pointer(), quadmesh);
-                const auto &triEdgeData = trimesh.data(OpenMesh::EdgeHandle(sv.Pointer())).triEdgeData;
+            const auto &triEdgeData = trimesh.data(OpenMesh::EdgeHandle(sv.Pointer())).triEdgeData;
 
-                if (triEdgeData.IsQuadEdge()) {
-                    const auto edge = OpenMesh::SmartEdgeHandle(triEdgeData.quadEdgeId, &quadmesh);
+            if (triEdgeData.IsQuadEdge()) {
+                const auto edge = OpenMesh::SmartEdgeHandle(triEdgeData.quadEdgeId, &quadmesh);
 
-                    if (quadmesh.data(edge).quadEdgeData.patchEdge) {
-                        const auto f0 = edge.h0().face();
-                        const auto f1 = edge.h1().face();
+                if (quadmesh.data(edge).quadEdgeData.patchEdge) {
+                    const auto f0 = edge.h0().face();
+                    const auto f1 = edge.h1().face();
 
-                        const auto face = (quadmesh.data(f0).quadFaceData.patchId == currentPatch) ? f1 : f0;
+                    const auto newInSKVOnCurrentPatch = static_cast<int>(i);
 
-                        currentPatch = quadmesh.data(face).quadFaceData.patchId;
+                    const auto inOut = InOutSKVIndex{
+                            inSKVOnCurrentPatch, // in
+                            newInSKVOnCurrentPatch // out
+                    };
 
-                        sides.emplace_back();
-                        sides.back().push_back(sv.ParametricPositionsByPatch().at(currentPatch));
-
-                        firstSketchVertex = static_cast<int>(i);
-
-                        break;
+                    // Don't add if is the first patch
+                    if (inSKVOnCurrentPatch != -1) {
+                        if (result.find(currentPatch) != result.end()) {
+                            result.at(currentPatch).push_back(inOut);
+                        } else {
+                            // Element doesn't exist
+                            result[currentPatch] = std::vector{inOut};
+                        }
+                    } else {
+                        outSKVOnFirstPatch = newInSKVOnCurrentPatch;
                     }
+
+                    const auto faceOnNewPatch = (quadmesh.data(f0).quadFaceData.patchId == currentPatch) ? f1 : f0;
+
+                    inSKVOnCurrentPatch = newInSKVOnCurrentPatch;
+
+                    // Update current because its the end of the old and the start of the new patch
+                    currentPatch = quadmesh.data(faceOnNewPatch).quadFaceData.patchId;
                 }
             }
         }
-
-        // Pass through all sketch vertices
-        for (unsigned int i = static_cast<unsigned int>(firstSketchVertex) + 1; i < sketch.Size(); i++) {
-
-            const auto &sv = sketch.Data()[i];
-
-//        try {
-//            sides.back().push_back(sv.ParametricPositionsByPatch().at(currentPatch));
-//        } catch (const std::out_of_range &e) {
-//            Log("Out of range! %d", currentPatch);
-//        }
-
-            sides.back().push_back(sv.ParametricPositionsByPatch().at(currentPatch));
-
-            if (sv.Type() == SketchVertex::EType::EDGE) {
-
-                const auto triEdgeData = trimesh.data(OpenMesh::EdgeHandle(sv.Pointer())).triEdgeData;
-
-                if (triEdgeData.IsQuadEdge()) {
-                    const auto edge = OpenMesh::SmartEdgeHandle(triEdgeData.quadEdgeId, &quadmesh);
-
-                    if (quadmesh.data(edge).quadEdgeData.patchEdge) {
-                        lastSketchVertex = static_cast<int>(i);
-
-                        break;
-                    }
-                }
-
-//            const auto edge = OpenMesh::SmartEdgeHandle(sv.Pointer(), &quadmesh);
-//
-//            if (quadmesh.data(edge).quadEdgeData.patchEdge) {
-//                lastEdgeIndex = sv.Pointer();
-//
-//                break;
-//            }
-            }
-        }
-
-        auto otherSides = FindSidesOfPatch(sketch.Data().at(firstSketchVertex), sketch.Data().at(lastSketchVertex));
-
-        result.emplace(currentPatch,
-                       std::vector(1, InOutSKVIndex{firstSketchVertex, lastSketchVertex}));
     }
 
+    const auto inOut = InOutSKVIndex{
+            inSKVOnCurrentPatch, // in
+            outSKVOnFirstPatch // out
+    };
+
+    // Add last in to first out
+    if (result.find(currentPatch) != result.end()) {
+        result.at(currentPatch).push_back(inOut);
+    } else {
+        // Element doesn't exist
+        result[currentPatch] = std::vector{inOut};
+    }
 
     return result;
 }
