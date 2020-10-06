@@ -521,11 +521,28 @@ int skbar::Requadrangulator::AddSketchVertexToQuadMesh(QuadMesh &mesh, const skb
     quadVertexData.isCorner = false;
     quadVertexData.patchParametrizations = sketchVertex.ParametricPositionsByPatch();
 
-    if (sketchVertex.Type() == SketchVertex::EType::EDGE) {
-        quadmesh.split_edge(OpenMesh::EdgeHandle(sketchVertex.Pointer()), newVertex);
-    }
-
     return newVertexId;
+}
+
+void skbar::Requadrangulator::SplitQuadEdges(skbar::QuadMesh &mesh, const skbar::Sketch &sketch,
+                                             const std::vector<int> &sketchVertexOnMesh,
+                                             const std::vector<bool> &mustSplitEdge) {
+
+    auto &quadmesh = dynamic_cast<OPQuadMesh &>(mesh).Get();
+
+    assert(((sketch.Size() == sketchVertexOnMesh.size()) && (sketch.Size() == mustSplitEdge.size())) &&
+           "Sizes don't match!");
+
+    for (std::size_t i = 0; i < sketch.Size(); i++) {
+        const auto &skv = sketch.Data().at(i);
+
+        if (mustSplitEdge.at(i)) {
+            const auto e = OpenMesh::EdgeHandle(skv.Pointer());
+            const auto v = OpenMesh::VertexHandle(sketchVertexOnMesh.at(i));
+
+            quadmesh.split_edge(e, v);
+        }
+    }
 }
 
 int skbar::Requadrangulator::AddQuadFace(skbar::QuadMesh &mesh, const std::vector<int> &verticesId) {

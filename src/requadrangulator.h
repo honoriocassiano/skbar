@@ -91,7 +91,11 @@ private:
     MapNewPatchToQuadMesh(QuadMesh &mesh, const QuadMesh &newPatch, const std::vector<int> &borderVertices);
 
     static void CreateNewFacesOnQuadMesh(QuadMesh &mesh, int patch, const QuadMesh &newPatch,
-                                  const std::map<int, int> &newPatchToQuadMesh);
+                                         const std::map<int, int> &newPatchToQuadMesh);
+
+    static void
+    RequadrangulatePatches(EditableMesh &editableMesh,
+                           const std::map<int, std::vector<InOutSKVIndex>> &inOutsByPatchMap);
 
 private:
     EditableMesh *editableMesh;
