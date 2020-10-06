@@ -76,21 +76,21 @@ private:
      */
     static int AddQuadVertex(QuadMesh &mesh, const Vec3f &position);
 
-    int AddQuadFace(QuadMesh &mesh, const std::vector<int> &verticesId);
+    static int AddQuadFace(QuadMesh &mesh, const std::vector<int> &verticesId);
 
-    void DeletePatchFaces(int patch);
+    static void DeletePatchFaces(QuadMesh &mesh, int patch);
 
-    int AddSketchVertexToQuadMesh(const SketchVertex &sketchVertex);
+    static int AddSketchVertexToQuadMesh(QuadMesh &mesh, const SketchVertex &sketchVertex);
 
     /**
      * Map and add the new patch vertices to quad mesh
      * @param newPatch the new patch
      * @return a map that maps the vertices on newPatch to vertices on quadmesh
      */
-    std::map<int, int>
+    static std::map<int, int>
     MapNewPatchToQuadMesh(QuadMesh &mesh, const QuadMesh &newPatch, const std::vector<int> &borderVertices);
 
-    void CreateNewFacesOnQuadMesh(QuadMesh &mesh, int patch, const QuadMesh &newPatch,
+    static void CreateNewFacesOnQuadMesh(QuadMesh &mesh, int patch, const QuadMesh &newPatch,
                                   const std::map<int, int> &newPatchToQuadMesh);
 
 private:

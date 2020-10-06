@@ -125,7 +125,8 @@ skbar::Requadrangulator::FindAffectedPatches() const {
     return result;
 }
 
-void skbar::Requadrangulator::RequadrangulatePatch(int patch, const std::vector<skbar::Requadrangulator::InOutSKVIndex> &inOuts) {
+void skbar::Requadrangulator::RequadrangulatePatch(int patch,
+                                                   const std::vector<skbar::Requadrangulator::InOutSKVIndex> &inOuts) {
 
     // If doesn't have any an in-out, then the sketch is contained inside one single patch, creating a hole inside of it
     const auto hasHole = inOuts.empty();
@@ -153,7 +154,8 @@ void skbar::Requadrangulator::RequadrangulatePatch(int patch, const std::vector<
 }
 
 void
-skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::vector<skbar::Requadrangulator::InOutSKVIndex> &inOuts) {
+skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch,
+                                                         const std::vector<skbar::Requadrangulator::InOutSKVIndex> &inOuts) {
 
     auto &sketch = dynamic_cast<OPSketch &>(editableMesh->GetSketch());
 
@@ -212,7 +214,7 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
 
                 borderVertexPositions.push_back(sketchVertexToAdd.ParametricPositionsByPatch().at(patch));
 
-                const auto newVertexId = AddSketchVertexToQuadMesh(sketchVertexToAdd);
+                const auto newVertexId = AddSketchVertexToQuadMesh(editableMesh->GetQuad(), sketchVertexToAdd);
 
                 borderVertices.push_back(newVertexId);
             }
@@ -284,7 +286,7 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
 
                             sketchPositions.push_back(sketchVertex.ParametricPositionsByPatch().at(patch));
 
-                            const auto newVertexId = AddSketchVertexToQuadMesh(sketchVertex);
+                            const auto newVertexId = AddSketchVertexToQuadMesh(editableMesh->GetQuad(), sketchVertex);
 
                             borderVertices.push_back(newVertexId);
                         }
@@ -340,7 +342,7 @@ skbar::Requadrangulator::RequadrangulatePatchWithoutHole(int patch, const std::v
                 newPatchToQuadMesh.merge(newVerticesMap);
             }
 
-            DeletePatchFaces(patch);
+            DeletePatchFaces(editableMesh->GetQuad(), patch);
             CreateNewFacesOnQuadMesh(editableMesh->GetQuad(), patch, newPolygonCCW, newPatchToQuadMesh);
 
             quadmesh.update_normals();
@@ -484,8 +486,8 @@ int skbar::Requadrangulator::SplitQuadEdge(unsigned int edgeId, const skbar::Vec
     return -1;
 }
 
-void skbar::Requadrangulator::DeletePatchFaces(int patch) {
-    auto &quadmesh = dynamic_cast<OPQuadMesh &>(editableMesh->GetQuad()).Get();
+void skbar::Requadrangulator::DeletePatchFaces(QuadMesh &mesh, int patch) {
+    auto &quadmesh = dynamic_cast<OPQuadMesh &>(mesh).Get();
 
     for (const auto &face : quadmesh.faces()) {
 
@@ -507,11 +509,11 @@ int skbar::Requadrangulator::AddQuadVertex(QuadMesh &mesh, const skbar::Vec3f &p
     return v.idx();
 }
 
-int skbar::Requadrangulator::AddSketchVertexToQuadMesh(const skbar::SketchVertex &sketchVertex) {
-    auto &quadmesh = dynamic_cast<OPQuadMesh &>(editableMesh->GetQuad()).Get();
+int skbar::Requadrangulator::AddSketchVertexToQuadMesh(QuadMesh &mesh, const skbar::SketchVertex &sketchVertex) {
+    auto &quadmesh = dynamic_cast<OPQuadMesh &>(mesh).Get();
 
     // Add vertex to quadmesh
-    const auto newVertexId = AddQuadVertex(editableMesh->GetQuad(), sketchVertex.Position());
+    const auto newVertexId = AddQuadVertex(mesh, sketchVertex.Position());
     const auto newVertex = OpenMesh::VertexHandle(newVertexId);
 
     auto &quadVertexData = quadmesh.data(newVertex).quadVertexData;
