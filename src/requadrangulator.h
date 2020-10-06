@@ -82,6 +82,10 @@ private:
 
     static int AddSketchVertexToQuadMesh(QuadMesh &mesh, const SketchVertex &sketchVertex);
 
+    static void SplitQuadEdges(QuadMesh &mesh, const Sketch &sketch, const std::vector<int> &sketchVertexOnMesh,
+                           const std::vector<bool> &mustSplitEdge
+    );
+
     /**
      * Map and add the new patch vertices to quad mesh
      * @param newPatch the new patch
