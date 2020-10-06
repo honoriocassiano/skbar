@@ -78,7 +78,11 @@ private:
 
     static int AddQuadFace(QuadMesh &mesh, const std::vector<int> &verticesId);
 
+    // TODO Remove this function
+    [[deprecated]]
     static void DeletePatchFaces(QuadMesh &mesh, int patch);
+
+    static void DeleteAllPatchFaces(QuadMesh &mesh, std::set<int> patches);
 
     static int AddSketchVertexToQuadMesh(QuadMesh &mesh, const SketchVertex &sketchVertex);
 

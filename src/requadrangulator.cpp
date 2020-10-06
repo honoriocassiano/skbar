@@ -499,6 +499,19 @@ void skbar::Requadrangulator::DeletePatchFaces(QuadMesh &mesh, int patch) {
     }
 }
 
+void skbar::Requadrangulator::DeleteAllPatchFaces(skbar::QuadMesh &mesh, std::set<int> patches) {
+    auto &quadmesh = dynamic_cast<OPQuadMesh &>(mesh).Get();
+
+    for (const auto &face : quadmesh.faces()) {
+
+        const auto fPatch = quadmesh.data(face).quadFaceData.patchId;
+
+        if (patches.find(fPatch) != patches.end()) {
+            quadmesh.delete_face(face, true);
+        }
+    }
+}
+
 int skbar::Requadrangulator::AddQuadVertex(QuadMesh &mesh, const skbar::Vec3f &position) {
     auto &quadmesh = dynamic_cast<OPQuadMesh &>(mesh).Get();
 
