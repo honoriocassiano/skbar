@@ -1162,11 +1162,15 @@ skbar::Requadrangulator::RequadrangulatePatches(skbar::EditableMesh &editableMes
     }
 
     // Delete all faces first
-    for (const auto &entry: dataByPatch) {
-        const auto patch = entry.first;
-        const auto &aux = entry.second;
+    {
+        std::set<int> temp;
 
-        DeletePatchFaces(editableMesh.GetQuad(), patch);
+        for (const auto &entry: dataByPolygonInPatch) {
+
+            temp.insert(entry.first);
+
+            DeleteAllPatchFaces(editableMesh.GetQuad(), temp);
+        }
     }
 
     // Then split the edges
