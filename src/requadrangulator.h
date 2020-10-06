@@ -69,6 +69,14 @@ private:
     FindQuadTriangles(const QuadMesh &quadMesh, const TriMesh &triMesh, int quadId);
 
     /**
+     * Get all half-edges that cross the sketch in some vertex
+     *
+     * @return a map that maps the edge index on quadmesh to the inOut index
+     */
+    static std::map<int, std::size_t> FindHEsToCheck(const EditableMesh &editableMesh, int patch,
+                                                     const std::vector<InOutSKVIndex> &inOuts);
+
+    /**
      * Add new vertices to quadmesh and return a map that maps the indices in newPatch to indices in quadmesh
      *
      * @param aQuadMesh

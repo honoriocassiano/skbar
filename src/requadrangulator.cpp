@@ -772,6 +772,40 @@ skbar::Requadrangulator::AddNewVerticesToQuad(skbar::QuadMesh &aQuadMesh, const 
     return result;
 }
 
+std::map<int, std::size_t> skbar::Requadrangulator::FindHEsToCheck(
+        const skbar::EditableMesh &editableMesh,
+        int patch,
+        const std::vector<skbar::Requadrangulator::InOutSKVIndex> &inOuts) {
+
+    std::map<int, std::size_t> result;
+
+    const auto &sketch = dynamic_cast<const OPSketch &>(editableMesh.GetSketch());
+
+    const auto &quadmesh = dynamic_cast<const OPQuadMesh &>(editableMesh.GetQuad()).Get();
+    const auto &trimesh = dynamic_cast<const OPTriMesh &>(editableMesh.GetTri()).Get();
+
+    for (unsigned int i = 0; i < inOuts.size(); i++) {
+        const auto &[in, out] = inOuts[i];
+
+        const auto &inSketchVertex = sketch.Data().at(in);
+        const auto &outSketchVertex = sketch.Data().at(out);
+
+        const auto inEdgeId = trimesh.data(OpenMesh::EdgeHandle(inSketchVertex.Pointer())).triEdgeData.quadEdgeId;
+        const auto outEdgeId = trimesh.data(OpenMesh::EdgeHandle(outSketchVertex.Pointer())).triEdgeData.quadEdgeId;
+
+        const auto inEdge = OpenMesh::SmartEdgeHandle(inEdgeId, &quadmesh);
+        const auto outEdge = OpenMesh::SmartEdgeHandle(outEdgeId, &quadmesh);
+
+        const auto inHE = (quadmesh.data(inEdge.h0().face()).quadFaceData.patchId == patch) ?
+                          inEdge.h0() : inEdge.h1();
+        const auto outHE = (quadmesh.data(outEdge.h0().face()).quadFaceData.patchId == patch) ?
+                           outEdge.h0() : outEdge.h1();
+
+        result[inEdgeId] = i;
+        result[outEdgeId] = i;
+    }
+}
+
 skbar::Requadrangulator::TraceData skbar::Requadrangulator::TracePolygons(
         skbar::EditableMesh &editableMesh,
         const std::map<int, std::vector<skbar::Requadrangulator::InOutSKVIndex>> &inOutsByPatchMap) {
@@ -792,33 +826,21 @@ skbar::Requadrangulator::TraceData skbar::Requadrangulator::TracePolygons(
         std::vector<Vec2f> borderVertexPositions;
         std::vector<int> borderVertices;
 
-        std::map<OpenMesh::SmartHalfedgeHandle, std::tuple<unsigned int, bool>> halfEdgesToCheck;
+        const auto halfEdgesToCheck = FindHEsToCheck(editableMesh, patch, inOuts);
 
-        // Find half edges to check
-        for (unsigned int i = 0; i < inOuts.size(); i++) {
-            const auto &[in, out] = inOuts[i];
+        std::map<int, bool> halfEdgesChecked;
 
-            const auto &inSketchVertex = sketch.Data().at(in);
-            const auto &outSketchVertex = sketch.Data().at(out);
-
-            const auto inEdgeId = trimesh.data(OpenMesh::EdgeHandle(inSketchVertex.Pointer())).triEdgeData.quadEdgeId;
-            const auto outEdgeId = trimesh.data(OpenMesh::EdgeHandle(outSketchVertex.Pointer())).triEdgeData.quadEdgeId;
-
-            const auto inEdge = OpenMesh::SmartEdgeHandle(inEdgeId, &quadmesh);
-            const auto outEdge = OpenMesh::SmartEdgeHandle(outEdgeId, &quadmesh);
-
-            const auto inHE = (quadmesh.data(inEdge.h0().face()).quadFaceData.patchId == patch) ?
-                              inEdge.h0() : inEdge.h1();
-            const auto outHE = (quadmesh.data(outEdge.h0().face()).quadFaceData.patchId == patch) ?
-                               outEdge.h0() : outEdge.h1();
-
-            halfEdgesToCheck[inHE] = std::make_tuple(i, false);
-            halfEdgesToCheck[outHE] = std::make_tuple(i, false);
+        for (const auto &entry : halfEdgesToCheck) {
+            halfEdgesChecked.emplace(entry.first, false);
         }
 
         for (const auto &entry : halfEdgesToCheck) {
-            const auto &firstHE = entry.first;
-            const auto[inOutId, checked] = entry.second;
+            const auto &firstHEId = entry.first;
+
+            const auto inOutId = entry.second;
+            const auto checked = halfEdgesChecked.at(entry.first);
+
+            const auto firstHE = OpenMesh::SmartHalfedgeHandle(firstHEId, &quadmesh);
 
             if (!checked) {
                 const auto[inId, outId] = inOuts[inOutId];
@@ -948,7 +970,7 @@ skbar::Requadrangulator::TraceData skbar::Requadrangulator::TracePolygons(
 
             }
 
-            std::get<1>(halfEdgesToCheck.at(firstHE)) = true;
+            halfEdgesChecked.at(firstHEId) = true;
 
             traceData.polygonsData.emplace(patch, PolygonData{
                     edgesBySide, // edgesBySide
