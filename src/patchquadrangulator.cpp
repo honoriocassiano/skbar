@@ -12,7 +12,37 @@
 
 const double skbar::PatchQuadrangulator::LAPLACE_CONSTRAINT_WEIGHT = 10 * 1000;
 
-patchgen::PatchParam skbar::PatchQuadrangulator::ComputeTopology(const Eigen::VectorXi &patchSides, skbar::OPQuadMesh &mesh) {
+skbar::OPQuadMesh
+skbar::PatchQuadrangulator::Quadrangulate(const Eigen::VectorXi &patchSides,
+                                          const std::vector<OpenMesh::Vec3d> &positions,
+                                          bool positionsIsClockwise) {
+
+    OPQuadMesh newPolygon;
+    auto &newMesh = newPolygon.Get();
+
+    const auto param = PatchQuadrangulator::ComputeTopology(patchSides, newPolygon);
+
+    PatchQuadrangulator::SetLaplacianPositions(newPolygon, positions, positionsIsClockwise);
+
+    const auto L = PatchQuadrangulator::GetLaplacianMatrix(newPolygon, param);
+    const auto b = PatchQuadrangulator::GetRightSide(newPolygon, param);
+
+    auto solver = new Eigen::SimplicialCholesky<Eigen::SparseMatrix<double>>(L.transpose() * L);
+
+    Eigen::Matrix<double, -1, 3> x = solver->solve(L.transpose() * b);
+
+    for (const auto &it : newMesh.vertices()) {
+
+        const auto pos = OpenMesh::Vec3f(x(it.idx(), 0), x(it.idx(), 1), x(it.idx(), 2));
+
+        newMesh.set_point(it, pos);
+    }
+
+    return newPolygon;
+}
+
+patchgen::PatchParam
+skbar::PatchQuadrangulator::ComputeTopology(const Eigen::VectorXi &patchSides, skbar::OPQuadMesh &mesh) {
     patchgen::PatchParam param;
 
     patchgen::generate_topology<OPQuadMesh::QuadMeshImpl>(patchSides, param, mesh.Get());
@@ -98,7 +128,7 @@ void skbar::PatchQuadrangulator::SetLaplacianPositions(skbar::OPQuadMesh &basePa
     OpenMesh::SmartVertexHandle currentVertex;
     OpenMesh::SmartHalfedgeHandle currentEdge;
 
-    auto patch = basePatch.Get();
+    auto &patch = basePatch.Get();
 
     // Find first corner
     for (auto v : patch.vertices()) {
@@ -118,19 +148,28 @@ void skbar::PatchQuadrangulator::SetLaplacianPositions(skbar::OPQuadMesh &basePa
 
     // TODO Use DRY principle here
     if (positionsIsClockwise) {
-        for (const auto &position : positions) {
+        for (int i = 0; static_cast<std::size_t>(i) < positions.size(); i++) {
 
-            patch.data(currentVertex).laplacian.position = position;
-            patch.data(currentVertex).laplacian.fixed = true;
+            auto &laplacian = patch.data(currentVertex).laplacian;
+
+            laplacian.position = positions[i];
+            laplacian.fixed = true;
+
+            patch.data(currentVertex).patchgen.indexOnPositionVector = i;
 
             currentEdge = currentEdge.next();
             currentVertex = currentEdge.to();
         }
     } else {
-        for (auto it = positions.rbegin(); it != positions.rend(); it++) {
+        // TODO Check this down-cast
+        for (int i = static_cast<int>(positions.size()) - 1; i >= 0; i--) {
 
-            patch.data(currentVertex).laplacian.position = *it;
-            patch.data(currentVertex).laplacian.fixed = true;
+            auto &laplacian = patch.data(currentVertex).laplacian;
+
+            laplacian.position = positions[i];
+            laplacian.fixed = true;
+
+            patch.data(currentVertex).patchgen.indexOnPositionVector = i;
 
             currentEdge = currentEdge.next();
             currentVertex = currentEdge.to();

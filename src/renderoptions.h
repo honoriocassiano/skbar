@@ -37,12 +37,13 @@ struct Options {
     enum class Mesh { TRI, QUAD } mesh;
 
     bool drawSketch;
+    bool drawMesh;
 
     TriMeshOptions triOptions;
     QuadMeshOptions quadOptions;
     SketchOptions skOptions;
 
-    Options() : mesh(Mesh::QUAD), drawSketch(true) {}
+    Options() : mesh(Mesh::QUAD), drawSketch(true), drawMesh(true) {}
     virtual ~Options() = default;
 };
 }

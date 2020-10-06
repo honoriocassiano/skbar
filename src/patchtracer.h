@@ -24,7 +24,7 @@ private:
 
     static std::vector<int> FindLine(const OpenMesh::SmartHalfedgeHandle& handle, const std::vector<int>& singularities);
 
-    static void TraceGrid(OPQuadMesh::QuadMeshImpl &mesh, unsigned int numPatches);
+    static void TraceGrid(OPQuadMesh &mesh, unsigned int numPatches);
 
 public:
     static void Trace(OPQuadMesh &mesh);

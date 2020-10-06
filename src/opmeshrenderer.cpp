@@ -101,24 +101,26 @@ void skbar::renderer::OPMeshRenderer::RenderTri(const skbar::EditableMesh &eMesh
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    glBegin(GL_TRIANGLES);
+    if (options.drawMesh) {
+        glBegin(GL_TRIANGLES);
 
-    glColor3f(1, 1, 1);
+        glColor3f(1, 1, 1);
 
-    for (auto it : mesh.faces()) {
+        for (auto it : mesh.faces()) {
 
-        auto normal = mesh.normal(it);
+            auto normal = mesh.normal(it);
 
-        glNormal3f(normal[0], normal[1], normal[2]);
+            glNormal3f(normal[0], normal[1], normal[2]);
 
-        for (auto vit : it.vertices()) {
-            auto pos = mesh.point(vit);
+            for (auto vit : it.vertices()) {
+                auto pos = mesh.point(vit);
 
-            glVertex3f(pos[0], pos[1], pos[2]);
+                glVertex3f(pos[0], pos[1], pos[2]);
+            }
         }
-    }
 
-    glEnd();
+        glEnd();
+    }
 
     glDisable(GL_LIGHTING);
 
@@ -206,40 +208,42 @@ skbar::renderer::OPMeshRenderer::RenderQuad(const skbar::EditableMesh &eMesh,
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    glBegin(GL_QUADS);
+    if (options.drawMesh) {
+        glBegin(GL_QUADS);
 
-    if (!options.quadOptions.drawPatches) {
-        glColor3f(1, 1, 1);
-    }
-
-    for (auto it : mesh.faces()) {
-
-        auto normal = mesh.normal(it);
-
-        if (options.quadOptions.drawPatches) {
-            const auto color = GetColor(mesh.data(it).quadFaceData.patchId);
-
-            glColor3f(color[0], color[1], color[2]);
+        if (!options.quadOptions.drawPatches) {
+            glColor3f(1, 1, 1);
         }
 
-        glNormal3f(normal[0], normal[1], normal[2]);
+        for (auto it : mesh.faces()) {
 
-        const auto startHE = mesh.halfedge_handle(it);
-        auto currentHE = startHE;
+            auto normal = mesh.normal(it);
 
-         do {
+            if (options.quadOptions.drawPatches) {
+                const auto color = GetColor(mesh.data(it).quadFaceData.patchId);
 
-            const auto v = currentHE.from();
-            auto pos = mesh.point(v);
+                glColor3f(color[0], color[1], color[2]);
+            }
 
-            glVertex3f(pos[0], pos[1], pos[2]);
+            glNormal3f(normal[0], normal[1], normal[2]);
 
-            currentHE = currentHE.next();
-        } while (currentHE != startHE);
+            const auto startHE = mesh.halfedge_handle(it);
+            auto currentHE = startHE;
 
+            do {
+
+                const auto v = currentHE.from();
+                auto pos = mesh.point(v);
+
+                glVertex3f(pos[0], pos[1], pos[2]);
+
+                currentHE = currentHE.next();
+            } while (currentHE != startHE);
+
+        }
+
+        glEnd();
     }
-
-    glEnd();
 
     glDisable(GL_POLYGON_OFFSET_FILL);
     glDisable(GL_LIGHTING);

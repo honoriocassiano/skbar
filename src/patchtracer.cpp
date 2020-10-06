@@ -76,7 +76,7 @@ void skbar::PatchTracer::Trace(skbar::OPQuadMesh &baseMesh) {
                  (mesh.data(mesh.face_handle(faceToStartCheck)).quadFaceData.patchId != -1));
     }
 
-    TraceGrid(mesh, currentPatch);
+    TraceGrid(baseMesh, currentPatch);
 }
 
 std::unordered_set<int> skbar::PatchTracer::GetEdges(const skbar::OPQuadMesh::QuadMeshImpl &mesh,
@@ -170,13 +170,17 @@ std::vector<int> skbar::PatchTracer::FindLine(const OpenMesh::SmartHalfedgeHandl
     return line;
 }
 
-void skbar::PatchTracer::TraceGrid(skbar::OPQuadMesh::QuadMeshImpl &mesh,
+void skbar::PatchTracer::TraceGrid(skbar::OPQuadMesh &baseMesh,
                                    const unsigned int numPatches) {
+
+    auto &mesh = baseMesh.Get();
+    auto &patchFacesMap = baseMesh.GetPatchFacesMap();
 
     std::unordered_set<int> tracedPatches;
 
     std::set<int> cornerVertices;
 
+    // Find the corner vertices
     for (const auto vertex : mesh.vertices()) {
 
         std::unordered_set<int> delimitedPatches;
@@ -190,6 +194,8 @@ void skbar::PatchTracer::TraceGrid(skbar::OPQuadMesh::QuadMeshImpl &mesh,
 
         if (delimitedPatches.size() == mesh.valence(vertex)) {
             cornerVertices.insert(vertex.idx());
+
+            mesh.data(vertex).quadVertexData.isCorner = true;
         }
     }
 
@@ -234,15 +240,15 @@ void skbar::PatchTracer::TraceGrid(skbar::OPQuadMesh::QuadMeshImpl &mesh,
                     }
                 }
 
-                int currentLine;
+                std::vector<std::vector<int>> patchFaces;
 
-                for (currentLine = 0; currentLine < gridLines; currentLine++) {
+                for (int currentLine = 0; currentLine < gridLines; currentLine++) {
 
-                    int currentColumn;
+                    std::vector<int> patchLineFaces;
 
                     currentHE = firstInLineHE;
 
-                    for (currentColumn = 0; currentColumn < gridColumns; currentColumn++) {
+                    for (int currentColumn = 0; currentColumn < gridColumns; currentColumn++) {
 
                         const Vec2f coordinate{float(currentLine) / float(gridLines - 1),
                                                float(currentColumn) / float(gridColumns - 1)};
@@ -250,13 +256,25 @@ void skbar::PatchTracer::TraceGrid(skbar::OPQuadMesh::QuadMeshImpl &mesh,
                         mesh.data(currentHE.from()).quadVertexData.patchParametrizations[currentPatch] =
                                 coordinate;
 
+                        // TODO Improve this
+                        if (currentColumn < (gridColumns - 1)) {
+                            patchLineFaces.push_back(currentHE.face().idx());
+                        }
+
                         currentHE = currentHE.next().opp().next();
                     }
 
                     firstInLineHE = firstInLineHE.next().next().opp();
+
+                    // TODO Improve this
+                    if (currentLine < (gridLines - 1)) {
+                        patchFaces.push_back(patchLineFaces);
+                    }
                 }
 
                 tracedPatches.insert(currentPatch);
+
+                patchFacesMap[currentPatch] = patchFaces;
             }
         }
     }

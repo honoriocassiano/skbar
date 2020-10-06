@@ -21,7 +21,7 @@ std::array<T, N> ToStdVector(const OpenMesh::VectorT<T, N> &vector) {
     return result;
 }
 
-template<typename T, int N>
+template<typename T, unsigned long N>
 OpenMesh::VectorT<T, N> ToOPVector(const std::array<T, N> &vector) {
     OpenMesh::VectorT<T, N> result;
 

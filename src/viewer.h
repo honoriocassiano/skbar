@@ -78,6 +78,8 @@ public:
 
     void ToggleDrawPatches();
 
+    void ToggleDrawMesh();
+
     void ToggleMesh();
 
 private:

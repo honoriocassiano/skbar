@@ -15,22 +15,26 @@
 
 namespace skbar {
 
-    class PatchQuadrangulator {
+class PatchQuadrangulator {
 
-    private:
-        const static double LAPLACE_CONSTRAINT_WEIGHT;
+private:
+    const static double LAPLACE_CONSTRAINT_WEIGHT;
 
-    public:
+public:
 
-        static patchgen::PatchParam ComputeTopology(const Eigen::VectorXi &patchSides, OPQuadMesh &mesh);
+    static OPQuadMesh
+    Quadrangulate(const Eigen::VectorXi &patchSides, const std::vector<OpenMesh::Vec3d> &positions,
+                  bool positionsIsClockwise);
 
-        static Eigen::SparseMatrix<double> GetLaplacianMatrix(const OPQuadMesh &mesh, const patchgen::PatchParam &param);
+    static patchgen::PatchParam ComputeTopology(const Eigen::VectorXi &patchSides, OPQuadMesh &mesh);
 
-        static Eigen::Matrix<double, -1, 3> GetRightSide(const OPQuadMesh &mesh, const patchgen::PatchParam &param);
+    static Eigen::SparseMatrix<double> GetLaplacianMatrix(const OPQuadMesh &mesh, const patchgen::PatchParam &param);
 
-        static void SetLaplacianPositions(OPQuadMesh &patch, const std::vector<OpenMesh::Vec3d> &positions,
-                                          bool positionsIsClockwise);
-    };
+    static Eigen::Matrix<double, -1, 3> GetRightSide(const OPQuadMesh &mesh, const patchgen::PatchParam &param);
+
+    static void SetLaplacianPositions(OPQuadMesh &patch, const std::vector<OpenMesh::Vec3d> &positions,
+                                      bool positionsIsClockwise);
+};
 }
 
 #endif //SKBAR_PATCHQUADRANGULATOR_H
