@@ -118,7 +118,7 @@ skbar::RequadrangulatorNew::FindAffectedPatches(const EditableMesh &editableMesh
     return result;
 }
 
-std::map<int, bool> skbar::RequadrangulatorNew::CutQuadWithSketch(skbar::EditableMesh &editableMesh) {
+std::map<int, bool> skbar::RequadrangulatorNew::CutQuadMesh(skbar::EditableMesh &editableMesh) {
 
     std::map<int, bool> result;
 

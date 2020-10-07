@@ -58,10 +58,10 @@ private:
     /**
      * Split the quad mesh according to the sketch
      *
-     * @param mesh
+     * @param editableMesh
      * @return a map indexed by the new vertices whose values says if the vertex is on the border
      */
-    static std::map<int, bool> CutQuadWithSketch(EditableMesh &mesh);
+    static std::map<int, bool> CutQuadMesh(EditableMesh &editableMesh);
 
     static TraceData TracePolygons(skbar::EditableMesh &editableMesh,
                                    const std::map<int, std::vector<InOutSKVIndex>> &inOutsByPatchMap);
