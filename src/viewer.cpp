@@ -141,3 +141,7 @@ void skbar::Viewer::ToggleMesh() {
         renderOptions.mesh = renderer::Options::Mesh::QUAD;
     }
 }
+
+void skbar::Viewer::ToggleDrawSketch() {
+    renderOptions.drawSketch = !renderOptions.drawSketch;
+}

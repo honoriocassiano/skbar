@@ -80,6 +80,8 @@ public:
 
     void ToggleDrawMesh();
 
+    void ToggleDrawSketch();
+
     void ToggleMesh();
 
 private:

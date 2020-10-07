@@ -123,6 +123,12 @@ bool skbar::ViewerEventProcessor::ProcessKeyboardUp(const SDL_Event *event) {
 
             break;
 
+        case SDLK_s:
+            viewer->ToggleDrawSketch();
+            processed = true;
+
+            break;
+
         case SDLK_p:
             viewer->ToggleDrawPatches();
             processed = true;
