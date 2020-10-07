@@ -147,8 +147,41 @@ std::map<int, bool> skbar::RequadrangulatorNew::CutQuadMesh(skbar::EditableMesh 
 
     std::set<int> addedFaces;
 
+    int firstValidSkv = -1;
+
     while (!allFacesAdded) {
         const auto &currentSkv = sketch.Data().at(currentSkvIndex);
+
+        // Find first side of new face
+        const auto findSide = [currentFace](OpenMesh::SmartVertexHandle firstV,
+                                            OpenMesh::SmartVertexHandle lastV)
+                -> std::vector<OpenMesh::SmartVertexHandle> {
+
+            std::vector<OpenMesh::SmartVertexHandle> result;
+
+            OpenMesh::SmartHalfedgeHandle firstHE;
+
+            // Find the first HE
+            for (const auto &he : firstV.outgoing_halfedges()) {
+                if (he.face().idx() == currentFace) {
+                    firstHE = he;
+
+                    result.push_back(firstHE.from());
+                }
+            }
+
+            assert(firstHE.is_valid() && "Invalid half edge!");
+
+            OpenMesh::SmartHalfedgeHandle currentHE = firstHE;
+
+            while (currentHE.from() != lastV) {
+                result.push_back(currentHE.to());
+
+                currentHE = currentHE.next();
+            }
+
+            return result;
+        };
 
         if (currentSkv.Type() == SketchVertex::EType::EDGE) {
 
@@ -164,6 +197,8 @@ std::map<int, bool> skbar::RequadrangulatorNew::CutQuadMesh(skbar::EditableMesh 
 
                     if (!inVertex.is_valid()) {
 
+                        firstValidSkv = currentSkvIndex;
+
                         inVertex = OpenMesh::SmartVertexHandle(newVertexId, &quadmesh);
                         mapSkvToVertex[currentSkvIndex] = inVertex;
 
@@ -176,37 +211,6 @@ std::map<int, bool> skbar::RequadrangulatorNew::CutQuadMesh(skbar::EditableMesh 
                     } else {
 
                         const auto outVertex = OpenMesh::SmartVertexHandle(newVertexId, &quadmesh);
-
-                        // Find first side of new face
-                        const auto findSide = [currentFace](OpenMesh::SmartVertexHandle firstV,
-                                                            OpenMesh::SmartVertexHandle lastV)
-                                -> std::vector<OpenMesh::SmartVertexHandle> {
-
-                            std::vector<OpenMesh::SmartVertexHandle> result;
-
-                            OpenMesh::SmartHalfedgeHandle firstHE;
-
-                            // Find the first HE
-                            for (const auto &he : firstV.outgoing_halfedges()) {
-                                if (he.face().idx() == currentFace) {
-                                    firstHE = he;
-
-                                    result.push_back(firstHE.from());
-                                }
-                            }
-
-                            assert(firstHE.is_valid() && "Invalid half edge!");
-
-                            OpenMesh::SmartHalfedgeHandle currentHE = firstHE;
-
-                            while (currentHE.from() != lastV) {
-                                result.push_back(currentHE.to());
-
-                                currentHE = currentHE.next();
-                            }
-
-                            return result;
-                        };
 
                         const auto side1 = findSide(inVertex, outVertex);
                         const auto side2 = findSide(outVertex, inVertex);
@@ -244,7 +248,37 @@ std::map<int, bool> skbar::RequadrangulatorNew::CutQuadMesh(skbar::EditableMesh 
                     }
                 } else {
 
+                    const auto skvInsideFace = sketch.Data().at(0);
 
+                    const auto vInsideFaceId = AddSketchVertexToQuadMesh(editableMesh.GetQuad(), skvInsideFace);
+                    const auto vInsideFace = OpenMesh::SmartVertexHandle(vInsideFaceId, &quadmesh);
+
+                    const auto outVertex = mapSkvToVertex[firstValidSkv];
+
+                    auto side1 = findSide(inVertex, outVertex);
+                    auto side2 = findSide(outVertex, inVertex);
+
+                    side1.push_back(vInsideFace);
+                    side2.push_back(vInsideFace);
+
+                    const auto oldData = quadmesh.data(OpenMesh::FaceHandle(currentFace)).quadFaceData;
+
+                    // Delete the face
+                    quadmesh.delete_face(OpenMesh::FaceHandle(currentFace), false);
+
+                    // Add the new face
+                    const auto newFaceId1 = quadmesh.add_face(side1);
+                    const auto newFaceId2 = quadmesh.add_face(side2);
+
+                    addedFaces.insert(newFaceId1.idx());
+                    addedFaces.insert(newFaceId2.idx());
+
+                    {
+                        quadmesh.data(
+                                OpenMesh::FaceHandle(newFaceId1.idx())).quadFaceData.patchId = oldData.patchId;
+                        quadmesh.data(
+                                OpenMesh::FaceHandle(newFaceId2.idx())).quadFaceData.patchId = oldData.patchId;
+                    }
 
                     // TODO Implement the last cut
                     allFacesAdded = true;
@@ -255,6 +289,8 @@ std::map<int, bool> skbar::RequadrangulatorNew::CutQuadMesh(skbar::EditableMesh 
         currentSkvIndex = (currentSkvIndex + 1) % sketchSize;
 
     }
+
+    quadmesh.update_normals();
 
     return result;
 }
