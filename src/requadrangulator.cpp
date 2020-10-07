@@ -772,7 +772,7 @@ skbar::Requadrangulator::AddNewVerticesToQuad(skbar::QuadMesh &aQuadMesh, const 
     return result;
 }
 
-std::map<int, std::size_t> skbar::Requadrangulator::FindHEsToCheck(
+std::map<int, std::size_t> skbar::Requadrangulator::FindEdgesToCheck(
         const skbar::EditableMesh &editableMesh,
         int patch,
         const std::vector<skbar::Requadrangulator::InOutSKVIndex> &inOuts) {
@@ -820,13 +820,13 @@ skbar::Requadrangulator::TraceData skbar::Requadrangulator::TracePolygons(
     for (const auto &entry: inOutsByPatchMap) {
 
         const auto &patch = entry.first;
-        const auto &inOuts = entry.second;
+        const auto &inOutsOnPatch = entry.second;
 
         std::vector<int> edgesBySide;
         std::vector<Vec2f> borderVertexPositions;
         std::vector<int> borderVertices;
 
-        const auto halfEdgesToCheck = FindHEsToCheck(editableMesh, patch, inOuts);
+        const auto halfEdgesToCheck = FindEdgesToCheck(editableMesh, patch, inOutsOnPatch);
 
         std::map<int, bool> halfEdgesChecked;
 
@@ -843,7 +843,7 @@ skbar::Requadrangulator::TraceData skbar::Requadrangulator::TracePolygons(
             const auto firstHE = OpenMesh::SmartHalfedgeHandle(firstHEId, &quadmesh);
 
             if (!checked) {
-                const auto[inId, outId] = inOuts[inOutId];
+                const auto[inId, outId] = inOutsOnPatch[inOutId];
 
                 // Used to add sketch vertices in reverse order if is true
                 const auto startingFromOut = (firstHE.edge().idx() == sketch.Data().at(outId).Pointer());
