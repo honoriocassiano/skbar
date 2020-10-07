@@ -209,13 +209,14 @@ skbar::renderer::OPMeshRenderer::RenderQuad(const skbar::EditableMesh &eMesh,
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     if (options.drawMesh) {
-        glBegin(GL_QUADS);
 
         if (!options.quadOptions.drawPatches) {
             glColor3f(1, 1, 1);
         }
 
         for (auto it : mesh.faces()) {
+
+            glBegin(GL_POLYGON);
 
             auto normal = mesh.normal(it);
 
@@ -240,9 +241,8 @@ skbar::renderer::OPMeshRenderer::RenderQuad(const skbar::EditableMesh &eMesh,
                 currentHE = currentHE.next();
             } while (currentHE != startHE);
 
+            glEnd();
         }
-
-        glEnd();
     }
 
     glDisable(GL_POLYGON_OFFSET_FILL);
@@ -267,18 +267,18 @@ void skbar::renderer::OPMeshRenderer::RenderEdges(const skbar::OPQuadMesh::QuadM
     glLineWidth(2.0f);
     glColor3f(0.0f, 0.0f, 0.0f);
 
-    glBegin(GL_QUADS);
-
     for (const auto &face : mesh.faces()) {
+
+        glBegin(GL_POLYGON);
 
         for (const auto v : face.vertices()) {
             const auto p = mesh.point(v);
 
             glVertex3f(p[0], p[1], p[2]);
         }
-    }
 
-    glEnd();
+        glEnd();
+    }
 
     glDisable(GL_LINE_SMOOTH);
 }
