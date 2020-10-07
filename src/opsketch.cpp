@@ -6,7 +6,7 @@
 #include "utils/openmesh.h"
 #include "utils/triangleutils.h"
 
-#include "requadrangulator.h"
+#include "requadrangulatornew.h"
 
 #include "utils/debug.h"
 
@@ -100,8 +100,7 @@ bool skbar::OPSketch::AddPoint(const Line<Vec3f> &ray,
 
                 // TODO Find a better place to do this
                 {
-                    Requadrangulator r(mesh);
-                    r.RequadrangulateAll();
+                    RequadrangulatorNew::RequadrangulateAll(*mesh);
                 }
             }
 
