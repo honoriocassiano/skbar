@@ -11,8 +11,15 @@ namespace skbar {
 
 class RequadrangulatorNew {
 
+    struct InOutSKVIndex {
+        int in;
+        int out;
+    };
+
 public:
-    static void RequadrangulateAll(EditableMesh &mesh);
+    static void RequadrangulateAll(EditableMesh &editableMesh);
+
+    static std::map<int, std::vector<InOutSKVIndex>> FindAffectedPatches(const EditableMesh &editableMesh);
 };
 }
 
