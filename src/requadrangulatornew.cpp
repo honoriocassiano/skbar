@@ -159,8 +159,8 @@ std::map<int, bool> skbar::RequadrangulatorNew::CutQuadWithSketch(skbar::Editabl
 
     auto allFacesAdded = false;
 
-    OpenMesh::VertexHandle inVertex;
-    OpenMesh::VertexHandle outVertex;
+    OpenMesh::SmartVertexHandle inVertex;
+    OpenMesh::SmartVertexHandle outVertex;
 
     while (!allFacesAdded) {
         const auto &currentSkv = sketch.Data().at(currentSkvIndex);
@@ -169,7 +169,7 @@ std::map<int, bool> skbar::RequadrangulatorNew::CutQuadWithSketch(skbar::Editabl
         if (!inVertex.is_valid()) {
             const int id = AddSketchVertexToQuadMesh(editableMesh.GetQuad(), currentSkv);
 
-            inVertex = OpenMesh::VertexHandle(id);
+            inVertex = OpenMesh::SmartVertexHandle(id, &quadmesh);
         } else {
 
             if (currentSkv.Type() == SketchVertex::EType::EDGE) {
@@ -181,13 +181,13 @@ std::map<int, bool> skbar::RequadrangulatorNew::CutQuadWithSketch(skbar::Editabl
 
                     const int newVertexId = AddSketchVertexToQuadMesh(editableMesh.GetQuad(), currentSkv);
 
-                    outVertex = OpenMesh::VertexHandle(newVertexId);
+                    outVertex = OpenMesh::SmartVertexHandle(newVertexId, &quadmesh);
 
                     {
                         OpenMesh::SmartHalfedgeHandle firstHE;
 //                        OpenMesh::SmartHalfedgeHandle firstHE;
 
-                        for (const auto &he : OpenMesh::make_smart(inVertex, quadmesh).outgoing_halfedges()) {
+                        for (const auto &he : inVertex.outgoing_halfedges()) {
                             if (he.face().idx() == currentFace) {
                                 firstHE = he;
                             }
@@ -198,7 +198,8 @@ std::map<int, bool> skbar::RequadrangulatorNew::CutQuadWithSketch(skbar::Editabl
 //                        OpenMesh::SmartHalfedgeHandle currentHE = firstHE;
 
                         // Find first side of new face
-                        const auto findSide = [&quadmesh, currentFace](auto firstV, auto lastV)
+                        const auto findSide = [&quadmesh, currentFace](OpenMesh::SmartVertexHandle firstV,
+                                                                       OpenMesh::SmartVertexHandle lastV)
                                 -> std::vector<OpenMesh::SmartVertexHandle> {
                             std::vector<OpenMesh::SmartVertexHandle> result;
 
