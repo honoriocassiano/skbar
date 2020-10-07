@@ -68,9 +68,6 @@ private:
 
     static int AddSketchVertexToQuadMesh(QuadMesh &mesh, const SketchVertex &sketchVertex);
 
-    static void CreateNewFacesOnQuadMesh(QuadMesh &mesh, int patch, const QuadMesh &newPatch,
-                                         const std::map<int, int> &newPatchToQuadMesh);
-
     /**
      * Get all half-edges that cross the sketch in some vertex
      *
