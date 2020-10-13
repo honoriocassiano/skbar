@@ -88,6 +88,18 @@ private:
     static std::map<int, int>
     AddNewVerticesToQuad(QuadMesh &aQuadMesh, const TriMesh &triMesh, const QuadMesh &newPatch, int patch);
 
+    /**
+     * Split the quad mesh according to the sketch
+     *
+     * @param mesh
+     * @return a map indexed by the new vertices whose values says if the vertex is on the border
+     */
+    static std::map<int, bool> CutQuadWithSketch(EditableMesh &mesh);
+
+//    static PolygonData
+//    WalkOnBorder(const EditableMesh &mesh, int patch, int heIndex, const std::vector<InOutSKVIndex> &inOutsOnPatch,
+//                 const std::map<int, std::size_t> &edgesToCheck, std::map<int, bool> &halfEdgesChecked);
+
     static Vec3f UnparametrizeVertex(const QuadMesh &aQuadMesh, const TriMesh &triMesh, int patch,
                                      const Vec2f parametricPosition);
 
@@ -118,7 +130,10 @@ private:
 
     static void DeleteAllPatchFaces(QuadMesh &mesh, std::set<int> patches);
 
+    [[deprecated]]
     static int AddSketchVertexToQuadMesh(QuadMesh &mesh, const SketchVertex &sketchVertex);
+
+    static int AddSketchVertexToQuadMesh2(QuadMesh &mesh, const SketchVertex &sketchVertex);
 
     static void SplitQuadEdges(QuadMesh &mesh, const Sketch &sketch, const std::vector<int> &sketchVertexOnMesh,
                                const std::vector<bool> &mustSplitEdge

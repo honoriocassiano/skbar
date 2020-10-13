@@ -297,15 +297,19 @@ std::map<int, bool> skbar::RequadrangulatorNew::CutQuadMesh(skbar::EditableMesh 
 
 void
 skbar::RequadrangulatorNew::RequadrangulatePatches(skbar::EditableMesh &editableMesh,
-                                                const std::map<int, std::vector<
-                                                        skbar::RequadrangulatorNew::InOutSKVIndex>> &inOutsByPatchMap) {
+                                                   const std::map<int, std::vector<
+                                                           skbar::RequadrangulatorNew::InOutSKVIndex>> &inOutsByPatchMap) {
 
     auto &sketch = dynamic_cast<OPSketch &>(editableMesh.GetSketch());
 
     auto &quadmesh = dynamic_cast<OPQuadMesh &>(editableMesh.GetQuad()).Get();
     auto &trimesh = dynamic_cast<OPTriMesh &>(editableMesh.GetTri()).Get();
 
-    const auto traceData = TracePolygons(editableMesh, inOutsByPatchMap);
+//    const auto traceData = TracePolygons(editableMesh, inOutsByPatchMap);
+//
+//    const auto &dataByPolygonInPatch = traceData.polygonsData;
+//    const auto &sketchVertexOnMesh = traceData.sketchVertexOnMesh;
+//    const auto &mustSplitEdge = traceData.mustSplitEdge;
 
     CutQuadMesh(editableMesh);
 
