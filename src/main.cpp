@@ -171,6 +171,73 @@ int FindHalfEdgeOnPatch(const OPQuadMesh::QuadMeshImpl &mesh, const int edgeId, 
     return -1;
 }
 
+// TODO Allow to split sketch in multiple sides
+std::vector<std::vector<PolygonVertex>> MapSegmentToSides(const std::vector<SketchPoint> &segment) {
+    std::vector<std::vector<PolygonVertex>> result;
+
+    std::vector<PolygonVertex> side;
+
+    for (const auto &skv : segment) {
+        side.emplace_back(skv.position, skv.metadata.indexOnSketch, PolygonVertexType::SKETCH);
+    }
+
+    result.push_back(std::move(side));
+
+    return result;
+}
+
+std::vector<Polygon> SplitPolygons(const OPQuadMesh::QuadMeshImpl &mesh,
+                                   const std::map<int, std::vector<SketchPoint>> &segmentsByPatch) {
+    std::vector<Polygon> result;
+
+    for (const auto &entry : segmentsByPatch) {
+        const auto &[patch, segment] = entry;
+
+        const auto &firstSkv = segment.at(0);
+        const auto &lastSkv = segment.at(segment.size() - 1);
+
+        const OpenMesh::SmartHalfedgeHandle sFirstHE(FindHalfEdgeOnPatch(mesh, firstSkv.metadata.index, patch), &mesh);
+        const OpenMesh::SmartHalfedgeHandle sLastHE(FindHalfEdgeOnPatch(mesh, lastSkv.metadata.index, patch), &mesh);
+
+        assert(sFirstHE.is_valid() && "Invalid half-edge");
+        assert(sLastHE.is_valid() && "Invalid half-edge");
+
+        const auto sideFirstToLast = FindBorderSidesBetween(mesh, firstSkv, lastSkv);
+        const auto sideLastToFirst = FindBorderSidesBetween(mesh, lastSkv, firstSkv);
+
+        {
+            std::vector<std::vector<PolygonVertex>> sketchSides = MapSegmentToSides(segment);
+            std::vector<std::vector<PolygonVertex>> reversedSketchSides;
+
+            // Reverse sketch sides
+            for (auto sideIt = sketchSides.rbegin(); sideIt != sketchSides.rend(); sideIt++) {
+                const auto side = *sideIt;
+
+                std::vector<PolygonVertex> temp;
+
+                temp.insert(temp.end(), side.rbegin(), side.rend());
+
+                reversedSketchSides.push_back(std::move(temp));
+            }
+
+            std::vector<std::vector<PolygonVertex>> polygon1;
+            std::vector<std::vector<PolygonVertex>> polygon2;
+
+            // Merge sketch sides with patch sides
+            polygon1.insert(polygon1.end(), sideFirstToLast.begin(), sideFirstToLast.end());
+            polygon1.insert(polygon1.end(), reversedSketchSides.begin(), reversedSketchSides.end());
+
+            polygon2.insert(polygon2.end(), sideLastToFirst.begin(), sideLastToFirst.end());
+            polygon2.insert(polygon2.end(), sketchSides.begin(), sketchSides.end());
+
+            result.emplace_back(polygon1, 0, false);
+            result.emplace_back(polygon2, 0, true);
+        }
+    }
+
+    return result;
+}
+
 // TODO Implement this function
 int GetCommonPatch(const OPQuadMesh::QuadMeshImpl &mesh, int v1Id, int v2Id) {
     return 0;
