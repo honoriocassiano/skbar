@@ -114,8 +114,7 @@ std::vector<std::vector<PolygonVertex>> FindBorderSidesBetween(const OPQuadMesh:
     std::vector<PolygonVertex> side;
 
     // Add first sketch vertex
-    side.emplace_back(utils::ToStdVector(mesh.point(sCurrentHE.from())), sCurrentHE.from().idx(),
-                   PolygonVertexType::MESH);
+    side.emplace_back(firstSkv.position, firstSkv.metadata.indexOnSketch, PolygonVertexType::SKETCH);
 
     while (sCurrentHE.idx() != sLastHE.idx()) {
 
@@ -141,8 +140,7 @@ std::vector<std::vector<PolygonVertex>> FindBorderSidesBetween(const OPQuadMesh:
     }
 
     // Add last sketch vertex
-    side.emplace_back(utils::ToStdVector(mesh.point(sCurrentHE.to())), sCurrentHE.to().idx(),
-                      PolygonVertexType::MESH);
+    side.emplace_back(lastSkv.position, lastSkv.metadata.indexOnSketch, PolygonVertexType::SKETCH);
 
     result.push_back(std::move(side));
 
