@@ -54,6 +54,38 @@ struct SketchPoint {
     }
 };
 
+// Polygon data
+enum class PolygonVertexType {
+    NONE,
+    SKETCH,
+    MESH,
+};
+
+struct PolygonVertex {
+    Vec3f position;
+    int index;
+    PolygonVertexType type;
+
+    PolygonVertex(const Vec3f &_position, const int _index, const PolygonVertexType _type)
+            : position(_position), index(_index), type(_type) {}
+
+    PolygonVertex()
+            : position(), index(-1), type(PolygonVertexType::NONE) {}
+};
+
+struct Polygon {
+    std::vector<std::vector<PolygonVertex>> sides;
+    int patch;
+    bool clockwise;
+
+    Polygon(std::vector<std::vector<PolygonVertex>> _sides, int _patch, bool _clockwise)
+            : sides(std::move(_sides)), patch(_patch), clockwise(_clockwise) {}
+
+    Polygon(const std::vector<std::vector<PolygonVertex>> &&_sides, int _patch, bool _clockwise)
+            : sides(_sides), patch(_patch), clockwise(_clockwise) {}
+};
+
+
 // TODO Implement this function
 int GetCommonPatch(const OPQuadMesh::QuadMeshImpl &mesh, int v1Id, int v2Id) {
     return 0;
