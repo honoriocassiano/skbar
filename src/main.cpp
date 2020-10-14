@@ -18,6 +18,7 @@
 
 #include "intersectionutils.h"
 #include "opquadmesh.h"
+#include "utils/openmesh.h"
 
 using namespace skbar;
 
@@ -91,6 +92,44 @@ struct Polygon {
 // TODO Improve this
 bool IsCornerVertex(const OpenMesh::SmartVertexHandle &v) {
     return v.valence() == 2;
+}
+
+std::vector<std::vector<PolygonVertex>> FindBorderSidesBetween(const OPQuadMesh::QuadMeshImpl &mesh,
+                                                               const OpenMesh::SmartHalfedgeHandle &sFirstHE,
+                                                               const OpenMesh::SmartHalfedgeHandle &sLastHE) {
+
+    std::vector<std::vector<PolygonVertex>> result;
+
+    auto sCurrentHE = sFirstHE;
+
+    std::vector<PolygonVertex> side;
+
+    while (sCurrentHE.idx() != sLastHE.idx()) {
+
+        const auto sVertex = sCurrentHE.to();
+
+        const PolygonVertex polygonVertex(utils::ToStdVector(mesh.point(sVertex)), sVertex.idx(),
+                                          PolygonVertexType::MESH);
+
+        if (!IsCornerVertex(sVertex)) {
+            side.push_back(polygonVertex);
+
+            sCurrentHE = sCurrentHE.next().opp().next();
+
+        } else {
+            side.push_back(polygonVertex);
+            result.push_back(std::move(side));
+
+            // Reset side variable
+            side = std::vector<PolygonVertex>(1, polygonVertex);
+
+            sCurrentHE = sCurrentHE.next();
+        }
+    }
+
+    result.push_back(std::move(side));
+
+    return result;
 }
 
 int GetFacePatch(const OPQuadMesh::QuadMeshImpl &mesh, const int faceId) {
