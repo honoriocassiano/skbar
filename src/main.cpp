@@ -36,12 +36,13 @@ struct SketchPointMeta {
     IntersectionType type;
     int index;
     bool onPatchBorder;
+    int indexOnSketch;
 
-    SketchPointMeta(IntersectionType _type, int _index, bool _onPatchBorder)
-            : type(_type), index(_index), onPatchBorder(_onPatchBorder) {}
+    SketchPointMeta(IntersectionType _type, int _index, bool _onPatchBorder, int _indexOnSketch)
+            : type(_type), index(_index), onPatchBorder(_onPatchBorder), indexOnSketch(_indexOnSketch) {}
 
     SketchPointMeta()
-            : type(IntersectionType::NONE), index(-1), onPatchBorder(false) {}
+            : type(IntersectionType::NONE), index(-1), onPatchBorder(false), indexOnSketch(-1) {}
 };
 
 struct SketchPoint {
@@ -49,12 +50,13 @@ struct SketchPoint {
 
     SketchPointMeta metadata;
 
-    SketchPoint(const Vec3f &_position, bool _isPatchEdge, bool _isEdge, int index)
+    SketchPoint(const Vec3f &_position, bool _isPatchEdge, bool _isEdge, int index, int _indexOnSketch)
             : position(_position) {
 
         this->metadata.onPatchBorder = _isPatchEdge;
         this->metadata.type = _isEdge ? IntersectionType::EDGE : IntersectionType::FACE;
         this->metadata.index = index;
+        this->metadata.indexOnSketch = _indexOnSketch;
     }
 };
 
@@ -218,15 +220,15 @@ std::vector<SketchPoint> GetSketch() {
 
     std::vector<SketchPoint> result;
 
-    result.emplace_back(Vec3f{0.0, 0.6, 0.0}, true, true, 9);
-    result.emplace_back(Vec3f{0.3, 0.6, 0.0}, false, false, 3);
-    result.emplace_back(Vec3f{0.36, 0.5, 0.0}, false, true, 2);
-    result.emplace_back(Vec3f{0.43, 0.43, 0.0}, false, false, 0);
-    result.emplace_back(Vec3f{0.5, 0.32, 0.0}, false, true, 1);
-    result.emplace_back(Vec3f{0.57, 0.42, 0.0}, false, false, 1);
-    result.emplace_back(Vec3f{0.69, 0.5, 0.0}, false, true, 6);
-    result.emplace_back(Vec3f{0.77, 0.81, 0.0}, false, false, 3);
-    result.emplace_back(Vec3f{1.0, 0.72, 0.0}, true, true, 10);
+    result.emplace_back(Vec3f{0.0, 0.6, 0.0}, true, true, 9, 0);
+    result.emplace_back(Vec3f{0.3, 0.6, 0.0}, false, false, 3, 1);
+    result.emplace_back(Vec3f{0.36, 0.5, 0.0}, false, true, 2, 2);
+    result.emplace_back(Vec3f{0.43, 0.43, 0.0}, false, false, 0, 3);
+    result.emplace_back(Vec3f{0.5, 0.32, 0.0}, false, true, 1, 4);
+    result.emplace_back(Vec3f{0.57, 0.42, 0.0}, false, false, 1, 5);
+    result.emplace_back(Vec3f{0.69, 0.5, 0.0}, false, true, 6, 6);
+    result.emplace_back(Vec3f{0.77, 0.81, 0.0}, false, false, 3, 7);
+    result.emplace_back(Vec3f{1.0, 0.72, 0.0}, true, true, 10, 8);
 
     return result;
 }
