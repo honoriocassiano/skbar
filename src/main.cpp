@@ -86,6 +86,30 @@ struct Polygon {
 };
 
 
+int GetFacePatch(const OPQuadMesh::QuadMeshImpl &mesh, const int faceId) {
+    return (faceId >= 0) ? 0 : -1;
+}
+
+int FindHalfEdgeOnPatch(const OPQuadMesh::QuadMeshImpl &mesh, const int edgeId, const int patch) {
+    const OpenMesh::SmartEdgeHandle sEdge(edgeId, &mesh);
+
+    const OpenMesh::SmartFaceHandle sFace0 = sEdge.h0().face();
+    const OpenMesh::SmartFaceHandle sFace1 = sEdge.h1().face();
+
+    const int patchFace0 = GetFacePatch(mesh, sFace0.idx());
+    const int patchFace1 = GetFacePatch(mesh, sFace1.idx());
+
+    assert(patchFace0 != patchFace1 && "Faces are on same patch");
+
+    if (patchFace0 == patch) {
+        return sEdge.h0().idx();
+    } else if (patchFace1 == patch) {
+        return sEdge.h1().idx();
+    }
+
+    assert(false && "Faces are not on patch");
+}
+
 // TODO Implement this function
 int GetCommonPatch(const OPQuadMesh::QuadMeshImpl &mesh, int v1Id, int v2Id) {
     return 0;
