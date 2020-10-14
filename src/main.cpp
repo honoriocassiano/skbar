@@ -185,6 +185,8 @@ SegmentSketchByPatch(const OPQuadMesh::QuadMeshImpl &mesh, const std::vector<Ske
     for (unsigned i = 0; i < sketch.size(); i++) {
         if (sketch.at(i).metadata.onPatchBorder) {
             firstIndex = static_cast<int>(i);
+
+            break;
         }
     }
 
@@ -208,12 +210,11 @@ SegmentSketchByPatch(const OPQuadMesh::QuadMeshImpl &mesh, const std::vector<Ske
 
         while (!finishedPatch) {
 
+            segment.push_back(sketch.at(currentIndex));
+
             if ((sketch.at(currentIndex).metadata.onPatchBorder) && segment.size() > 1) {
                 finishedPatch = true;
             } else {
-                // Add first vertex on patch
-                segment.push_back(sketch.at(currentIndex));
-
                 currentIndex = (currentIndex + 1) % sketch.size();
             }
         }
