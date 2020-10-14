@@ -53,7 +53,12 @@ struct SketchPoint {
     }
 };
 
-std::vector<std::vector<SketchPoint>>
+// TODO Implement this function
+int GetCommonPatch(const OPQuadMesh::QuadMeshImpl &mesh, int v1Id, int v2Id) {
+    return 0;
+}
+
+std::map<int, std::vector<SketchPoint>>
 SegmentSketchByPatch(const OPQuadMesh::QuadMeshImpl &mesh, const std::vector<SketchPoint> &sketch) {
     auto firstIndex = -1;
 
