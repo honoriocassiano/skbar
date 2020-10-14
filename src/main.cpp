@@ -107,7 +107,7 @@ int FindHalfEdgeOnPatch(const OPQuadMesh::QuadMeshImpl &mesh, const int edgeId, 
         return sEdge.h1().idx();
     }
 
-    assert(false && "Faces are not on patch");
+    return -1;
 }
 
 // TODO Implement this function
