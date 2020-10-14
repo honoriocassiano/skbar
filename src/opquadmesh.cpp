@@ -27,7 +27,7 @@ bool skbar::OPQuadMesh::Load(const std::string &filename) {
         mesh.data(ei).quadEdgeData.id = ei.idx();
     }
 
-    PatchTracer::Trace(*this);
+//    PatchTracer::Trace(*this);
 
     mesh.update_normals();
 
