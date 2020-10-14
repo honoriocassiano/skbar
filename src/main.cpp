@@ -25,6 +25,8 @@ using namespace skbar;
 // Definitions
 int FindHalfEdgeOnPatch(const OPQuadMesh::QuadMeshImpl &mesh, int edgeId, int patch);
 
+int GetCommonPatch(const OPQuadMesh::QuadMeshImpl &mesh, int v1Id, int v2Id);
+
 // Sketch data
 enum class IntersectionType {
     NONE,
@@ -97,14 +99,23 @@ bool IsCornerVertex(const OpenMesh::SmartVertexHandle &v) {
 }
 
 std::vector<std::vector<PolygonVertex>> FindBorderSidesBetween(const OPQuadMesh::QuadMeshImpl &mesh,
-                                                               const OpenMesh::SmartHalfedgeHandle &sFirstHE,
-                                                               const OpenMesh::SmartHalfedgeHandle &sLastHE) {
+                                                               const SketchPoint &firstSkv,
+                                                               const SketchPoint &lastSkv) {
+
+    const int patch = GetCommonPatch(mesh, firstSkv.metadata.index, lastSkv.metadata.index);
+
+    const OpenMesh::SmartHalfedgeHandle sFirstHE(FindHalfEdgeOnPatch(mesh, firstSkv.metadata.index, patch), &mesh);
+    const OpenMesh::SmartHalfedgeHandle sLastHE(FindHalfEdgeOnPatch(mesh, lastSkv.metadata.index, patch), &mesh);
 
     std::vector<std::vector<PolygonVertex>> result;
 
     auto sCurrentHE = sFirstHE;
 
     std::vector<PolygonVertex> side;
+
+    // Add first sketch vertex
+    side.emplace_back(utils::ToStdVector(mesh.point(sCurrentHE.from())), sCurrentHE.from().idx(),
+                   PolygonVertexType::MESH);
 
     while (sCurrentHE.idx() != sLastHE.idx()) {
 
@@ -128,6 +139,10 @@ std::vector<std::vector<PolygonVertex>> FindBorderSidesBetween(const OPQuadMesh:
             sCurrentHE = sCurrentHE.next();
         }
     }
+
+    // Add last sketch vertex
+    side.emplace_back(utils::ToStdVector(mesh.point(sCurrentHE.to())), sCurrentHE.to().idx(),
+                      PolygonVertexType::MESH);
 
     result.push_back(std::move(side));
 
