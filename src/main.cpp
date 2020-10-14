@@ -68,15 +68,15 @@ SegmentSketchByPatch(const OPQuadMesh::QuadMeshImpl &mesh, const std::vector<Ske
         }
     }
 
-    std::vector<std::vector<SketchPoint>> result;
+    std::map<int, std::vector<SketchPoint>> result;
 
     // If it's a polygon with hole
     if (firstIndex == -1) {
-        result.push_back(sketch);
+        // TODO Find patch here
+        result.insert_or_assign(0, result);
 
         return result;
     }
-
 
     auto currentIndex = firstIndex;
 
@@ -98,7 +98,10 @@ SegmentSketchByPatch(const OPQuadMesh::QuadMeshImpl &mesh, const std::vector<Ske
             }
         }
 
-        result.push_back(std::move(segment));
+        const int patch = GetCommonPatch(mesh, segment.at(0).metadata.index,
+                                         segment.at(segment.size() - 1).metadata.index);
+
+        result.insert_or_assign(patch, std::move(segment));
 
         // TODO Remove this
         break;
