@@ -53,6 +53,56 @@ struct SketchPoint {
     }
 };
 
+std::vector<std::vector<SketchPoint>>
+SegmentSketchByPatch(const OPQuadMesh::QuadMeshImpl &mesh, const std::vector<SketchPoint> &sketch) {
+    auto firstIndex = -1;
+
+    for (unsigned i = 0; i < sketch.size(); i++) {
+        if (sketch.at(i).metadata.onPatchBorder) {
+            firstIndex = static_cast<int>(i);
+        }
+    }
+
+    std::vector<std::vector<SketchPoint>> result;
+
+    // If it's a polygon with hole
+    if (firstIndex == -1) {
+        result.push_back(sketch);
+
+        return result;
+    }
+
+
+    auto currentIndex = firstIndex;
+
+    do {
+
+        std::vector<SketchPoint> segment;
+
+        bool finishedPatch = false;
+
+        while (!finishedPatch) {
+
+            if ((sketch.at(currentIndex).metadata.onPatchBorder) && segment.size() > 1) {
+                finishedPatch = true;
+            } else {
+                // Add first vertex on patch
+                segment.push_back(sketch.at(currentIndex));
+
+                currentIndex = (currentIndex + 1) % sketch.size();
+            }
+        }
+
+        result.push_back(std::move(segment));
+
+        // TODO Remove this
+        break;
+
+    } while (currentIndex != firstIndex);
+
+    return result;
+}
+
 std::vector<SketchPoint> GetSketch() {
 
     std::vector<SketchPoint> result;
@@ -85,8 +135,11 @@ int main(int argc, char *argv[]) {
 
     mesh.Load("../models/parametric_plane.obj");
 
+    const auto &quadmesh = dynamic_cast<const OPQuadMesh &>(mesh.GetQuad()).Get();
+
     auto sketch = GetSketch();
 
+    const auto segmented = SegmentSketchByPatch(quadmesh, sketch);
 
     return 0;
 }
