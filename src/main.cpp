@@ -130,7 +130,7 @@ SegmentSketchByPatch(const OPQuadMesh::QuadMeshImpl &mesh, const std::vector<Ske
     // If it's a polygon with hole
     if (firstIndex == -1) {
         // TODO Find patch here
-        result.insert_or_assign(0, result);
+        result.insert_or_assign(0, sketch);
 
         return result;
     }
