@@ -21,6 +21,9 @@
 
 using namespace skbar;
 
+// Definitions
+int FindHalfEdgeOnPatch(const OPQuadMesh::QuadMeshImpl &mesh, int edgeId, int patch);
+
 // Sketch data
 enum class IntersectionType {
     NONE,
@@ -85,6 +88,10 @@ struct Polygon {
             : sides(_sides), patch(_patch), clockwise(_clockwise) {}
 };
 
+// TODO Improve this
+bool IsCornerVertex(const OpenMesh::SmartVertexHandle &v) {
+    return v.valence() == 2;
+}
 
 int GetFacePatch(const OPQuadMesh::QuadMeshImpl &mesh, const int faceId) {
     return (faceId >= 0) ? 0 : -1;
