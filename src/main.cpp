@@ -21,6 +21,7 @@
 
 using namespace skbar;
 
+// Sketch data
 enum class IntersectionType {
     NONE,
     EDGE,
