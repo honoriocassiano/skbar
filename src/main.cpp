@@ -20,6 +20,7 @@
 #include "opquadmesh.h"
 #include "patchquadrangulator.h"
 #include "utils/openmesh.h"
+#include "constants.h"
 
 using namespace skbar;
 
@@ -88,6 +89,50 @@ OPQuadMesh QuadrangulatePolygon1(const PolygonInfo &polygonInfo, const VSketch &
     return PatchQuadrangulator::Quadrangulate(sides, positions, false);
 }
 
+void RestorePolygon(OPQuadMesh &oldPolygon, const PolygonInfo &polygonInfo, const OPQuadMesh &newPolygon) {
+    auto &oldMesh = oldPolygon.Get();
+    auto &newMesh = newPolygon.Get();
+
+    std::map<int, int> mapNewVerticesOnOldMesh;
+
+    for (const auto &face : newMesh.faces()) {
+
+        std::vector<OpenMesh::VertexHandle> verticesOnOldMesh;
+
+        for (const auto &vertex : face.vertices()) {
+            const bool fixed = newMesh.data(vertex).laplacian.fixed;
+            const OpenMesh::Vec3d position = newMesh.data(vertex).laplacian.position;
+
+            const double u = position[0] * polygonInfo.u_length;
+            const double v = position[1] * polygonInfo.v_length;
+
+            const int round_u = int(round(u));
+            const int round_v = int(round(v));
+
+            if (mapNewVerticesOnOldMesh.find(vertex.idx()) != mapNewVerticesOnOldMesh.end()) {
+                verticesOnOldMesh.emplace_back(mapNewVerticesOnOldMesh.at(vertex.idx()));
+            } else {
+
+                if ((((u - round_u) + (v - round_v)) < constants::epsilon)) {
+                    // Vertices already on mesh
+                    const auto &vertexOnOldMesh = polygonInfo.parametricVertices.at(std::make_pair(round_u, round_v));
+
+                    // Add to face vertices on old mesh
+                    verticesOnOldMesh.emplace_back(vertexOnOldMesh.idx());
+
+                    // Update the map with the new found vertex
+                    mapNewVerticesOnOldMesh.insert_or_assign(vertex.idx(), vertexOnOldMesh.idx());
+                } else {
+                    // TODO Unparametrize and add to Old mesh
+                }
+            }
+
+            // Add the new face
+            oldMesh.add_face(verticesOnOldMesh);
+        }
+    }
+}
+
 int main(int argc, char *argv[]) {
 
 //    SDLApplication app("SkBaR", 1024, 768);
@@ -108,7 +153,7 @@ int main(int argc, char *argv[]) {
     auto sketch = GetSketch();
     auto polygonInfo = GetPolygonInfo();
 
-    OPQuadMesh newPatch = QuadrangulatePolygon1(polygonInfo, sketch);
+    OPQuadMesh newPolygon = QuadrangulatePolygon1(polygonInfo, sketch);
 
     return 0;
 }
